@@ -120,7 +120,7 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
 .voice-stop:hover{background:rgba(255,255,255,.15)}
 .voice-err{margin:0;text-align:center;font-size:13px;color:#FF7A70;max-width:340px;padding:0 16px}
 .chat-close{position:fixed;top:calc(env(safe-area-inset-top,0px) + 20px);right:28px;z-index:6;background:rgba(6,12,28,.92);border-color:var(--edge)}
-.chat-open .top-right>*,.chat-open .live{display:none}
+.chat-open .top-right>*,.chat-open .live{display:none!important}
 @media (hover:hover){.pill:not(.join-btn),.more{opacity:.55}.pill:hover,.pill:focus-visible,.more:hover,.more:focus-visible{opacity:1}}
 .is-city .legend{opacity:0;pointer-events:none}
 .panel{position:fixed;z-index:2;top:0;right:0;bottom:0;width:min(420px,40vw);padding:calc(env(safe-area-inset-top,0px) + 100px) 32px calc(env(safe-area-inset-bottom,0px) + 32px);background:var(--glass);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);border-left:1px solid var(--edge);overflow-y:auto;transform:translateX(100%);opacity:0;transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .5s}
