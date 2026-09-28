@@ -106,6 +106,7 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
 .msg{max-width:82%;font-size:15px;line-height:1.5}
 .msg p{margin:0}
 .msg.me{align-self:flex-end;padding:10px 16px;border-radius:20px 20px 6px 20px;background:rgba(255,255,255,.1)}
+.msg.offline{color:var(--muted);font-style:italic}
 .msg.them{align-self:flex-start;color:rgba(242,244,248,.88)}
 .msg img{display:block;max-width:220px;max-height:220px;margin:0 0 8px;border-radius:14px;object-fit:cover}
 .typing canvas{display:block;width:32px;height:32px}
@@ -356,6 +357,13 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
 (()=>{
 /* Paste your n8n webhook address here to switch from sample data to live Google Sheet data. */
 const DATA_URL='';
+/* ---- Chat → your Ollama (temporary) ----
+   Paste your Cloudflare Access service token below to make the chat box talk to your Ollama.
+   While these still say PASTE_..., the chat keeps using the built-in preview replies. */
+const OLLAMA_URL='https://ollama.withfava.com/api/chat';
+const OLLAMA_MODEL='huihui_ai/qwen3-vl-abliterated:8b-instruct';
+const CF_ACCESS_ID='b770a52dd2ec89db68280ea68d35e791.access';
+const CF_ACCESS_SECRET='cfast_ojvPeY2pSvHT1FfVrNolqxQ2zZ7fSECZcFjVdjp81d95289c';
 const REFRESH_SECONDS=60;
 /* Sample data. The IDs are made up, not your real bot IDs. */
 const MOCK={
@@ -727,13 +735,42 @@ chatInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.prev
 el('sendBtn').addEventListener('click',sendChat);
 let chatBot=null;
 function pickChatBot(){return bots[Math.random()*bots.length|0]||null;}
-function setChatBot(b){chatBot=b||pickChatBot();if(!chatBot)return;chatInput.placeholder='Message '+chatBot.name;}
+const OLLAMA_ON=!!(OLLAMA_URL&&CF_ACCESS_ID&&CF_ACCESS_SECRET&&!/PASTE_/.test(CF_ACCESS_ID+CF_ACCESS_SECRET));
+let chatHist=[],histBot=null,chatBusy=false;
+function setChatBot(b){chatBot=b||pickChatBot();if(!chatBot)return;chatInput.placeholder='Message '+chatBot.name;
+ if(histBot!==chatBot){histBot=chatBot;chatHist=[];chatLog.textContent='';chat.classList.remove('has-msgs');}
+ const note=chat.querySelector('.chat-note');if(note)note.hidden=OLLAMA_ON;}
+function personaPrompt(b){const lp=b.tz?localParts(b.tz).text:'';
+ return 'You are '+b.name+', a person living in '+(b.city||'a big city')+'. '+(lp?'It is '+lp+' where you are. ':'')+(b.doing?'Right now you are: '+b.doing+'. ':'')+(b.mood?'Your mood right now: '+b.mood+'. ':'')+
+ 'Someone is texting you through the FAVA website. Stay in character as '+b.name+' and reply the way a real person texts: casual, natural, usually one to three short sentences. Don\u2019t use lists or headings.';}
+const cleanReply=s=>s.replace(/<think>[\s\S]*?(<\/think>|$)/g,'').trim();
+function toJpegB64(url){return new Promise(res=>{const im=new Image();im.onload=()=>{const m=1024,s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*s));c.height=Math.max(1,Math.round(im.height*s));c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.85).split(',')[1]);};im.onerror=()=>res(null);im.src=url;});}
+async function askOllama(bot,text,imgs,onToken){
+ const imgs64=(await Promise.all(imgs.map(toJpegB64))).filter(Boolean);
+ const um={role:'user',content:text||'(sent you a photo)'};if(imgs64.length)um.images=imgs64;chatHist.push(um);
+ const recent=chatHist.slice(-16).map((m,i,a)=>i===a.length-1?m:{role:m.role,content:m.content});
+ const ac=typeof AbortController==='function'?new AbortController():null,to=setTimeout(()=>{if(ac)ac.abort();},90000);
+ try{
+  const r=await fetch(OLLAMA_URL,{method:'POST',headers:{'Content-Type':'application/json','CF-Access-Client-Id':CF_ACCESS_ID,'CF-Access-Client-Secret':CF_ACCESS_SECRET},body:JSON.stringify({model:OLLAMA_MODEL,messages:[{role:'system',content:personaPrompt(bot)},...recent],stream:true,options:{temperature:.8}}),signal:ac?ac.signal:undefined});
+  if(!r.ok||!r.body)throw new Error('status '+r.status);
+  const rd=r.body.getReader(),dec=new TextDecoder();let buf='',raw='';
+  for(;;){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let nl;
+   while((nl=buf.indexOf('\n'))>=0){const line=buf.slice(0,nl).trim();buf=buf.slice(nl+1);if(!line)continue;let j;try{j=JSON.parse(line);}catch(e){continue;}
+    if(j.error)throw new Error(j.error);if(j.message&&j.message.content){raw+=j.message.content;const c=cleanReply(raw);if(c)onToken(c);}}}
+  const final=cleanReply(raw);if(!final)throw new Error('empty');chatHist.push({role:'assistant',content:final});return final;
+ }catch(e){chatHist.pop();throw e;}finally{clearTimeout(to);}}
 const REPLIES=['I\u2019m only a preview for now, so I can\u2019t really chat yet. Soon, though.','Chat isn\u2019t hooked up yet, but I\u2019m listening. Kind of.','Almost ready to talk. The wires are still going in.'];
 function addMsg(who,text,imgs){const m=make('div','msg '+who);(imgs||[]).forEach(u=>{const im=make('img');im.src=u;im.alt='Image you added';m.append(im);});if(text)m.append(make('p',null,text));chatLog.append(m);chatLog.scrollTop=chatLog.scrollHeight;return m;}
-function sendChat(){const text=chatInput.value.trim();if(!text&&!pendingImgs.length){chatInput.focus();return;}chat.classList.add('has-msgs');const imgs=pendingImgs.slice();addMsg('me',text,imgs);pendingImgs=[];renderThumbs();chatInput.value='';chatInput.style.height='auto';syncSend();
+function sendChat(){if(chatBusy)return;const text=chatInput.value.trim();if(!text&&!pendingImgs.length){chatInput.focus();return;}chat.classList.add('has-msgs');const imgs=pendingImgs.slice();addMsg('me',text,imgs);pendingImgs=[];renderThumbs();chatInput.value='';chatInput.style.height='auto';syncSend();
  const typing=make('div','msg them typing'),tc=make('canvas');tc.setAttribute('aria-hidden','true');typing.append(tc);chatLog.append(typing);chatLog.scrollTop=chatLog.scrollHeight;const d=Math.min(window.devicePixelRatio||1,2);tc.width=32*d;tc.height=32*d;const c2=tc.getContext('2d');c2.setTransform(d,0,0,d,0,0);const t0=performance.now();cancelAnimationFrame(typingRAF);
  const loop=now=>{drawOrb(c2,32,(now-t0)/1000,3);typingRAF=requestAnimationFrame(loop);};typingRAF=requestAnimationFrame(loop);
- setTimeout(()=>{cancelAnimationFrame(typingRAF);typing.remove();addMsg('them',imgs.length&&!text?'Nice picture. I\u2019ll be able to look at images once chat is connected.':REPLIES[Math.random()*REPLIES.length|0]);},1400);}
+ const stopTyping=()=>{cancelAnimationFrame(typingRAF);typing.remove();};
+ if(!OLLAMA_ON){setTimeout(()=>{stopTyping();addMsg('them',imgs.length&&!text?'Nice picture. I\u2019ll be able to look at images once chat is connected.':REPLIES[Math.random()*REPLIES.length|0]);},1400);return;}
+ const bot=chatBot;chatBusy=true;let bubble=null;
+ askOllama(bot,text,imgs,partial=>{if(!bubble){stopTyping();bubble=addMsg('them','…');}bubble.querySelector('p').textContent=partial;chatLog.scrollTop=chatLog.scrollHeight;})
+  .then(final=>{if(!bubble){stopTyping();bubble=addMsg('them',final);}else bubble.querySelector('p').textContent=final;})
+  .catch(()=>{stopTyping();if(bubble)bubble.remove();const m=addMsg('them',(bot?bot.name:'They')+' is offline right now. Try again in a bit.');m.classList.add('offline');})
+  .finally(()=>{chatBusy=false;chatLog.scrollTop=chatLog.scrollHeight;});}
 syncSend();
 // ---- Voice input ----
 const voicePanel=el('voicePanel'),voiceCanvas=el('voiceViz'),vctx=voiceCanvas.getContext('2d'),voiceTx=el('voiceTx'),voiceErr=el('voiceErr'),micBtn=el('micBtn'),voiceStopBtn=el('voiceStop');
