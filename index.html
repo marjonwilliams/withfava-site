@@ -453,10 +453,13 @@ let rot=2.064-.55,tilt=HOME_TILT,vel=spinOn?BASE:0,ca=1,sa=0,ct=1,st=0;
 function startZoom(inn){zFrom=zt;zTo=inn?1:0;zStart=performance.now();rotA=rot;tiltA=tilt;
  if(inn){let d=-Math.atan2(focus.x,focus.z)-rot;d=((d%TAU)+TAU*1.5)%TAU-Math.PI;rotB=rot+d;tiltB=Math.max(-1.1,Math.min(1.1,Math.asin(focus.y)));}
  else{tiltB=HOME_TILT;vel=spinOn?BASE*.4:0;}}
+let pinchS=1,pinching=false,pmx=0,pmy=0,pd0=1,ps0=1;const PINCH_MAX=1.8;
 function layout(){const m=W<=700;
  const g=m?[W/2,H*.42,Math.min(W*.46,H*.28)]:[W*.5,H*.5,Math.min(W*.3,H*.36)];
  const pw=Math.min(420,W*.4),c=m?[W/2,H*.3,Math.min(W*.62,H*.24)]:[(W-pw)*.42,H*.52,Math.min(W*.36,H*.6)];
- cx=g[0]+(c[0]-g[0])*zt;cy=g[1]+(c[1]-g[1])*zt;R=g[2]+(c[2]-g[2])*zt;sc=R/260;}
+ cx=g[0]+(c[0]-g[0])*zt;cy=g[1]+(c[1]-g[1])*zt;R=g[2]+(c[2]-g[2])*zt;
+ if(pinchS!==1){cx=pmx+(cx-pmx)*pinchS;cy=pmy+(cy-pmy)*pinchS;R*=pinchS;}
+ sc=R/260;}
 const norm=v=>{const m=Math.hypot(v[0],v[1],v[2]);return[v[0]/m,v[1]/m,v[2]/m];};
 const L=norm([-.45,.5,.74]),HV=norm([L[0],L[1],L[2]+1]);
 const P=(x,y,z)=>{const x1=x*ca+z*sa,z1=-x*sa+z*ca;return[x1,y*ct-z1*st,y*st+z1*ct];};
@@ -496,18 +499,27 @@ let dragging=false,moved=0,lx=0,ly=0,lt=0;
 const canSpin=()=>!focus&&zStart<0;
 const clampT=t=>Math.max(-.9,Math.min(1.1,t));
 function hit(x,y){let best=null,bd=20;for(const c of cities){if(!c.on)continue;const r=c.lr;if(r&&x>=r.x-4&&x<=r.x+r.w+4&&y>=r.y-4&&y<=r.y+r.h+4)return c;const d=Math.hypot(c.sx-x,c.sy-y);if(d<bd){bd=d;best=c;}}return best;}
-cv.addEventListener('pointerdown',e=>{dragging=true;moved=0;lx=e.clientX;ly=e.clientY;lt=performance.now();cv.setPointerCapture(e.pointerId);if(canSpin())cv.style.cursor='grabbing';});
-cv.addEventListener('pointermove',e=>{if(!dragging){cv.style.cursor=hit(e.clientX,e.clientY)||focus?'pointer':canSpin()?'grab':'default';return;}
+const touches=new Map();
+const pinchDist=()=>{const p=[...touches.values()];return Math.max(1,Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y));};
+const pinchMid=()=>{const p=[...touches.values()];return[(p[0].x+p[1].x)/2,(p[0].y+p[1].y)/2];};
+const softPinch=raw=>raw<=1?1-(1-raw)*.12:1+(PINCH_MAX-1)*Math.tanh((raw-1)/(PINCH_MAX-1));
+cv.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'){touches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(touches.size===2){pinching=true;dragging=false;moved=999;pd0=pinchDist();ps0=pinchS;const m=pinchMid();if(pinchS===1){pmx=m[0];pmy=m[1];}cv.setPointerCapture(e.pointerId);return;}if(touches.size>2)return;}
+ dragging=true;moved=0;lx=e.clientX;ly=e.clientY;lt=performance.now();cv.setPointerCapture(e.pointerId);if(canSpin())cv.style.cursor='grabbing';});
+cv.addEventListener('pointermove',e=>{if(e.pointerType==='touch'&&touches.has(e.pointerId)){touches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pinching&&touches.size>=2){pinchS=softPinch(ps0*pinchDist()/pd0);return;}}
+ if(pinching)return;
+ if(!dragging){cv.style.cursor=hit(e.clientX,e.clientY)||focus?'pointer':canSpin()?'grab':'default';return;}
  const now=performance.now(),dx=e.clientX-lx,dy=e.clientY-ly,d=Math.max(.008,(now-lt)/1000);moved+=Math.abs(dx)+Math.abs(dy);
  if(canSpin()){rot+=dx/R;tilt=clampT(tilt+dy/R);vel=Math.max(-5,Math.min(5,dx/R/d));}lx=e.clientX;ly=e.clientY;lt=now;});
-cv.addEventListener('pointerup',e=>{dragging=false;cv.style.cursor=canSpin()?'grab':'default';if(moved>=6)return;
+const endTouch=e=>{if(e.pointerType==='touch'){touches.delete(e.pointerId);if(pinching&&touches.size<2){pinching=false;}}};
+cv.addEventListener('pointerup',e=>{endTouch(e);if(pinching||touches.size)return;dragging=false;cv.style.cursor=canSpin()?'grab':'default';if(moved>=6)return;
  const c=hit(e.clientX,e.clientY);if(c){openCity(c);return;}
  if(focus){closeCity();return;}
  const p=planetPoint(e.clientX,e.clientY);if(!p)return;
  if(T<armedUntil){if(nukes.filter(n=>T-n.t0<2.8).length<4&&T-lastLaunch>.35)launchNuke(p);else armedUntil=T+2.5;aim=null;return;}
  taps=taps.filter(t=>T-t<1.6);taps.push(T);aim=taps.length>=2?{v:p,t:T,n:taps.length}:null;
  if(taps.length>=5){launchNuke(p);taps=[];aim=null;}});
-cv.addEventListener('pointercancel',()=>{dragging=false;});
+cv.addEventListener('pointercancel',e=>{endTouch(e);dragging=false;});
+document.addEventListener('gesturestart',e=>{if(e.target===cv)e.preventDefault();},{passive:false});
 cv.addEventListener('keydown',e=>{if(!canSpin())return;const k={ArrowLeft:[-.2,0],ArrowRight:[.2,0],ArrowUp:[0,-.12],ArrowDown:[0,.12]}[e.key];if(!k)return;e.preventDefault();rot+=k[0];tilt=clampT(tilt+k[1]);});
 try{const p=JSON.parse(localStorage.getItem('fava-prefs')||'{}');if(typeof p.spin==='boolean'){spinOn=p.spin;vel=spinOn?BASE:0;}if(typeof p.fx==='boolean'){fxOn=p.fx;fxLevel=fxOn?1:0;}}catch(e){}
 const spinSwitch=el('spinSwitch'),fxSwitch=el('fxSwitch');
@@ -524,6 +536,7 @@ function frame(now){
  fxLevel+=((fxOn?1:0)-fxLevel)*Math.min(1,dt*1.5);
  if(zStart>=0){const p=Math.min(1,(now-zStart)/1000/ZDUR),e=p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;zt=zFrom+(zTo-zFrom)*e;tilt=tiltA+(tiltB-tiltA)*e;if(zTo===1)rot=rotA+(rotB-rotA)*e;if(p>=1){zStart=-1;if(zTo===0)fadeFocus=null;}}
  if(!focus&&!dragging&&!(zStart>=0&&zTo===1)){vel+=((spinOn?BASE:0)-vel)*Math.min(1,dt*(spinOn?4:6));rot+=vel*dt;}
+ if(!pinching&&pinchS!==1){pinchS+=(1-pinchS)*Math.min(1,dt*9);if(Math.abs(pinchS-1)<.002)pinchS=1;}
  const ff=focus||fadeFocus;
  layout();
  if(!reduce&&T-shakeT<.6){const k=(1-(T-shakeT)/.6)*9;cx+=(Math.random()-.5)*2*k;cy+=(Math.random()-.5)*2*k;}
