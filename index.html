@@ -111,7 +111,7 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
 .chat.voice-on .voice-panel{display:flex}
 .chat.voice-on .chat-hello,.chat.voice-on .composer textarea,.chat.voice-on #addImg,.chat.voice-on #sendBtn,.chat.voice-on #fileIn,.chat.voice-on .thumbs{display:none}
 .chat.voice-on .composer{border-color:transparent;background:transparent;padding:0;display:flex;justify-content:center}
-.voice-viz{display:block;width:min(360px,80vw);height:120px}
+.voice-viz{display:block;width:210px;height:210px;margin:0 auto}
 .voice-tx{margin:0;text-align:center;font-size:17px;font-weight:500;letter-spacing:-.015em;color:var(--ink);line-height:1.4;max-width:520px;min-height:1.4em;padding:0 12px}
 .voice-tx.hint{color:var(--faint);font-weight:400}
 .mic-btn.rec{background:var(--live);color:#fff;box-shadow:0 0 0 0 rgba(255,59,48,.5);animation:live-ping 1.6s ease-out infinite}
@@ -699,21 +699,22 @@ syncSend();
 // ---- Voice input ----
 const voicePanel=el('voicePanel'),voiceCanvas=el('voiceViz'),vctx=voiceCanvas.getContext('2d'),voiceTx=el('voiceTx'),voiceErr=el('voiceErr'),micBtn=el('micBtn'),voiceStopBtn=el('voiceStop');
 let vAudio=null,vAnalyser=null,vStream=null,vFreq=null,vRAF=0,vSR=null,vOn=false,vSmooth=null,vSpokenFinal='',vSpokenInterim='';
-function vSize(){const d=Math.min(window.devicePixelRatio||1,2),w=voiceCanvas.clientWidth||360,h=120;voiceCanvas.width=w*d;voiceCanvas.height=h*d;vctx.setTransform(d,0,0,d,0,0);voiceCanvas._w=w;voiceCanvas._h=h;}
+function vSize(){const d=Math.min(window.devicePixelRatio||1,2),s=210;voiceCanvas.width=s*d;voiceCanvas.height=s*d;vctx.setTransform(d,0,0,d,0,0);voiceCanvas._w=s;voiceCanvas._h=s;}
 vSize();
-function drawVoice(now){const w=voiceCanvas._w||360,h=voiceCanvas._h||120,cy=h/2,N=48,maxA=h*.32;
+function drawVoice(now){const w=voiceCanvas._w||210,h=voiceCanvas._h||210,cx=w/2,cy=h/2,baseR=w*.29,maxD=w*.14,N=96;
  if(vAnalyser){vAnalyser.getByteFrequencyData(vFreq);} else if(vFreq){vFreq.fill(0);}
  const t=(now||performance.now())/1000;vctx.clearRect(0,0,w,h);
  if(!vSmooth||vSmooth.length!==N)vSmooth=new Float32Array(N);
  let peak=0;
- for(let i=0;i<N;i++){const bin=Math.floor((i/N)*(vFreq?vFreq.length*.55:1));const r=vFreq?vFreq[bin]/255:0;peak=Math.max(peak,r);vSmooth[i]=vSmooth[i]*.6+r*.4;}
- for(let m=0;m<2;m++){const sign=m===0?-1:1;const pts=new Array(N);
-  for(let i=0;i<N;i++){const amp=vSmooth[i],wobble=.6+.4*Math.sin(t*3.4+i*.55),idle=Math.sin(t*1.2+i*.28)*2.4;pts[i]=[i/(N-1)*w,cy+sign*(idle+amp*maxA*wobble)];}
-  vctx.strokeStyle='rgba(255,255,255,'+(.55+peak*.45)+')';vctx.lineWidth=2;vctx.beginPath();vctx.moveTo(pts[0][0],pts[0][1]);
-  for(let i=1;i<N-1;i++){const xc=(pts[i][0]+pts[i+1][0])/2,yc=(pts[i][1]+pts[i+1][1])/2;vctx.quadraticCurveTo(pts[i][0],pts[i][1],xc,yc);}
-  vctx.lineTo(pts[N-1][0],pts[N-1][1]);vctx.stroke();
- }
- vctx.globalAlpha=.15+peak*.4;vctx.fillStyle='#FFFFFF';vctx.beginPath();vctx.arc(w/2,cy,4+peak*8,0,TAU);vctx.fill();vctx.globalAlpha=1;
+ for(let i=0;i<N;i++){const mi=i<N/2?i:N-1-i;const bin=Math.floor((mi/(N/2))*(vFreq?vFreq.length*.55:1));const r=vFreq?vFreq[bin]/255:0;peak=Math.max(peak,r);vSmooth[i]=vSmooth[i]*.72+r*.28;}
+ // Points around a warping circle: each angle bends in or out based on a phased wave, driven by voice amplitude
+ const pts=new Array(N);
+ for(let i=0;i<N;i++){const a=(i/N)*TAU,amp=vSmooth[i],idle=Math.sin(t*1.25+i*.22)*1.6,wave=Math.sin(t*3.1+i*.44),r=baseR+idle+amp*maxD*wave;pts[i]=[cx+Math.cos(a)*r,cy+Math.sin(a)*r];}
+ function trace(){vctx.beginPath();const m0=[(pts[N-1][0]+pts[0][0])/2,(pts[N-1][1]+pts[0][1])/2];vctx.moveTo(m0[0],m0[1]);for(let i=0;i<N;i++){const cur=pts[i],nxt=pts[(i+1)%N];vctx.quadraticCurveTo(cur[0],cur[1],(cur[0]+nxt[0])/2,(cur[1]+nxt[1])/2);}vctx.closePath();}
+ // Soft outer glow
+ vctx.strokeStyle='rgba(255,255,255,'+(.1+peak*.18)+')';vctx.lineWidth=9;trace();vctx.stroke();
+ // Main ring
+ vctx.strokeStyle='rgba(255,255,255,'+(.7+peak*.3)+')';vctx.lineWidth=2;trace();vctx.stroke();
  vRAF=requestAnimationFrame(drawVoice);
 }
 function setVoiceTx(text,hint){voiceTx.textContent=text||(hint?'Listening…':'');voiceTx.classList.toggle('hint',!!hint);}
@@ -741,7 +742,7 @@ function stopVoice(canceled){
  if(vSR){try{vSR.onend=null;vSR.stop();}catch(e){}vSR=null;}
  if(vStream){vStream.getTracks().forEach(t=>t.stop());vStream=null;}
  if(vAudio){try{vAudio.close();}catch(e){}vAudio=null;vAnalyser=null;vFreq=null;}
- cancelAnimationFrame(vRAF);vRAF=0;vctx.clearRect(0,0,voiceCanvas._w||360,voiceCanvas._h||120);
+ cancelAnimationFrame(vRAF);vRAF=0;vctx.clearRect(0,0,voiceCanvas._w||210,voiceCanvas._h||210);
  chat.classList.remove('voice-on');micBtn.classList.remove('rec');micBtn.setAttribute('aria-label','Talk instead');
  const spoken=(vSpokenFinal+vSpokenInterim).trim();
  if(!canceled&&spoken){chatInput.value=spoken;chatInput.dispatchEvent(new Event('input'));chatInput.focus({preventScroll:true});}
