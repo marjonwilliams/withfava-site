@@ -43,6 +43,18 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
 .mitem:hover{color:#fff}
 .live{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
 .live-dot{width:9px;height:9px;border-radius:50%;background:var(--live);animation:breathe 2.6s ease-in-out infinite}
+.spin{display:inline-block;flex:none;width:11px;height:11px;border-radius:50%;border:1.6px solid rgba(242,244,248,.18);border-top-color:rgba(242,244,248,.62);animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.live .spin{display:none}
+.live{transition:color .3s}
+.poor-conn .live{color:var(--muted);font-weight:500}
+.poor-conn .live .live-dot{display:none}
+.poor-conn .live .spin{display:inline-block}
+.live.swap{animation:liveSwap .45s ease}
+@keyframes liveSwap{0%{opacity:0}100%{opacity:1}}
+.conn-note{display:none;align-items:center;justify-content:center;gap:8px;margin:0;font-size:13px;color:var(--muted);opacity:0;transition:opacity .45s ease}
+.chat.voice-on .conn-note{display:flex}
+.poor-conn .chat.voice-on .conn-note{opacity:1}
 @keyframes breathe{0%,100%{opacity:.3;transform:scale(.7)}50%{opacity:1;transform:scale(1)}}
 .pill{font-size:14px;font-weight:500;background:rgba(255,255,255,.08);border:1px solid var(--edge);border-radius:999px;padding:8px 16px;transition:opacity .2s,background .15s,border-color .15s}
 .pill:hover{background:rgba(255,255,255,.14);border-color:var(--edge-strong)}
@@ -231,7 +243,7 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
  .stat:nth-child(3){padding-left:0;border-left:0}
  .stat:nth-child(n+3){border-top:1px solid var(--edge)}
 }
-@media (prefers-reduced-motion:reduce){.live-dot,.timeline li.now .a::after{animation:none}.live-dot{opacity:1;transform:none}.panel{transition:opacity .3s}}
+@media (prefers-reduced-motion:reduce){.live-dot,.spin,.live.swap,.timeline li.now .a::after{animation:none}.live-dot{opacity:1;transform:none}.panel{transition:opacity .3s}}
 </style>
 </head>
 <body>
@@ -241,7 +253,7 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
  <h1 class="wordmark"><span class="sr-only">FAVA</span><span class="ltr" data-fx="rocket" aria-hidden="true">F</span><span class="ltr" data-fx="teleport" aria-hidden="true">A</span><span class="ltr" data-fx="star" aria-hidden="true">V</span><span class="ltr" data-fx="radar" aria-hidden="true">A</span></h1>
  <nav class="center-nav" aria-label="Main"><button class="nav unpaid" type="button">Pricing</button><button class="nav" type="button" data-chat>Chat</button><button class="nav guest" type="button">About</button><button class="nav member" type="button">My profile</button><button class="nav member" type="button" data-settings>Settings</button></nav>
  <div class="top-right">
-  <span class="live"><span class="live-dot" aria-hidden="true"></span>Live</span>
+  <span class="live" id="liveBadge" role="status"><span class="live-dot" aria-hidden="true"></span><span class="spin" aria-hidden="true"></span><span id="liveText">Live</span></span>
   <button class="pill" id="loginBtn" type="button">Log in</button>
   <button class="pill join-btn" id="joinBtn" type="button">Join now</button>
   <button class="pill menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu">Menu</button>
@@ -286,6 +298,7 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
    </div>
    <input type="file" id="fileIn" accept="image/*" multiple hidden>
   </div>
+  <p class="conn-note" id="connNote" aria-live="polite"><span class="spin" aria-hidden="true"></span>Poor connection</p>
   <p class="chat-note">Chat is a preview for now.</p>
  </div>
 </div>
@@ -843,7 +856,21 @@ setData(MOCK);
 syncMenuBtn();
 setInterval(()=>{const mt=el('myTime'),mb=myBot();if(mt&&mb)mt.textContent=localParts(mb.tz).text;},15000);
 drop(cities[0]||{x:0,y:0,z:1},.8,2.8);
-if(DATA_URL){const pull=()=>fetch(DATA_URL,{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(d=>{if(d&&Array.isArray(d.bots))setData(d);}).catch(()=>{});pull();setInterval(pull,REFRESH_SECONDS*1000);}
+/* ---- Connection quality: "Live" turns into "Poor connection" when the network is slow or down ---- */
+let poorConn=false,slowNet=false;
+function setPoor(p){if(p===poorConn)return;poorConn=p;document.body.classList.toggle('poor-conn',p);const b=el('liveBadge');el('liveText').textContent=p?'Poor connection':'Live';b.classList.remove('swap');void b.offsetWidth;b.classList.add('swap');}
+function checkConn(){const c=navigator.connection;let p=navigator.onLine===false||slowNet;
+ if(c){if(c.effectiveType==='slow-2g'||c.effectiveType==='2g')p=true;if(c.rtt&&c.rtt>=900)p=true;if(typeof c.downlink==='number'&&c.downlink>0&&c.downlink<.35)p=true;}
+ setPoor(p);}
+function timedFetch(url,opts,ms){const ac=typeof AbortController==='function'?new AbortController():null,t0=performance.now();const to=setTimeout(()=>{if(ac)ac.abort();},ms);
+ return fetch(url,Object.assign({},opts,ac?{signal:ac.signal}:{})).then(r=>{clearTimeout(to);return[r,performance.now()-t0];},e=>{clearTimeout(to);throw e;});}
+function probe(){if(document.hidden||!/^https?:/.test(location.protocol))return;
+ timedFetch(location.pathname+'?ping='+Date.now(),{method:'HEAD',cache:'no-store'},6000).then(([r,ms])=>{slowNet=ms>2500;},()=>{slowNet=navigator.onLine!==false;}).finally(checkConn);}
+window.addEventListener('online',()=>{slowNet=false;checkConn();probe();});window.addEventListener('offline',checkConn);
+if(navigator.connection&&navigator.connection.addEventListener)navigator.connection.addEventListener('change',checkConn);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)probe();});
+checkConn();probe();setInterval(probe,30000);
+if(DATA_URL){const pull=()=>timedFetch(DATA_URL,{cache:'no-store'},10000).then(([r,ms])=>{slowNet=ms>4000;checkConn();return r.ok?r.json():Promise.reject(r.status);}).then(d=>{if(d&&Array.isArray(d.bots))setData(d);}).catch(()=>{if(navigator.onLine!==false){slowNet=true;checkConn();}});pull();setInterval(pull,REFRESH_SECONDS*1000);}
 if(document.fonts&&document.fonts.load)document.fonts.load('600 13px "Inter"');
 route();
 requestAnimationFrame(frame);
