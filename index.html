@@ -25,9 +25,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--bot);outline-of
 .top>*{pointer-events:auto}
 .wordmark{margin:0;font-size:clamp(40px,5vw,62px);font-weight:700;letter-spacing:-.05em;line-height:1;display:flex}
 .ltr{display:inline-block;user-select:none;-webkit-user-select:none;transition:transform .2s cubic-bezier(.2,.8,.2,1)}
-body:not(.touch):not(.is-city):not(.on-page) .ltr{cursor:pointer}
-body:not(.touch):not(.is-city):not(.on-page) .ltr:hover{transform:translateY(-2px)}
-.is-city .wordmark,.on-page .wordmark{cursor:pointer}
+body:not(.touch):not(.is-city):not(.on-page):not(.chat-open):not(.menu-open) .ltr{cursor:pointer}
+body:not(.touch):not(.is-city):not(.on-page):not(.chat-open):not(.menu-open) .ltr:hover{transform:translateY(-2px)}
+.is-city .wordmark,.on-page .wordmark,.chat-open .wordmark,.menu-open .wordmark{cursor:pointer}
+.is-city .ltr,.on-page .ltr,.chat-open .ltr,.menu-open .ltr{pointer-events:none}
 body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:none}
 .top-right{display:flex;align-items:center;justify-content:flex-end;gap:16px}
 .center-nav{grid-column:2;display:flex;align-items:center;gap:30px}
@@ -65,7 +66,7 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
 .bots.scroll.fade-b{-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 44px),rgba(0,0,0,0) 100%);mask-image:linear-gradient(to bottom,#000 calc(100% - 44px),rgba(0,0,0,0) 100%)}
 .bots.scroll.fade-t{-webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,0) 0,#000 44px);mask-image:linear-gradient(to bottom,rgba(0,0,0,0) 0,#000 44px)}
 .bots.scroll.fade-t.fade-b{-webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,0) 0,#000 44px,#000 calc(100% - 44px),rgba(0,0,0,0) 100%);mask-image:linear-gradient(to bottom,rgba(0,0,0,0) 0,#000 44px,#000 calc(100% - 44px),rgba(0,0,0,0) 100%)}
-.bots.clip{max-height:100px;overflow:hidden;-webkit-mask-image:linear-gradient(to bottom,#000 55%,rgba(0,0,0,0) 100%);mask-image:linear-gradient(to bottom,#000 55%,rgba(0,0,0,0) 100%)}
+.bots.clip{max-height:100px;margin:0 -8px;padding:0 8px;overflow:hidden;-webkit-mask-image:linear-gradient(to bottom,#000 55%,rgba(0,0,0,0) 100%);mask-image:linear-gradient(to bottom,#000 55%,rgba(0,0,0,0) 100%)}
 .legend-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px}
 .legend h2{margin:0;font-size:15px;font-weight:600;letter-spacing:-.015em}
 .bots{list-style:none;margin:0;padding:0}
@@ -109,7 +110,17 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
 .msg.offline{color:var(--muted);font-style:italic}
 .msg.them{align-self:flex-start;color:rgba(242,244,248,.88)}
 .msg img{display:block;max-width:220px;max-height:220px;margin:0 0 8px;border-radius:14px;object-fit:cover}
-.typing canvas{display:block;width:32px;height:32px}
+.msg.typing{padding:6px 2px;line-height:0}
+.chase{position:relative;display:block;width:24px;height:24px}
+.chase i{position:absolute;inset:0;animation:chase 1.25s cubic-bezier(.4,.2,.6,.8) infinite}
+.chase i::after{content:"";position:absolute;top:1px;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#fff}
+.chase i:nth-child(1){animation-delay:-.36s}
+.chase i:nth-child(2){animation-delay:-.18s;opacity:.7}
+.chase i:nth-child(2)::after{width:5px;height:5px;margin-left:-2.5px}
+.chase i:nth-child(3){opacity:.4}
+.chase i:nth-child(3)::after{width:4px;height:4px;margin-left:-2px}
+@keyframes chase{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.chase i{animation:none}.chase i:nth-child(2){transform:rotate(-40deg)}.chase i:nth-child(3){transform:rotate(-80deg)}}
 .composer{padding:7px;border-radius:24px;background:rgba(255,255,255,.06);border:1px solid var(--edge-strong);transition:border-color .15s}
 .composer:focus-within{border-color:rgba(255,255,255,.36)}
 .composer-row{display:flex;align-items:flex-end;gap:8px}
@@ -128,8 +139,11 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
 .voice-panel{display:none;flex-direction:column;align-items:center;gap:18px;padding:8px 0}
 .chat.voice-on .voice-panel{display:flex}
 .chat.voice-on .chat-hello,.chat.voice-on .composer textarea,.chat.voice-on #addImg,.chat.voice-on #sendBtn,.chat.voice-on #fileIn,.chat.voice-on .thumbs{display:none}
-.chat.voice-on .composer{border-color:transparent;background:transparent;padding:0;display:flex;justify-content:center}
+.chat.voice-on .composer{display:none}
 .voice-viz{display:block;width:210px;height:210px;margin:0 auto}
+.voice-copy{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;max-width:100%;max-height:7.5em;overflow:hidden}
+.voice-copy>*{flex:none}
+.voice-sub{margin:0;font-size:13px;color:var(--faint)}
 .voice-tx{margin:0;text-align:center;font-size:17px;font-weight:500;letter-spacing:-.015em;color:var(--ink);line-height:1.4;max-width:520px;min-height:1.4em;padding:0 12px}
 .voice-tx.hint{color:var(--faint);font-weight:400}
 .mic-btn.rec{background:var(--live);color:#fff;box-shadow:0 0 0 0 rgba(255,59,48,.5);animation:live-ping 1.6s ease-out infinite}
@@ -137,6 +151,13 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
 .chat.voice-on .voice-stop{display:grid}
 .voice-stop:hover{background:rgba(255,255,255,.15)}
 .voice-err{margin:0;text-align:center;font-size:13px;color:#FF7A70;max-width:340px;padding:0 16px}
+.chat.voice-on.has-msgs .voice-panel{flex-direction:row;align-items:center;gap:10px;width:100%;padding:8px 10px 8px 8px;border-radius:28px;background:rgba(255,255,255,.06);border:1px solid var(--edge-strong)}
+.chat.voice-on.has-msgs .voice-viz{width:48px;height:48px;margin:0;flex:none}
+.chat.voice-on.has-msgs .voice-copy{flex:1;align-items:flex-start;max-height:2.8em}
+.chat.voice-on.has-msgs .voice-tx{text-align:left;font-size:15px;padding:0;max-width:none;min-height:0}
+.chat.voice-on.has-msgs .voice-sub{display:none}
+.chat.voice-on.has-msgs .voice-err{text-align:left;padding:0}
+.chat.voice-on.has-msgs .voice-stop{width:38px;height:38px;flex:none}
 .chat-close{position:fixed;top:calc(env(safe-area-inset-top,0px) + 20px);right:28px;z-index:6;background:rgba(6,12,28,.92);border-color:var(--edge)}
 .chat-open .top-right>*,.chat-open .live{display:none!important}
 @media (hover:hover){.pill:not(.join-btn),.more{opacity:.55}.pill:hover,.pill:focus-visible,.more:hover,.more:focus-visible{opacity:1}}
@@ -266,7 +287,7 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
  <nav aria-label="Menu"><button class="mitem unpaid" type="button">Pricing</button><button class="mitem" type="button" data-chat>Chat</button><button class="mitem guest" type="button">About</button><button class="mitem member" type="button">My profile</button><button class="mitem member" type="button" data-settings>Settings</button><button class="mitem" id="menuLogin" type="button">Log in</button></nav>
 </div>
 <section class="legend" aria-labelledby="where">
- <div class="legend-head"><h2 id="where">Current active bots</h2></div>
+ <div class="legend-head"><h2 id="where">Currently active</h2></div>
  <div class="list-wrap"><ul class="bots clip" id="botList"></ul></div>
  <button class="more" id="more" type="button" aria-expanded="false">Show more</button>
 </section>
@@ -287,8 +308,12 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
   <h2 class="chat-hello" id="chatHello"></h2>
   <div class="voice-panel" id="voicePanel" aria-live="polite">
    <canvas class="voice-viz" id="voiceViz" aria-hidden="true"></canvas>
-   <p class="voice-tx hint" id="voiceTx">Listening…</p>
-   <p class="voice-err" id="voiceErr" hidden></p>
+   <div class="voice-copy" id="voiceCopy">
+    <p class="voice-tx hint" id="voiceTx">Listening…</p>
+    <p class="voice-sub" id="voiceSub">Tap anywhere to finish</p>
+    <p class="voice-err" id="voiceErr" hidden></p>
+   </div>
+   <button class="voice-stop" id="voiceStop" type="button" aria-label="Cancel and discard"></button>
   </div>
   <div class="composer">
    <div class="thumbs" id="thumbs" hidden></div>
@@ -297,7 +322,6 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
     <textarea id="chatInput" rows="1" placeholder="Message FAVA" aria-label="Message"></textarea>
     <button class="round-btn mic-btn" id="micBtn" type="button" aria-label="Talk instead"></button>
     <button class="send" id="sendBtn" type="button" aria-label="Send"></button>
-    <button class="voice-stop" id="voiceStop" type="button" aria-label="Stop"></button>
    </div>
    <input type="file" id="fileIn" accept="image/*" multiple hidden>
   </div>
@@ -432,7 +456,7 @@ function setData(d){
 const myBot=()=>user&&user.paid&&bots.find(b=>b.id===user.botId)||null;
 function renderLegend(){
  const mine=myBot(),list=mine?[mine]:bots,ul=el('botList');ul.textContent='';
- el('where').textContent=mine?'Where your bot lives':'Current active bots';
+ el('where').textContent=mine?'Where your bot lives':'Currently active';
  list.forEach((b,i)=>{const li=make('li');const btn=make('button','bot');btn.type='button';const pin=make('span',b===mine?'pin me':'pin');pin.setAttribute('aria-hidden','true');const who=make('span','who',b.name);if(user&&b.id)who.append(make('span','id',b.id.slice(0,4)));btn.append(pin,who,make('span','city',b.city));btn.addEventListener('click',()=>openCity(b.home,b));li.append(btn);
   if(b===mine){const dl=make('dl','mine-info'),tm=make('dd',null,localParts(b.tz).text);tm.id='myTime';dl.append(make('dt',null,'Doing now'),make('dd',null,b.doing||''),make('dt',null,'Local time'),tm);li.append(dl);}
   ul.append(li);});
@@ -762,9 +786,8 @@ async function askOllama(bot,text,imgs,onToken){
 const REPLIES=['I\u2019m only a preview for now, so I can\u2019t really chat yet. Soon, though.','Chat isn\u2019t hooked up yet, but I\u2019m listening. Kind of.','Almost ready to talk. The wires are still going in.'];
 function addMsg(who,text,imgs){const m=make('div','msg '+who);(imgs||[]).forEach(u=>{const im=make('img');im.src=u;im.alt='Image you added';m.append(im);});if(text)m.append(make('p',null,text));chatLog.append(m);chatLog.scrollTop=chatLog.scrollHeight;return m;}
 function sendChat(){if(chatBusy)return;const text=chatInput.value.trim();if(!text&&!pendingImgs.length){chatInput.focus();return;}chat.classList.add('has-msgs');const imgs=pendingImgs.slice();addMsg('me',text,imgs);pendingImgs=[];renderThumbs();chatInput.value='';chatInput.style.height='auto';syncSend();
- const typing=make('div','msg them typing'),tc=make('canvas');tc.setAttribute('aria-hidden','true');typing.append(tc);chatLog.append(typing);chatLog.scrollTop=chatLog.scrollHeight;const d=Math.min(window.devicePixelRatio||1,2);tc.width=32*d;tc.height=32*d;const c2=tc.getContext('2d');c2.setTransform(d,0,0,d,0,0);const t0=performance.now();cancelAnimationFrame(typingRAF);
- const loop=now=>{drawOrb(c2,32,(now-t0)/1000,3);typingRAF=requestAnimationFrame(loop);};typingRAF=requestAnimationFrame(loop);
- const stopTyping=()=>{cancelAnimationFrame(typingRAF);typing.remove();};
+ const typing=make('div','msg them typing');typing.setAttribute('role','status');typing.setAttribute('aria-label','Typing');const ch=make('span','chase');ch.setAttribute('aria-hidden','true');ch.append(make('i'),make('i'),make('i'));typing.append(ch);chatLog.append(typing);chatLog.scrollTop=chatLog.scrollHeight;
+ const stopTyping=()=>{typing.remove();};
  if(!OLLAMA_ON){setTimeout(()=>{stopTyping();addMsg('them',imgs.length&&!text?'Nice picture. I\u2019ll be able to look at images once chat is connected.':REPLIES[Math.random()*REPLIES.length|0]);},1400);return;}
  const bot=chatBot;chatBusy=true;let bubble=null;
  askOllama(bot,text,imgs,partial=>{if(!bubble){stopTyping();bubble=addMsg('them','…');}bubble.querySelector('p').textContent=partial;chatLog.scrollTop=chatLog.scrollHeight;})
@@ -773,43 +796,47 @@ function sendChat(){if(chatBusy)return;const text=chatInput.value.trim();if(!tex
   .finally(()=>{chatBusy=false;chatLog.scrollTop=chatLog.scrollHeight;});}
 syncSend();
 // ---- Voice input ----
-const voicePanel=el('voicePanel'),voiceCanvas=el('voiceViz'),vctx=voiceCanvas.getContext('2d'),voiceTx=el('voiceTx'),voiceErr=el('voiceErr'),micBtn=el('micBtn'),voiceStopBtn=el('voiceStop');
+const voicePanel=el('voicePanel'),voiceCanvas=el('voiceViz'),vctx=voiceCanvas.getContext('2d'),voiceTx=el('voiceTx'),voiceCopy=el('voiceCopy'),voiceErr=el('voiceErr'),micBtn=el('micBtn'),voiceStopBtn=el('voiceStop');
 let vAudio=null,vAnalyser=null,vStream=null,vFreq=null,vRAF=0,vSR=null,vOn=false,vSmooth=null,vSpokenFinal='',vSpokenInterim='';
-function vSize(){const d=Math.min(window.devicePixelRatio||1,2),s=210;voiceCanvas.width=s*d;voiceCanvas.height=s*d;vctx.setTransform(d,0,0,d,0,0);voiceCanvas._w=s;voiceCanvas._h=s;}
+function vSize(){const d=Math.min(window.devicePixelRatio||1,2),s=Math.round(voiceCanvas.clientWidth)||210;voiceCanvas.width=s*d;voiceCanvas.height=s*d;vctx.setTransform(d,0,0,d,0,0);voiceCanvas._w=s;voiceCanvas._h=s;}
 vSize();
-let vBands=[0,0,0,0],vPh=[0,1.7,3.1];
+window.addEventListener('resize',()=>{if(vOn)vSize();});
+let vBands=[0,0,0,0],vPh=[0,1.7,3.1],vPulse=0,vStartT=0;
+const vLift=v=>Math.min(1,Math.pow(v,.7)*1.35);
 function drawVoice(now){const w=voiceCanvas._w||210,h=voiceCanvas._h||210,cx=w/2,cy=h/2,baseR=w*.3,maxD=w*.1,N=180;
  if(vAnalyser){vAnalyser.getByteFrequencyData(vFreq);}
  const t=(now||performance.now())/1000;vctx.clearRect(0,0,w,h);
  // Energy in a few broad bands (low / mid / high / overall), eased so the shape glides instead of twitching
  const band=(a,b)=>{if(!vFreq||!vAnalyser)return 0;let s=0,n=0;for(let i=a;i<b&&i<vFreq.length;i++){s+=vFreq[i];n++;}return n?s/n/255:0;};
- const tgt=[band(1,5),band(5,14),band(14,32),band(1,32)];
- for(let k=0;k<4;k++){const up=tgt[k]>vBands[k];vBands[k]+=(tgt[k]-vBands[k])*(up?.18:.06);}
+ vPulse*=.93;
+ const floors=[.42,.34,.2,.36],tgt=[vLift(band(1,4)),vLift(band(4,12)),vLift(band(12,30)),vLift(band(1,30))].map((v,k)=>Math.max(v,vPulse*floors[k]));
+ for(let k=0;k<4;k++){const up=tgt[k]>vBands[k];vBands[k]+=(tgt[k]-vBands[k])*(up?.32:.09);}
  const lvl=vBands[3];
- vPh[0]+=.012+lvl*.05;vPh[1]-=.009+lvl*.04;vPh[2]+=.007+lvl*.03;
- const e1=.05+Math.min(.75,vBands[0])*.9,e2=.04+Math.min(.75,vBands[1])*.7,e3=.02+Math.min(.75,vBands[2])*.35,breathe=Math.sin(t*1.4)*.015;
+ vPh[0]+=.012+lvl*.06;vPh[1]-=.009+lvl*.05;vPh[2]+=.007+lvl*.04;
+ const e1=.05+Math.min(.85,vBands[0])*.8,e2=.04+Math.min(.85,vBands[1])*.65,e3=.02+Math.min(.85,vBands[2])*.3,breathe=Math.sin(t*1.4)*.015;
  vctx.beginPath();
  for(let i=0;i<=N;i++){const a=i/N*TAU;
   const d=e1*Math.sin(2*a+vPh[0])+e2*Math.sin(3*a+vPh[1])*.8+e3*Math.sin(5*a+vPh[2])*.5;
   const r=baseR*(1+breathe)+maxD*d;
   const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;i?vctx.lineTo(x,y):vctx.moveTo(x,y);}
- vctx.closePath();vctx.lineJoin='round';vctx.strokeStyle='rgba(255,255,255,.92)';vctx.lineWidth=2.2;vctx.stroke();
+ vctx.closePath();vctx.lineJoin='round';vctx.strokeStyle='rgba(255,255,255,.92)';vctx.lineWidth=Math.max(1.5,w*.0105);vctx.stroke();
  vRAF=requestAnimationFrame(drawVoice);
 }
-function setVoiceTx(text,hint){voiceTx.textContent=text||(hint?'Listening…':'');voiceTx.classList.toggle('hint',!!hint);}
+function setVoiceTx(text,hint){voiceTx.textContent=text||(hint?'Listening…':'');voiceTx.classList.toggle('hint',!!hint);voiceCopy.scrollTop=voiceCopy.scrollHeight;}
 function voiceSupported(){return !!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);}
 async function startVoice(){
  if(vOn)return;voiceErr.hidden=true;voiceErr.textContent='';
  if(!voiceSupported()){voiceErr.textContent='Your browser doesn\u2019t support microphone input.';voiceErr.hidden=false;return;}
+ let ac=null;try{ac=new (window.AudioContext||window.webkitAudioContext)();if(ac.resume)ac.resume().catch(()=>{});}catch(e){ac=null;}
  try{vStream=await navigator.mediaDevices.getUserMedia({audio:true});}
- catch(e){voiceErr.textContent='Microphone blocked. Enable it in your browser settings and try again.';voiceErr.hidden=false;return;}
- try{vAudio=new (window.AudioContext||window.webkitAudioContext)();const src=vAudio.createMediaStreamSource(vStream);vAnalyser=vAudio.createAnalyser();vAnalyser.fftSize=128;vAnalyser.smoothingTimeConstant=.7;vFreq=new Uint8Array(vAnalyser.frequencyBinCount);src.connect(vAnalyser);}catch(e){}
- vOn=true;chat.classList.add('voice-on');micBtn.classList.add('rec');micBtn.setAttribute('aria-label','Stop talking');
+ catch(e){if(ac){try{ac.close();}catch(x){}}voiceErr.textContent='Microphone blocked. Enable it in your browser settings and try again.';voiceErr.hidden=false;return;}
+ try{vAudio=ac;const src=vAudio.createMediaStreamSource(vStream);vAnalyser=vAudio.createAnalyser();vAnalyser.fftSize=256;vAnalyser.smoothingTimeConstant=.55;vAnalyser.minDecibels=-90;vAnalyser.maxDecibels=-28;vFreq=new Uint8Array(vAnalyser.frequencyBinCount);src.connect(vAnalyser);}catch(e){}
+ vOn=true;vStartT=performance.now();vPulse=0;chat.classList.add('voice-on');vSize();micBtn.classList.add('rec');micBtn.setAttribute('aria-label','Stop talking');
  vSpokenFinal=chatInput.value?chatInput.value.trim()+' ':'';vSpokenInterim='';setVoiceTx('',true);
  cancelAnimationFrame(vRAF);vRAF=requestAnimationFrame(drawVoice);
  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
  if(SR){try{vSR=new SR();vSR.continuous=true;vSR.interimResults=true;vSR.lang=navigator.language||'en-US';
-  vSR.onresult=e=>{vSpokenInterim='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)vSpokenFinal+=r[0].transcript.trim()+' ';else vSpokenInterim+=r[0].transcript;}const shown=(vSpokenFinal+vSpokenInterim).trim();setVoiceTx(shown,!shown);};
+  vSR.onresult=e=>{vPulse=1;vSpokenInterim='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)vSpokenFinal+=r[0].transcript.trim()+' ';else vSpokenInterim+=r[0].transcript;}const shown=(vSpokenFinal+vSpokenInterim).trim();setVoiceTx(shown,!shown);};
   vSR.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){voiceErr.textContent='Microphone blocked. Enable it in your browser settings and try again.';voiceErr.hidden=false;stopVoice(true);}};
   vSR.onend=()=>{if(vOn){try{vSR.start();}catch(e){}}};
   vSR.start();
@@ -824,11 +851,16 @@ function stopVoice(canceled){
  cancelAnimationFrame(vRAF);vRAF=0;vctx.clearRect(0,0,voiceCanvas._w||210,voiceCanvas._h||210);
  chat.classList.remove('voice-on');micBtn.classList.remove('rec');micBtn.setAttribute('aria-label','Talk instead');
  const spoken=(vSpokenFinal+vSpokenInterim).trim();
- if(!canceled&&spoken){chatInput.value=spoken;chatInput.dispatchEvent(new Event('input'));chatInput.focus({preventScroll:true});}
+ if(!canceled&&spoken){chatInput.value=spoken;chatInput.dispatchEvent(new Event('input'));if(finePointer)chatInput.focus({preventScroll:true});}
  vSpokenFinal='';vSpokenInterim='';
 }
 micBtn.addEventListener('click',()=>{vOn?stopVoice():startVoice();});
-voiceStopBtn.addEventListener('click',()=>stopVoice());
+/* While listening: tap anywhere = finish and keep the words in the message box. The X = cancel and throw them away. */
+let swallowUntil=0;
+document.addEventListener('pointerdown',e=>{if(!vOn||performance.now()-vStartT<300)return;if(e.target.closest&&e.target.closest('#voiceStop,#chatClose'))return;swallowUntil=performance.now()+600;stopVoice(false);},true);
+document.addEventListener('click',e=>{if(performance.now()<swallowUntil){swallowUntil=0;e.stopPropagation();e.preventDefault();}},true);
+document.addEventListener('keydown',e=>{if(vOn&&e.key==='Enter'&&!(e.target.closest&&e.target.closest('#voiceStop'))){e.preventDefault();stopVoice(false);}});
+voiceStopBtn.addEventListener('click',()=>stopVoice(true));
 function previewSignIn(addr){err.textContent='';setUser({email:addr,botId:MOCK.me,paid:false});note.textContent="Preview only. Sign-in isn't connected yet, so this just shows the signed-in view.";setTimeout(()=>{hideModal();if(pendingBot){const b=pendingBot;pendingBot=null;openBot(b);}},1300);}
 el('loginGo').addEventListener('click',()=>{previewSignIn(email.value.trim()||'you@example.com');pwd.value='';});
 [email,pwd].forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();el('loginGo').click();}}));
