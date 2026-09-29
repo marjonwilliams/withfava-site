@@ -358,12 +358,10 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
 /* Paste your n8n webhook address here to switch from sample data to live Google Sheet data. */
 const DATA_URL='';
 /* ---- Chat → your Ollama (temporary) ----
-   Paste your Cloudflare Access service token below to make the chat box talk to your Ollama.
-   While these still say PASTE_..., the chat keeps using the built-in preview replies. */
+   Only the /api/chat path is open (Cloudflare Access "Website Chat Bypass"); everything else on Ollama stays locked.
+   Set OLLAMA_URL to '' to go back to the built-in preview replies. */
 const OLLAMA_URL='https://ollama.withfava.com/api/chat';
 const OLLAMA_MODEL='huihui_ai/qwen3-vl-abliterated:8b-instruct';
-const CF_ACCESS_ID='b770a52dd2ec89db68280ea68d35e791.access';
-const CF_ACCESS_SECRET='cfast_ojvPeY2pSvHT1FfVrNolqxQ2zZ7fSECZcFjVdjp81d95289c';
 const REFRESH_SECONDS=60;
 /* Sample data. The IDs are made up, not your real bot IDs. */
 const MOCK={
@@ -735,7 +733,7 @@ chatInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.prev
 el('sendBtn').addEventListener('click',sendChat);
 let chatBot=null;
 function pickChatBot(){return bots[Math.random()*bots.length|0]||null;}
-const OLLAMA_ON=!!(OLLAMA_URL&&CF_ACCESS_ID&&CF_ACCESS_SECRET&&!/PASTE_/.test(CF_ACCESS_ID+CF_ACCESS_SECRET));
+const OLLAMA_ON=!!OLLAMA_URL;
 let chatHist=[],histBot=null,chatBusy=false;
 function setChatBot(b){chatBot=b||pickChatBot();if(!chatBot)return;chatInput.placeholder='Message '+chatBot.name;
  if(histBot!==chatBot){histBot=chatBot;chatHist=[];chatLog.textContent='';chat.classList.remove('has-msgs');}
@@ -751,7 +749,7 @@ async function askOllama(bot,text,imgs,onToken){
  const recent=chatHist.slice(-16).map((m,i,a)=>i===a.length-1?m:{role:m.role,content:m.content});
  const ac=typeof AbortController==='function'?new AbortController():null,to=setTimeout(()=>{if(ac)ac.abort();},90000);
  try{
-  const r=await fetch(OLLAMA_URL,{method:'POST',headers:{'Content-Type':'application/json','CF-Access-Client-Id':CF_ACCESS_ID,'CF-Access-Client-Secret':CF_ACCESS_SECRET},body:JSON.stringify({model:OLLAMA_MODEL,messages:[{role:'system',content:personaPrompt(bot)},...recent],stream:true,options:{temperature:.8}}),signal:ac?ac.signal:undefined});
+  const r=await fetch(OLLAMA_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:OLLAMA_MODEL,messages:[{role:'system',content:personaPrompt(bot)},...recent],stream:true,options:{temperature:.8}}),signal:ac?ac.signal:undefined});
   if(!r.ok||!r.body)throw new Error('status '+r.status);
   const rd=r.body.getReader(),dec=new TextDecoder();let buf='',raw='';
   for(;;){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let nl;
