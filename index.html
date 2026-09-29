@@ -106,7 +106,7 @@ body:not(.signed-in) .join-btn{display:inline-flex;align-items:center}
 .chat.instant{transition:none}
 .chat.inner-hidden .chat-inner{opacity:0}
 .chat[hidden]{display:none}
-.chat-inner{width:min(600px,100%);height:100%;display:flex;flex-direction:column;justify-content:center;gap:18px;transition:opacity .3s ease;padding:calc(env(safe-area-inset-top,0px) + 120px) 24px calc(env(safe-area-inset-bottom,0px) + 20px)}
+.chat-inner{width:min(600px,100%);height:100%;display:flex;flex-direction:column;justify-content:center;gap:18px;transition:opacity .3s ease;padding:calc(env(safe-area-inset-top,0px) + 132px) 24px calc(env(safe-area-inset-bottom,0px) + 20px)}
 .chat.has-msgs .chat-inner{justify-content:flex-end}
 .chat-hello{margin:0;text-align:center;font-size:clamp(22px,2.6vw,28px);font-weight:600;letter-spacing:-.035em}
 .chat.has-msgs .chat-hello{display:none}
@@ -168,6 +168,45 @@ body:not(.signed-in) .join-btn{display:inline-flex;align-items:center}
 .chat.voice-on.has-msgs .voice-stop{width:38px;height:38px;flex:none}
 /* Phones/tablets: solid navy (same colour as the loading screen). Safari copies a solid full-screen layer's colour into its status-bar strip, so the strip blends in. */
 @media (max-width:700px),(pointer:coarse){.chat,.menu{background:var(--navy);-webkit-backdrop-filter:none;backdrop-filter:none}body.chat-open,body.menu-open{background:var(--navy)}}
+.chat-head{position:absolute;top:calc(env(safe-area-inset-top,0px) + 84px);left:50%;transform:translateX(-50%);width:min(600px,calc(100% - 48px));display:flex;align-items:center;gap:10px;z-index:2}
+.bot-pick-wrap{position:relative;min-width:0}
+.bot-pick{display:inline-flex;align-items:center;gap:8px;height:34px;max-width:100%;padding:0 12px 0 12px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid var(--edge);color:var(--ink);font-size:15px;font-weight:500;transition:background .15s}
+.bot-pick:hover,.bot-pick[aria-expanded="true"]{background:rgba(255,255,255,.13)}
+#botPickName{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bot-pick .chev{display:grid;place-items:center;flex:none;color:var(--muted);transition:transform .2s}
+.bot-pick[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.bot-menu{position:absolute;top:calc(100% + 8px);left:0;z-index:8;min-width:250px;max-height:min(58vh,340px);overflow-y:auto;padding:6px;border-radius:16px;background:#0E1220;border:1px solid var(--edge-strong);box-shadow:0 18px 50px rgba(0,0,0,.55);animation:popIn .16s ease}
+@keyframes popIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.bot-menu[hidden]{display:none}
+.bot-opt{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:10px;background:none;border:0;color:var(--ink);text-align:left;font-size:15px}
+.bot-opt:hover,.bot-opt:focus-visible{background:rgba(255,255,255,.08)}
+.bo-name{flex:1;min-width:0;font-weight:500}
+.bo-city{color:var(--muted);font-size:13px}
+.bo-check{display:grid;flex:none}
+.hist-scrim{position:absolute;inset:0;z-index:6;background:rgba(0,0,0,.5);opacity:0;transition:opacity .28s ease}
+.hist-scrim.open{opacity:1}
+.hist-scrim[hidden],.hist[hidden]{display:none}
+.hist{position:absolute;top:0;bottom:0;left:0;z-index:7;width:min(320px,86vw);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 16px) 12px calc(env(safe-area-inset-bottom,0px) + 14px);background:#0A1024;border-right:1px solid var(--edge);transform:translateX(-102%);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.hist.open{transform:none}
+.hist-top{display:flex;align-items:center;justify-content:space-between;padding:0 4px 12px}
+.hist-top h3{margin:0;font-size:17px;font-weight:600;letter-spacing:-.02em}
+.hist-new{display:flex;align-items:center;gap:10px;width:100%;height:44px;padding:0 12px;margin-bottom:10px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid var(--edge);color:var(--ink);font-size:15px;font-weight:500}
+.hist-new:hover{background:rgba(255,255,255,.12)}
+.hist-new span{display:grid}
+.hist-list{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;display:flex;flex-direction:column;gap:2px}
+.hist-list::-webkit-scrollbar{display:none}
+.hist-item{display:flex;align-items:center;border-radius:12px}
+.hist-item:hover,.hist-item.on{background:rgba(255,255,255,.07)}
+.hist-row{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;padding:9px 10px;background:none;border:0;color:var(--ink);text-align:left}
+.hist-title{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-meta{font-size:12px;color:var(--muted)}
+.hist-del{flex:none;width:32px;height:32px;margin-right:4px;display:grid;place-items:center;border-radius:50%;background:none;border:0;color:var(--muted);opacity:.7}
+.hist-del:hover{color:var(--ink);background:rgba(255,255,255,.1);opacity:1}
+.hist-empty{margin:20px 10px;font-size:14px;line-height:1.5;color:var(--muted)}
+body.hist-open .top{opacity:0}
+body.hist-open .top,body.hist-open .top *{pointer-events:none!important}
+.msg .ph{display:block;width:fit-content;margin:0 0 6px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.bot-menu{animation:none}.hist,.hist-scrim{transition:none}}
 .chat-close{position:fixed;top:calc(env(safe-area-inset-top,0px) + 20px);right:28px;z-index:6;background:rgba(6,12,28,.92);border-color:var(--edge)}
 .chat-open .top-right>*,.chat-open .live{display:none!important}
 @media (hover:hover){.pill:not(.join-btn),.more{opacity:.55}.pill:hover,.pill:focus-visible,.more:hover,.more:focus-visible{opacity:1}}
@@ -265,6 +304,7 @@ body:not(.signed-in) .join-btn{display:inline-flex;align-items:center}
  .chat-inner{padding:calc(env(safe-area-inset-top,0px) + 72px) 16px calc(env(safe-area-inset-bottom,0px) + 14px)}
  .composer textarea{font-size:16px}
  .chat-close{top:calc(env(safe-area-inset-top,0px) + 18px);right:16px}
+ .chat-head{top:calc(env(safe-area-inset-top,0px) + 18px);left:16px;right:66px;transform:none;width:auto}
  .wordmark{transition:opacity .3s ease}
  .chat-open .wordmark{opacity:0;pointer-events:none}
  body:not(.touch):not(.is-city):not(.on-page) .ltr{cursor:default}
@@ -314,6 +354,13 @@ body:not(.signed-in) .join-btn{display:inline-flex;align-items:center}
 <div class="chat" id="chat" hidden role="dialog" aria-modal="true" aria-label="Chat">
  <button class="round-btn chat-close" id="chatClose" type="button" aria-label="Close chat"></button>
  <div class="chat-inner">
+  <div class="chat-head" id="chatHead">
+   <button class="round-btn" id="histBtn" type="button" aria-label="Chat history" aria-expanded="false" aria-controls="hist"></button>
+   <div class="bot-pick-wrap">
+    <button class="bot-pick" id="botPick" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="botMenu"><span class="pin" aria-hidden="true"></span><span id="botPickName">Choose a bot</span><span class="chev" id="botPickChev" aria-hidden="true"></span></button>
+    <div class="bot-menu" id="botMenu" role="listbox" aria-label="Choose who to talk to" hidden></div>
+   </div>
+  </div>
   <div class="chat-log" id="chatLog" aria-live="polite"></div>
   <h2 class="chat-hello" id="chatHello"></h2>
   <div class="voice-panel" id="voicePanel" aria-live="polite">
@@ -338,6 +385,12 @@ body:not(.signed-in) .join-btn{display:inline-flex;align-items:center}
   <p class="conn-note" id="connNote" aria-live="polite"><span class="spin" aria-hidden="true"></span>Poor connection</p>
   <p class="chat-note">Chat is a preview for now.</p>
  </div>
+ <div class="hist-scrim" id="histScrim" hidden></div>
+ <aside class="hist" id="hist" aria-label="Previous chats" hidden>
+  <div class="hist-top"><h3>Chats</h3><button class="round-btn" id="histClose" type="button" aria-label="Close chat history"></button></div>
+  <button class="hist-new" id="histNew" type="button"><span id="histNewIcon" aria-hidden="true"></span>New chat</button>
+  <div class="hist-list" id="histList" role="list"></div>
+ </aside>
 </div>
 <section class="page" id="botPage" hidden aria-labelledby="bpName">
  <div class="bp" id="bpBody" hidden>
@@ -448,6 +501,7 @@ const make=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.classNa
 const slug=s=>String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 let fadeFocus=null;
 let bots=[],cities=[],spots=[],focus=null,picked=null,expanded=false,user=null,pendingBot=null,loaded=false;
+let convos=[],activeId=null,chatBot=null,chatReady=false;const chatBusyIds=new Set();
 const seenEvents=new Set(),queuedReds=[];
 const SHOW=4;
 function setData(d){
@@ -751,7 +805,7 @@ document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if
 let loginMode='login';
 function setLoginMode(m){loginMode=m;el('loginTitle').textContent=m==='join'?'Join FAVA':'Log in';el('loginGo').textContent=m==='join'?'Create account':'Log in';el('footText').textContent=m==='join'?'Already have an account?':'New here?';el('create').textContent=m==='join'?'Log in':'Create an account';pwd.setAttribute('autocomplete',m==='join'?'new-password':'current-password');}
 function showLogin(why,mode){setLoginMode(mode||'login');el('loginWhy').textContent=why||'';note.textContent='';err.textContent='';showModal(el('login'));}
-function setUser(u){user=u;document.body.classList.toggle('signed-in',!!u);document.body.classList.toggle('paid',!!(u&&u.paid));if(typeof syncMenuBtn==='function')syncMenuBtn();loginBtn.textContent=u?'Dashboard':'Log in';el('menuLogin').textContent=u?'Dashboard':'Log in';renderLegend();if(focus)renderPanel();if(!u&&pageOpen)location.hash='';}
+function setUser(u){user=u;document.body.classList.toggle('signed-in',!!u);document.body.classList.toggle('paid',!!(u&&u.paid));if(typeof syncMenuBtn==='function')syncMenuBtn();loginBtn.textContent=u?'Dashboard':'Log in';el('menuLogin').textContent=u?'Dashboard':'Log in';renderLegend();if(focus)renderPanel();if(!u&&pageOpen)location.hash='';chatAccountChanged();}
 function accountClick(){if(user){el('dashWho').textContent='Signed in as '+user.email;showModal(el('dash'));}else showLogin('','login');}
 loginBtn.addEventListener('click',accountClick);
 const menu=el('menu'),menuBtn=el('menuBtn');let menuTimer=0,menuIsOpen=false;
@@ -768,7 +822,7 @@ el('chatClose').innerHTML=ICON.x;el('addImg').innerHTML=ICON.plus;el('sendBtn').
 function greeting(){const h=new Date().getHours(),sets=h<5||h>=23?['Up late again?','Still awake?','Can\u2019t sleep either?']:h<11?['Morning. What\u2019s on the agenda?','Good morning. What are we doing today?']:h<17?['What\u2019s on the agenda today?','What are we getting into?']:['How was your day?','Winding down?'];return sets[Math.random()*sets.length|0];}
 let chatLoadTimer=0;
 function hideChatLoader(instant){const ld=el('loader');clearTimeout(chatLoadTimer);if(ld.hidden)return;if(instant){ld.classList.remove('show');ld.hidden=true;stopOrb();return;}ld.classList.remove('show');chatLoadTimer=setTimeout(()=>{ld.hidden=true;stopOrb();},reduce?0:460);}
-function openChat(bot){clearTimeout(chatTimer);clearTimeout(chatLoadTimer);setChatBot(bot||chatBot||pickChatBot());chatReturn=document.activeElement;if(!chat.classList.contains('has-msgs'))el('chatHello').textContent=greeting();
+function openChat(bot){clearTimeout(chatTimer);clearTimeout(chatLoadTimer);if(bot)setChatBot(bot);else setChatBot(chatBot||resumeBot());chatReturn=document.activeElement;if(!chat.classList.contains('has-msgs'))el('chatHello').textContent=greeting();
  const ld=el('loader');
  if(pageOpen||!ld.hidden){/* something else owns the loader — skip */ }
  else{el('loadMsg').textContent=pickLine();startOrb();ld.hidden=false;}
@@ -776,8 +830,8 @@ function openChat(bot){clearTimeout(chatTimer);clearTimeout(chatLoadTimer);setCh
  if(menuIsOpen){chatReturn=menuBtn;chat.classList.add('instant','open');closeMenu(false);requestAnimationFrame(()=>requestAnimationFrame(()=>{chat.classList.remove('instant');ld.classList.add('show');}));}
  else requestAnimationFrame(()=>requestAnimationFrame(()=>{chat.classList.add('open');ld.classList.add('show');}));
  chatLoadTimer=setTimeout(()=>{ld.classList.remove('show');chat.classList.remove('inner-hidden');chatLoadTimer=setTimeout(()=>{ld.hidden=true;stopOrb();},reduce?0:460);setTimeout(()=>chatInput.focus({preventScroll:true}),60);},reduce?300:1400);}
-function closeChat(back){if(chat.hidden)return;if(vOn)stopVoice(true);hideChatLoader();chat.classList.remove('open','inner-hidden');document.body.classList.remove('chat-open');chatTimer=setTimeout(()=>{chat.hidden=true;},reduce?0:300);if(back!==false&&chatReturn&&document.body.contains(chatReturn)&&chatReturn.offsetParent!==null)chatReturn.focus({preventScroll:true});}
-document.querySelectorAll('[data-chat]').forEach(b=>b.addEventListener('click',()=>{chat.hidden||!chat.classList.contains('open')?openChat(pickChatBot()):closeChat();}));
+function closeChat(back){if(chat.hidden)return;if(vOn)stopVoice(true);closeHist(true);closeBotMenu();hideChatLoader();chat.classList.remove('open','inner-hidden');document.body.classList.remove('chat-open');chatTimer=setTimeout(()=>{chat.hidden=true;},reduce?0:300);if(back!==false&&chatReturn&&document.body.contains(chatReturn)&&chatReturn.offsetParent!==null)chatReturn.focus({preventScroll:true});}
+document.querySelectorAll('[data-chat]').forEach(b=>b.addEventListener('click',()=>{chat.hidden||!chat.classList.contains('open')?openChat():closeChat();}));
 el('chatClose').addEventListener('click',()=>closeChat());
 el('addImg').addEventListener('click',()=>el('fileIn').click());
 function syncSend(){el('sendBtn').classList.toggle('idle',!chatInput.value.trim()&&!pendingImgs.length);}
@@ -786,43 +840,98 @@ el('fileIn').addEventListener('change',e=>{for(const f of e.target.files){if(!f.
 chatInput.addEventListener('input',()=>{chatInput.style.height='auto';chatInput.style.height=Math.min(140,chatInput.scrollHeight)+'px';syncSend();});
 chatInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}});
 el('sendBtn').addEventListener('click',sendChat);
-let chatBot=null;
 function pickChatBot(){return bots[Math.random()*bots.length|0]||null;}
 const OLLAMA_ON=!!OLLAMA_URL;
-let chatHist=[],histBot=null,chatBusy=false;
-function setChatBot(b){chatBot=b||pickChatBot();if(!chatBot)return;chatInput.placeholder='Message '+chatBot.name;
- if(histBot!==chatBot){histBot=chatBot;chatHist=[];chatLog.textContent='';chat.classList.remove('has-msgs');}
- const note=chat.querySelector('.chat-note');if(note)note.hidden=OLLAMA_ON;}
+/* ---------- Chats: kept on this device, one store per account (a real version would keep them on a server) ---------- */
+const CHAT_MAX=50,MSG_MAX=200;
+const chatKey=()=>'fava-chats-v1:'+(user&&user.email?String(user.email).toLowerCase():'guest');
+function loadConvos(){convos=[];activeId=null;try{const j=JSON.parse(localStorage.getItem(chatKey())||'null');if(j&&Array.isArray(j.convos)){convos=j.convos.filter(c=>c&&c.id&&c.bot&&Array.isArray(c.msgs));activeId=convos.some(c=>c.id===j.active)?j.active:null;}}catch(e){}}
+function saveConvos(){try{localStorage.setItem(chatKey(),JSON.stringify({convos:convos,active:activeId}));}catch(e){}}
+const findBot=name=>bots.find(b=>b.name===name)||null;
+const convoById=id=>convos.find(c=>c.id===id)||null;
+const byRecent=()=>convos.slice().sort((a,b)=>b.updated-a.updated);
+const latestConvoFor=name=>byRecent().find(c=>c.bot===name)||null;
+function resumeBot(){const cv=convoById(activeId)||byRecent()[0];return (cv&&findBot(cv.bot))||pickChatBot();}
+function relTime(ts){const s=(Date.now()-ts)/1000;if(s<60)return 'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';const d=Math.floor(s/86400);if(d<7)return d===1?'Yesterday':d+'d';try{return new Date(ts).toLocaleDateString(undefined,{month:'short',day:'numeric'});}catch(e){return d+'d';}}
+const botPick=el('botPick'),botMenu=el('botMenu'),botPickName=el('botPickName'),histBtn=el('histBtn'),hist=el('hist'),histScrim=el('histScrim'),histList=el('histList');
+function renderConvo(cv){chatLog.textContent='';(cv?cv.msgs:[]).forEach(m=>addMsg(m.r,m.t,null,m.n));chat.classList.toggle('has-msgs',!!(cv&&cv.msgs.length));chatLog.scrollTop=chatLog.scrollHeight;
+ pendingImgs.forEach(u=>{try{URL.revokeObjectURL(u);}catch(e){}});pendingImgs=[];renderThumbs();syncSend();if(!(cv&&cv.msgs.length))el('chatHello').textContent=greeting();}
+function setChatBot(b,force){const nb=b||pickChatBot();if(!nb)return;const same=!!chatBot&&chatBot.name===nb.name;chatBot=nb;
+ chatInput.placeholder='Message '+nb.name;botPickName.textContent=nb.name;
+ const note=chat.querySelector('.chat-note');if(note)note.hidden=OLLAMA_ON;
+ if(!same||force){if(vOn)stopVoice(true);const cv=latestConvoFor(nb.name);activeId=cv?cv.id:null;renderConvo(cv);saveConvos();}
+ renderBotMenu();}
+/* who am I talking to: the little drop-down at the top */
+const botMenuOpen=()=>!botMenu.hidden;
+function renderBotMenu(){botMenu.textContent='';bots.forEach(b=>{const on=!!chatBot&&chatBot.name===b.name,o=make('button','bot-opt');o.type='button';o.setAttribute('role','option');o.setAttribute('aria-selected',String(on));
+  const pin=make('span','pin');pin.setAttribute('aria-hidden','true');o.append(pin,make('span','bo-name',b.name),make('span','bo-city',b.city||''));
+  if(on){const ck=make('span','bo-check');ck.setAttribute('aria-hidden','true');ck.innerHTML=ICON.check;o.append(ck);}
+  o.addEventListener('click',()=>{closeBotMenu();if(!on){setChatBot(b);if(finePointer)chatInput.focus({preventScroll:true});}});botMenu.append(o);});}
+function openBotMenu(){if(histIsOpen())closeHist();renderBotMenu();botMenu.hidden=false;botPick.setAttribute('aria-expanded','true');const cur=botMenu.querySelector('[aria-selected="true"]')||botMenu.firstElementChild;if(cur)cur.focus({preventScroll:true});}
+function closeBotMenu(){if(botMenu.hidden)return;botMenu.hidden=true;botPick.setAttribute('aria-expanded','false');}
+/* previous chats: the drawer on the left */
+const histIsOpen=()=>!hist.hidden&&hist.classList.contains('open');let histTimer=0;
+function renderHist(){histList.textContent='';const list=byRecent();
+ if(!list.length){histList.append(make('p','hist-empty','No chats yet. Start one and it will show up here.'));return;}
+ list.forEach(c=>{const row=make('div','hist-item'+(c.id===activeId?' on':'')),b=make('button','hist-row');b.type='button';
+  b.append(make('span','hist-title',c.title||'New chat'),make('span','hist-meta',c.bot+' \u00b7 '+relTime(c.updated)));b.addEventListener('click',()=>openConvo(c.id));
+  const d=make('button','hist-del');d.type='button';d.setAttribute('aria-label','Delete this chat');d.innerHTML=ICON.trash;d.addEventListener('click',ev=>{ev.stopPropagation();deleteConvo(c.id);});row.append(b,d);histList.append(row);});}
+function openHist(){closeBotMenu();clearTimeout(histTimer);renderHist();hist.hidden=false;histScrim.hidden=false;document.body.classList.add('hist-open');histBtn.setAttribute('aria-expanded','true');
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{hist.classList.add('open');histScrim.classList.add('open');}));setTimeout(()=>{const f=el('histNew');if(f)f.focus({preventScroll:true});},60);}
+function closeHist(instant){if(hist.hidden)return;hist.classList.remove('open');histScrim.classList.remove('open');document.body.classList.remove('hist-open');histBtn.setAttribute('aria-expanded','false');
+ clearTimeout(histTimer);histTimer=setTimeout(()=>{hist.hidden=true;histScrim.hidden=true;},(instant||reduce)?0:300);}
+function openConvo(id){const c=convoById(id);if(!c)return;const b=findBot(c.bot);if(vOn)stopVoice(true);if(b){chatBot=b;chatInput.placeholder='Message '+b.name;botPickName.textContent=b.name;}activeId=id;renderConvo(c);saveConvos();closeHist();}
+function deleteConvo(id){convos=convos.filter(c=>c.id!==id);if(activeId===id){activeId=null;renderConvo(null);}saveConvos();renderHist();}
+function newChat(){if(vOn)stopVoice(true);activeId=null;renderConvo(null);saveConvos();closeHist();if(finePointer)setTimeout(()=>chatInput.focus({preventScroll:true}),320);}
+function chatAccountChanged(){if(!chatReady)return;loadConvos();chatBot=null;chatLog.textContent='';chat.classList.remove('has-msgs');botPickName.textContent='Choose a bot';closeHist(true);closeBotMenu();
+ if(!chat.hidden&&chat.classList.contains('open'))setChatBot(resumeBot());}
 function personaPrompt(b){const lp=b.tz?localParts(b.tz).text:'';
  return 'You are '+b.name+', a person living in '+(b.city||'a big city')+'. '+(lp?'It is '+lp+' where you are. ':'')+(b.doing?'Right now you are: '+b.doing+'. ':'')+(b.mood?'Your mood right now: '+b.mood+'. ':'')+
  'Someone is texting you through the FAVA website. Stay in character as '+b.name+' and reply the way a real person texts: casual, natural, usually one to three short sentences. Don\u2019t use lists or headings.';}
 const cleanReply=s=>s.replace(/<think>[\s\S]*?(<\/think>|$)/g,'').trim();
 function toJpegB64(url){return new Promise(res=>{const im=new Image();im.onload=()=>{const m=1024,s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*s));c.height=Math.max(1,Math.round(im.height*s));c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.85).split(',')[1]);};im.onerror=()=>res(null);im.src=url;});}
-async function askOllama(bot,text,imgs,onToken){
+async function askOllama(bot,cv,imgs,onToken){
  const imgs64=(await Promise.all(imgs.map(toJpegB64))).filter(Boolean);
- const um={role:'user',content:text||'(sent you a photo)'};if(imgs64.length)um.images=imgs64;chatHist.push(um);
- const recent=chatHist.slice(-16).map((m,i,a)=>i===a.length-1?m:{role:m.role,content:m.content});
+ const ctxm=cv.msgs.slice(-16).map(m=>({role:m.r==='me'?'user':'assistant',content:m.t||(m.n?'(sent you a photo)':'')}));
+ if(imgs64.length&&ctxm.length)ctxm[ctxm.length-1].images=imgs64;
  const ac=typeof AbortController==='function'?new AbortController():null,to=setTimeout(()=>{if(ac)ac.abort();},90000);
  try{
-  const r=await fetch(OLLAMA_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:OLLAMA_MODEL,messages:[{role:'system',content:personaPrompt(bot)},...recent],stream:true,options:{temperature:.8}}),signal:ac?ac.signal:undefined});
+  const r=await fetch(OLLAMA_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:OLLAMA_MODEL,messages:[{role:'system',content:personaPrompt(bot)},...ctxm],stream:true,options:{temperature:.8}}),signal:ac?ac.signal:undefined});
   if(!r.ok||!r.body)throw new Error('status '+r.status);
   const rd=r.body.getReader(),dec=new TextDecoder();let buf='',raw='';
   for(;;){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let nl;
    while((nl=buf.indexOf('\n'))>=0){const line=buf.slice(0,nl).trim();buf=buf.slice(nl+1);if(!line)continue;let j;try{j=JSON.parse(line);}catch(e){continue;}
     if(j.error)throw new Error(j.error);if(j.message&&j.message.content){raw+=j.message.content;const c=cleanReply(raw);if(c)onToken(c);}}}
-  const final=cleanReply(raw);if(!final)throw new Error('empty');chatHist.push({role:'assistant',content:final});return final;
- }catch(e){chatHist.pop();throw e;}finally{clearTimeout(to);}}
+  const final=cleanReply(raw);if(!final)throw new Error('empty');return final;
+ }finally{clearTimeout(to);}}
 const REPLIES=['I\u2019m only a preview for now, so I can\u2019t really chat yet. Soon, though.','Chat isn\u2019t hooked up yet, but I\u2019m listening. Kind of.','Almost ready to talk. The wires are still going in.'];
-function addMsg(who,text,imgs){const m=make('div','msg '+who);(imgs||[]).forEach(u=>{const im=make('img');im.src=u;im.alt='Image you added';m.append(im);});if(text)m.append(make('p',null,text));chatLog.append(m);chatLog.scrollTop=chatLog.scrollHeight;return m;}
-function sendChat(){if(chatBusy)return;const text=chatInput.value.trim();if(!text&&!pendingImgs.length){chatInput.focus();return;}chat.classList.add('has-msgs');const imgs=pendingImgs.slice();addMsg('me',text,imgs);pendingImgs=[];renderThumbs();chatInput.value='';chatInput.style.height='auto';syncSend();
+function addMsg(who,text,imgs,photos){const m=make('div','msg '+who);(imgs||[]).forEach(u=>{const im=make('img');im.src=u;im.alt='Image you added';m.append(im);});if(photos&&!(imgs&&imgs.length))m.append(make('span','ph',photos>1?photos+' photos':'Photo'));if(text)m.append(make('p',null,text));chatLog.append(m);chatLog.scrollTop=chatLog.scrollHeight;return m;}
+function sendChat(){const text=chatInput.value.trim();if(!text&&!pendingImgs.length){chatInput.focus();return;}
+ if(!chatBot)setChatBot(resumeBot());if(!chatBot)return;
+ let cv=convoById(activeId);if(cv&&chatBusyIds.has(cv.id))return;
+ const bot=chatBot;
+ if(!cv){cv={id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),bot:bot.name,title:'',updated:Date.now(),msgs:[]};convos.unshift(cv);activeId=cv.id;if(convos.length>CHAT_MAX)convos.length=CHAT_MAX;}
+ const cid=cv.id,imgs=pendingImgs.slice();
+ chat.classList.add('has-msgs');addMsg('me',text,imgs);
+ cv.msgs.push({r:'me',t:text,n:imgs.length});if(cv.msgs.length>MSG_MAX)cv.msgs.splice(0,cv.msgs.length-MSG_MAX);
+ if(!cv.title)cv.title=text?text.slice(0,48):'Photo';cv.updated=Date.now();saveConvos();
+ pendingImgs=[];renderThumbs();chatInput.value='';chatInput.style.height='auto';syncSend();
  const typing=make('div','msg them typing');typing.setAttribute('role','status');typing.setAttribute('aria-label','Typing');const ch=make('span','chase');ch.setAttribute('aria-hidden','true');ch.append(make('i'),make('i'),make('i'));typing.append(ch);chatLog.append(typing);chatLog.scrollTop=chatLog.scrollHeight;
- const stopTyping=()=>{typing.remove();};
- if(!OLLAMA_ON){setTimeout(()=>{stopTyping();addMsg('them',imgs.length&&!text?'Nice picture. I\u2019ll be able to look at images once chat is connected.':REPLIES[Math.random()*REPLIES.length|0]);},1400);return;}
- const bot=chatBot;chatBusy=true;let bubble=null;
- askOllama(bot,text,imgs,partial=>{if(!bubble){stopTyping();bubble=addMsg('them','…');}bubble.querySelector('p').textContent=partial;chatLog.scrollTop=chatLog.scrollHeight;})
-  .then(final=>{if(!bubble){stopTyping();bubble=addMsg('them',final);}else bubble.querySelector('p').textContent=final;})
-  .catch(()=>{stopTyping();if(bubble)bubble.remove();const m=addMsg('them',(bot?bot.name:'They')+' is offline right now. Try again in a bit.');m.classList.add('offline');})
-  .finally(()=>{chatBusy=false;chatLog.scrollTop=chatLog.scrollHeight;});}
+ const stopTyping=()=>{typing.remove();},live=()=>activeId===cid;
+ const record=t=>{const c=convoById(cid);if(c){c.msgs.push({r:'them',t:t,n:0});c.updated=Date.now();saveConvos();if(histIsOpen())renderHist();}};
+ if(!OLLAMA_ON){setTimeout(()=>{stopTyping();const t=imgs.length&&!text?'Nice picture. I\u2019ll be able to look at images once chat is connected.':REPLIES[Math.random()*REPLIES.length|0];if(live())addMsg('them',t);record(t);},1400);return;}
+ chatBusyIds.add(cid);let bubble=null;
+ askOllama(bot,cv,imgs,partial=>{if(!live())return;if(!bubble){stopTyping();bubble=addMsg('them','\u2026');}bubble.querySelector('p').textContent=partial;chatLog.scrollTop=chatLog.scrollHeight;})
+  .then(final=>{record(final);if(live()){if(!bubble){stopTyping();bubble=addMsg('them',final);}else bubble.querySelector('p').textContent=final;}})
+  .catch(()=>{if(live()){stopTyping();if(bubble)bubble.remove();const m=addMsg('them',bot.name+' is offline right now. Try again in a bit.');m.classList.add('offline');}})
+  .finally(()=>{chatBusyIds.delete(cid);if(live())chatLog.scrollTop=chatLog.scrollHeight;});}
+Object.assign(ICON,{hist:'<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect x="2.5" y="3.5" width="13" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 3.5v11" stroke="currentColor" stroke-width="1.6"/></svg>',chev:'<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5L6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',check:'<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',trash:'<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8h5.8l.6-8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'});
+histBtn.innerHTML=ICON.hist;el('botPickChev').innerHTML=ICON.chev;el('histClose').innerHTML=ICON.x;el('histNewIcon').innerHTML=ICON.plus;
+histBtn.addEventListener('click',()=>{histIsOpen()?closeHist():openHist();});el('histClose').addEventListener('click',()=>closeHist());histScrim.addEventListener('click',()=>closeHist());el('histNew').addEventListener('click',newChat);
+botPick.addEventListener('click',()=>{botMenuOpen()?closeBotMenu():openBotMenu();});
+document.addEventListener('pointerdown',e=>{if(botMenuOpen()&&!(e.target.closest&&e.target.closest('.bot-pick-wrap')))closeBotMenu();});
+botMenu.addEventListener('keydown',e=>{if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return;e.preventDefault();const o=[...botMenu.querySelectorAll('.bot-opt')],i=o.indexOf(document.activeElement),n=e.key==='ArrowDown'?(i+1)%o.length:(i-1+o.length)%o.length;if(o[n])o[n].focus();});
+loadConvos();chatReady=true;
 syncSend();
 // ---- Voice input ----
 const voicePanel=el('voicePanel'),voiceCanvas=el('voiceViz'),vctx=voiceCanvas.getContext('2d'),voiceTx=el('voiceTx'),voiceCopy=el('voiceCopy'),voiceErr=el('voiceErr'),micBtn=el('micBtn'),voiceStopBtn=el('voiceStop');
@@ -890,7 +999,7 @@ document.addEventListener('pointerdown',e=>{if(!vOn||performance.now()-vStartT<3
 document.addEventListener('click',e=>{if(performance.now()<swallowUntil){swallowUntil=0;e.stopPropagation();e.preventDefault();}},true);
 document.addEventListener('keydown',e=>{if(vOn&&e.key==='Enter'&&!(e.target.closest&&e.target.closest('#voiceStop'))){e.preventDefault();stopVoice(false);}});
 voiceStopBtn.addEventListener('click',()=>stopVoice(true));
-function previewSignIn(addr){err.textContent='';setUser({email:addr,botId:MOCK.me,paid:false});note.textContent="Preview only. Sign-in isn't connected yet, so this just shows the signed-in view.";setTimeout(()=>{hideModal();if(pendingBot){const b=pendingBot;pendingBot=null;openBot(b);}},1300);}
+function previewSignIn(addr){err.textContent='';const toChat=loginMode==='join'&&!pendingBot;setUser({email:addr,botId:MOCK.me,paid:false});note.textContent="Preview only. Sign-in isn't connected yet, so this just shows the signed-in view.";setTimeout(()=>{hideModal();if(pendingBot){const b=pendingBot;pendingBot=null;openBot(b);}else if(toChat)openChat();},1300);}
 el('loginGo').addEventListener('click',()=>{previewSignIn(email.value.trim()||'you@example.com');pwd.value='';});
 [email,pwd].forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();el('loginGo').click();}}));
 [email,pwd].forEach(i=>i.addEventListener('input',()=>{err.textContent='';i.removeAttribute('aria-invalid');}));
@@ -946,7 +1055,7 @@ function route(){const m=location.hash.match(/^#\/bot\/([a-z0-9-]+)/);if(!m){hid
 window.addEventListener('hashchange',route);
 el('bpBack').addEventListener('click',()=>{location.hash='';});
 document.addEventListener('keydown',e=>{
- if(e.key==='Escape'){if(!chat.hidden&&chat.classList.contains('open')){closeChat();return;}if(menuIsOpen){closeMenu();return;}if(openModal){pendingBot=null;hideModal();}else if(pageOpen)location.hash='';else if(focus)closeCity();return;}
+ if(e.key==='Escape'){if(!chat.hidden&&chat.classList.contains('open')){if(botMenuOpen()){closeBotMenu();botPick.focus();return;}if(histIsOpen()){closeHist();histBtn.focus();return;}closeChat();return;}if(menuIsOpen){closeMenu();return;}if(openModal){pendingBot=null;hideModal();}else if(pageOpen)location.hash='';else if(focus)closeCity();return;}
  const trap=!chat.hidden?chat:menuIsOpen?menu:openModal;
  if(e.key==='Tab'&&trap){const f=(trap===menu?[menuBtn,...menuItems()]:[...trap.querySelectorAll('button,input,textarea')]).filter(n=>!n.disabled&&n.offsetParent!==null);const first=f[0],lastEl=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();lastEl.focus();}else if(!e.shiftKey&&document.activeElement===lastEl){e.preventDefault();first.focus();}}
 });
