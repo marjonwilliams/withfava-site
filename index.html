@@ -161,7 +161,8 @@ body:not(.signed-in) .member,.signed-in .guest,.signed-in.paid .unpaid{display:n
 .chat.voice-on.has-msgs .voice-sub{display:none}
 .chat.voice-on.has-msgs .voice-err{text-align:left;padding:0}
 .chat.voice-on.has-msgs .voice-stop{width:38px;height:38px;flex:none}
-@media (max-width:700px),(pointer:coarse){.chat{background:rgba(3,6,14,.97)}.menu{background:rgba(3,6,14,.95)}.chat-close{background:rgba(3,6,14,.92)}}
+/* Phones/tablets: solid navy (same colour as the loading screen). Safari copies a solid full-screen layer's colour into its status-bar strip, so the strip blends in. */
+@media (max-width:700px),(pointer:coarse){.chat,.menu{background:var(--navy);-webkit-backdrop-filter:none;backdrop-filter:none}body.chat-open,body.menu-open{background:var(--navy)}}
 .chat-close{position:fixed;top:calc(env(safe-area-inset-top,0px) + 20px);right:28px;z-index:6;background:rgba(6,12,28,.92);border-color:var(--edge)}
 .chat-open .top-right>*,.chat-open .live{display:none!important}
 @media (hover:hover){.pill:not(.join-btn),.more{opacity:.55}.pill:hover,.pill:focus-visible,.more:hover,.more:focus-visible{opacity:1}}
