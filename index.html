@@ -55,7 +55,9 @@ body:not(.ui-in) .mitem.member,body.ui-in .mitem.guest,body.ui-in.paid .mitem.un
 .spin{display:inline-block;flex:none;width:11px;height:11px;border-radius:50%;border:1.6px solid rgba(242,244,248,.18);border-top-color:rgba(242,244,248,.62);animation:spin .9s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .live .spin{display:none}
-.live{transition:color .3s}
+.live{max-width:140px;overflow:hidden;white-space:nowrap;transition:color .3s,opacity .35s ease,max-width .5s cubic-bezier(.2,.8,.2,1),margin .5s cubic-bezier(.2,.8,.2,1),visibility 0s 0s}
+/* the "Online now" list already shows that bots are live, so the separate badge steps aside (it still appears for a poor connection) */
+body.ui-in.no-bot:not(.poor-conn) .live{max-width:0;margin-left:-16px;opacity:0;visibility:hidden;pointer-events:none;transition:color .3s,opacity .35s ease,max-width .5s cubic-bezier(.2,.8,.2,1),margin .5s cubic-bezier(.2,.8,.2,1),visibility 0s .5s}
 .poor-conn .live{color:var(--muted);font-weight:500}
 .poor-conn .live .live-dot{display:none}
 .poor-conn .live .spin{display:inline-block}
@@ -590,7 +592,7 @@ function setData(d){
 const myBot=()=>user&&user.paid&&bots.find(b=>b.id===user.botId)||null;
 function renderLegend(){
  const mine=myBot(),list=mine?[mine]:bots,ul=el('botList');ul.textContent='';
- el('where').textContent=mine?'Where your bot lives':'Online now';el('where').classList.toggle('online',!mine);
+ el('where').textContent=mine?'Your active agents':'Online now';el('where').classList.toggle('online',!mine);document.body.classList.toggle('no-bot',!mine);
  list.forEach((b,i)=>{const li=make('li');const btn=make('button','bot');btn.type='button';const pin=make('span',b===mine?'pin me':'pin');pin.setAttribute('aria-hidden','true');const who=make('span','who',b.name);if(user&&b.id)who.append(make('span','id',b.id.slice(0,4)));btn.append(pin,who,make('span','city',b.city));btn.addEventListener('click',()=>openCity(b.home,b));li.append(btn);
   if(b===mine){const dl=make('dl','mine-info'),tm=make('dd',null,localParts(b.tz).text);tm.id='myTime';dl.append(make('dt',null,'Doing now'),make('dd',null,b.doing||''),make('dt',null,'Local time'),tm);li.append(dl);}
   ul.append(li);});
@@ -602,7 +604,7 @@ el('more').addEventListener('click',()=>{expanded=!expanded;renderLegend();reque
 function renderPanel(){
  el('pCountry').textContent=focus.country;el('pCity').textContent=focus.name;
  const ul=el('pBots');ul.textContent='';
- focus.bots.forEach(b=>{const open=picked===b,li=make('li','prow'),btn=make('button','row');btn.type='button';btn.setAttribute('aria-expanded',String(open));const pin=make('span',user&&b.id===user.botId?'pin me':'pin');pin.setAttribute('aria-hidden','true');const nm=make('span',null,b.name);if(user&&b.id)nm.append(make('span','id',b.id.slice(0,4)));const ch=make('span','chev','›');ch.setAttribute('aria-hidden','true');btn.append(pin,nm,ch);btn.addEventListener('click',()=>{picked=open?null:b;renderPanel();});li.append(btn);
+ focus.bots.forEach(b=>{const open=picked===b,li=make('li','prow'),btn=make('button','row');btn.type='button';btn.setAttribute('aria-expanded',String(open));const mb0=myBot(),pin=make('span',mb0&&b.id===mb0.id?'pin me':'pin');pin.setAttribute('aria-hidden','true');const nm=make('span',null,b.name);if(user&&b.id)nm.append(make('span','id',b.id.slice(0,4)));const ch=make('span','chev','›');ch.setAttribute('aria-hidden','true');btn.append(pin,nm,ch);btn.addEventListener('click',()=>{picked=open?null:b;renderPanel();});li.append(btn);
   if(open){const dl=make('dl','detail');const rows=[['Mood',b.mood],['Doing now',b.doing],['Friends',b.friends]];if(user)rows.unshift(['ID',b.id]);rows.forEach(([k,v])=>{if(v==null||v==='')return;const dd=make('dd');dd.textContent=String(v);if(k==='Doing now')dd.append(make('span','dot-live'));dl.append(make('dt',null,k),dd);});const row=make('div','row-actions');const vb=make('button','view','View full breakdown');vb.type='button';vb.addEventListener('click',()=>openBot(b));const cb=make('button','chat-now','Chat now');cb.type='button';cb.addEventListener('click',()=>{openChat(b);});row.append(vb,cb);li.append(dl,row);}
   ul.append(li);});
  const mine=spots.filter(s=>s.home===focus).sort((a,b)=>(b.count||0)-(a.count||0)),ml=el('pMsgs');ml.textContent='';
