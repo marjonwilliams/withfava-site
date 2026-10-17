@@ -62,6 +62,14 @@ html.intro.intro-reveal #globe{opacity:1;transform:scale(1);transition:opacity .
 html.intro.intro-reveal.intro-quick #globe{transition:opacity .5s ease}
 html.intro #fxTop{opacity:0}
 html.intro .legend{opacity:0!important;visibility:hidden!important}
+html.intro .ltr{pointer-events:none!important;cursor:default!important}
+#introCta{position:fixed;left:clamp(24px,4.2vw,76px);bottom:clamp(44px,12vh,120px);z-index:4;display:none;opacity:0;pointer-events:none;transition:opacity .45s ease;max-width:calc(100vw - 48px)}
+html.intro #introCta{display:block}
+#introCta h2{margin:0 0 26px;font:700 clamp(40px,5.6vw,84px)/.95 var(--font,inherit);letter-spacing:-.015em;text-transform:uppercase;color:#f4f6fb;text-shadow:0 2px 30px rgba(3,6,14,.8)}
+#introCta button{display:inline-flex;align-items:center;gap:12px;padding:15px 22px;background:rgba(3,6,14,.62);color:#f4f6fb;border:1px solid rgba(255,255,255,.55);border-radius:4px;font:600 13px/1 inherit;letter-spacing:.09em;text-transform:uppercase;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:background .2s ease,border-color .2s ease}
+#introCta button:hover{background:rgba(255,255,255,.14);border-color:#fff}
+#introCta button svg{width:16px;height:16px;transition:transform .2s ease}
+#introCta button:hover svg{transform:translateX(3px)}
 .live{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
 .live-dot{width:9px;height:9px;border-radius:50%;background:var(--live);animation:breathe 2.6s ease-in-out infinite}
 .spin{display:inline-block;flex:none;width:11px;height:11px;border-radius:50%;border:1.6px solid rgba(242,244,248,.18);border-top-color:rgba(242,244,248,.62);animation:spin .9s linear infinite}
@@ -391,6 +399,7 @@ body.at-home .mitem[data-home]{display:none}
 <body class="at-home"><script>if(document.documentElement.classList.contains("intro"))document.body.classList.remove("at-home")</script>
 <canvas id="fxTop" aria-hidden="true"></canvas>
 <canvas id="nebula" aria-hidden="true"></canvas><canvas id="galaxy" aria-hidden="true"></canvas>
+<div id="introCta"><h2>Meet the team</h2><button type="button">Continue <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg></button></div>
 <canvas id="globe" role="img" tabindex="0" aria-label="A turning dotted Earth showing where the FAVA bots live and where messages come from. Use the arrow keys to turn it."></canvas>
 <header class="top">
  <h1 class="wordmark"><span class="sr-only">FAVA</span><span class="ltr" data-fx="rocket" aria-hidden="true">F</span><span class="ltr" data-fx="teleport" aria-hidden="true">A</span><span class="ltr" data-fx="star" aria-hidden="true">V</span><span class="ltr" data-fx="radar" aria-hidden="true">A</span></h1>
@@ -1240,7 +1249,7 @@ const SC=['#DDE6F7','#9EC3FF','#FFC8A0','#FF9ED2','#8FEBE3','#C7B4FF'];
 
 (function introInit(){
  const root=document.documentElement;
- const parts=['galaxy','nebula'].map(id=>document.getElementById(id));
+ const parts=['galaxy','nebula','introCta'].map(id=>document.getElementById(id));
  function strip(){root.classList.remove('intro','intro-out','intro-quick');parts.forEach(n=>n&&n.remove());document.body.classList.add('at-home');}
  if(!INTRO_ON||reduce||/[?&]nointro/.test(location.search)||/^#\/bot\//.test(location.hash)||!finePointer||window.innerWidth<=700||!root.classList.contains('intro')){strip();return;}
  let ok=false;
@@ -1258,7 +1267,7 @@ const SC=['#DDE6F7','#9EC3FF','#FFC8A0','#FF9ED2','#8FEBE3','#C7B4FF'];
   const VS=`precision highp float;
 attribute vec3 a_p;attribute vec3 a_c;attribute vec4 a_s;attribute vec2 a_k;attribute vec2 a_o;
 uniform mat3 u_rot;uniform vec3 u_cam;
-uniform float u_cam0,u_form,u_t,u_focal,u_len,u_earthA,u_gf,u_mob,u_hy,u_wh,u_tf,u_fz,u_cs;
+uniform float u_cam0,u_form,u_t,u_focal,u_len,u_earthA,u_gf,u_mob,u_hy,u_wh,u_tf,u_fz,u_cs,u_set;
 uniform vec2 u_res;
 varying vec3 v_c;varying float v_a;varying vec2 v_l;varying float v_hl;varying float v_r;varying float v_big;
 void main(){
@@ -1297,7 +1306,7 @@ void main(){
    flowA=smoothstep(0.0,0.2,u)*(1.0-smoothstep(0.88,1.0,u));
   }
   float ph=a_s.y*6.2832+u_t*(0.3+zr*0.45);
-  vec3 pf=pb+e*vec3(cos(ph),sin(ph*1.3)*0.8,sin(ph))*0.0075*(0.5+zr);
+  vec3 pf=pb+e*vec3(cos(ph),sin(ph*1.3)*0.8,sin(ph))*0.0075*(0.5+zr)*(1.0-u_set);
   vec3 pw=u_rot*pf;
   vec3 bow=cross(vec3(h.x-0.5,h.y-0.5,h.z-0.5),vec3(0.0,1.0,0.0))*0.5*sin(3.14159*e);
   p=mix(pw+p0,pw,e)+bow;
@@ -1305,7 +1314,7 @@ void main(){
   sz=mix(min(sz,1.15),sz,e);
   }
  }else{
-  al=(0.55+0.45*sin(u_t*(0.5+zr*1.6)+a_s.y*40.0))*smoothstep(a_s.y*2.2,a_s.y*2.2+0.8,u_t);
+  al=mix(0.55+0.45*sin(u_t*(0.5+zr*1.6)+a_s.y*40.0),0.78,u_set)*smoothstep(a_s.y*2.2,a_s.y*2.2+0.8,u_t);
  }
  if(kind<0.5){if(a_s.z>9.5)al*=u_earthA;}
  {float hh=fract(sin(a_s.y*127.1+zr*311.7+a_s.w*7.0)*43758.5453);float keep=kind<0.5?0.07:0.13;if(a_s.z>9.5)keep=2.0;float tg=0.12+0.88*clamp((hh-keep)/(1.0-keep),0.0,1.0);al*=hh<keep?1.0:1.0-smoothstep(tg-0.3,tg,u_hy);}
@@ -1319,8 +1328,11 @@ void main(){
  al*=smoothstep(0.04,0.35,d);
  if(kind<0.5)al*=mix(0.5,1.15,smoothstep(4.0,1.6,dc));
  else if(kind<1.5)al*=mix(1.0,0.5,smoothstep(6.0,28.0,dc));
+ if(kind<0.5&&a_s.x>10.0)al*=1.0-smoothstep(0.0,0.1,u_hy);
+ float hs=fract(sin(a_s.y*53.3+zr*29.1)*9341.7);
  float szp=sz*clamp(u_cam0/dc,0.55,1.9);
- if(kind<0.5&&zr<1.5)szp=min(szp,mix(60.0,2.6,smoothstep(2.0,0.9,dc)));
+ if(kind<0.5)szp=min(szp,mix(60.0,2.6,smoothstep(2.0,0.9,dc)));
+ szp=mix(szp,hs>0.88?1.4:0.9,u_set);al=mix(al,min(al,0.8),u_set);
  if(a_s.z>9.5&&kind<0.5)szp*=1.0+3.5*smoothstep(1.8,0.5,dc);
  vec2 ax=tl-sp;float L=length(ax);vec2 dir=L>0.0001?ax/L:vec2(1.0,0.0);
  al*=1.0+min(L/(szp*2.0+8.0),2.0)*0.3;
@@ -1329,7 +1341,7 @@ void main(){
  vec2 pos=mid+dir*a_k.x*(hl+R)+perp*a_k.y*R;
  if(al<0.003)pos=vec2(99999.0);
  gl_Position=vec4(pos/(u_res*0.5),0.0,1.0);
- v_c=mix(a_c,vec3(max(a_c.r,max(a_c.g,a_c.b))),u_wh);v_a=al;v_l=vec2(a_k.x*(hl+R),a_k.y*R);v_hl=hl;v_r=R;v_big=smoothstep(3.5,6.0,a_s.x);
+ v_c=mix(a_c,vec3(max(a_c.r,max(a_c.g,a_c.b))),u_wh);v_a=al;v_l=vec2(a_k.x*(hl+R),a_k.y*R);v_hl=hl;v_r=R;v_big=smoothstep(3.5,6.0,a_s.x)*(1.0-smoothstep(9.0,12.0,a_s.x));
 }`;
   const FS=`precision mediump float;
 varying vec3 v_c;varying float v_a;varying vec2 v_l;varying float v_hl;varying float v_r;varying float v_big;
@@ -1350,7 +1362,7 @@ void main(){
   const PP=gl.createProgram();gl.attachShader(PP,sh(gl.VERTEX_SHADER,VS));gl.attachShader(PP,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(PP);
   if(!gl.getProgramParameter(PP,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(PP));
   const U=n=>gl.getUniformLocation(PP,n);
-  const uP={rot:U('u_rot'),cam:U('u_cam'),cam0:U('u_cam0'),form:U('u_form'),t:U('u_t'),focal:U('u_focal'),len:U('u_len'),earthA:U('u_earthA'),gf:U('u_gf'),wh:U('u_wh'),tf:U('u_tf'),fz:U('u_fz'),cs:U('u_cs'),mob:U('u_mob'),hy:U('u_hy'),res:U('u_res')};
+  const uP={rot:U('u_rot'),cam:U('u_cam'),cam0:U('u_cam0'),form:U('u_form'),t:U('u_t'),focal:U('u_focal'),len:U('u_len'),earthA:U('u_earthA'),gf:U('u_gf'),wh:U('u_wh'),tf:U('u_tf'),fz:U('u_fz'),set:U('u_set'),cs:U('u_cs'),mob:U('u_mob'),hy:U('u_hy'),res:U('u_res')};
 
   /* ----- the stars ----- */
   const gauss=()=>(Math.random()+Math.random()+Math.random()+Math.random()-2)*1.73;
@@ -1370,7 +1382,8 @@ void main(){
    const nc=Math.round(95*a.rmax*F);
    for(let j=0;j<nc;j++){ /* star clusters: one bright star with smaller companions */
     const r=a.rmin+(a.rmax-a.rmin)*Math.random(),th=armTh(r,a)+gauss()*.035,cx=r*Math.cos(th),cz=r*Math.sin(th),cy=gauss()*thick(r)*1.1+warp(r,th,ai);
-    add(cx,cy,cz,pick(),rnd(.85,1),Math.random()<.18?rnd(6,9):rnd(3.2,5.5),0);
+    const hc=pick();add(cx,cy,cz,hc,rnd(.85,1),Math.random()<.18?rnd(6,9):rnd(3.2,5.5),0);
+    add(cx,cy,cz,hc,rnd(.045,.085),rnd(14,26),0); /* the soft pocket of light around it */
     const m=2+(Math.random()*5|0);
     for(let i=0;i<m;i++)add(cx+gauss()*.02,cy+gauss()*.02,cz+gauss()*.02,pick(),rnd(.45,.85),rnd(.8,2.0),0);
    }
@@ -1385,7 +1398,7 @@ void main(){
    const rr=Math.abs(gauss())*.075+.008,th=Math.random()*6.2832,ph=Math.acos(2*Math.random()-1),br=rnd(.45,.8);
    add(rr*Math.sin(ph)*Math.cos(th),rr*Math.cos(ph)*.55,rr*Math.sin(ph)*Math.sin(th),[1,.9-rr*1.2,.72-rr*1.5],br,rnd(.7,1.8),0);
   }
-  for(let i=0;i<6;i++){const t=Math.random()*6.2832,rr=Math.random()*.03;add(Math.cos(t)*rr,0,Math.sin(t)*rr,[1,.9,.78],rnd(.02,.045),rnd(16,38),0);}
+  for(let i=0;i<10;i++){const t=Math.random()*6.2832,rr=Math.random()*.03;add(Math.cos(t)*rr,0,Math.sin(t)*rr,[1,.9,.78],rnd(.05,.09),rnd(20,44),0);}
   for(let i=0;i<Math.round(14*F);i++)add(gauss()*.04,gauss()*.04,gauss()*.04,[1,.92,.8],rnd(.7,.95),rnd(3,5),0);
   for(let i=0;i<Math.round(600*F);i++){ /* faint stars scattered through the disc */
    const r=Math.min(1.05,-Math.log(1-Math.random()*.97)*.34),th=Math.random()*6.2832;
@@ -1453,6 +1466,9 @@ void main(){
   function rotvec(a){let x=a[0],y=a[1],z=a[2],w=a[3];if(w<0){x=-x;y=-y;z=-z;w=-w;}const s=Math.hypot(x,y,z);if(s<1e-6)return[0,0,0];const ang=2*Math.atan2(s,w);return[x/s*ang,y/s*ang,z/s*ang];}
   const MR=new Array(9),MC=new Float32Array(9);
   function rotMat(){const M=mmul(qmat(qex),mmul(qmat(q),mmul(Rx(PITCH0),Ry(.4+ttr*.1))));for(let i=0;i<9;i++)MR[i]=M[i];MC[0]=M[0];MC[1]=M[3];MC[2]=M[6];MC[3]=M[1];MC[4]=M[4];MC[5]=M[7];MC[6]=M[2];MC[7]=M[5];MC[8]=M[8];}
+  const cta=document.getElementById('introCta'),ctaBtn=cta&&cta.querySelector('button');let ctaV=-1;
+  if(ctaBtn)ctaBtn.addEventListener('click',e=>{e.stopPropagation();commit();});
+  function ctaSet(v){if(!cta||v===ctaV)return;ctaV=v;cta.style.opacity=v;cta.style.pointerEvents=v>.5?'auto':'none';}
   intro.on=true;intro.hold=true;intro.clear=true;intro.starA=0;window.__introOn=true;
 
   function resize(){
@@ -1551,8 +1567,10 @@ void main(){
   function onClickCap(e){
    if(!intro.on)return;
    const t=e.target;if(!t||!t.closest||!t.closest('.top,.menu'))return;
+   if(tw>=FLIGHT)return;
    if(t.closest('#menuBtn,#joinBtn,button.pill'))return; /* opening the menu or a sign-in box leaves the galaxy running */
    if(t.closest('[data-home],.wordmark')){e.stopPropagation();e.preventDefault();commit();return;}
+   if(tw>=FLIGHT)return;
    if(tw>=0||quick){e.stopPropagation();e.preventDefault();return;}
    quickFinish();
   }
@@ -1604,6 +1622,7 @@ void main(){
    try{
     const dt=Math.min(.05,(now-lastT)/1000);lastT=now;tt+=dt;if(!frozen){ttr+=dt;tf+=dt;}
     resize();
+    ctaSet(tw<0&&!quick&&tt>3.2?(1-Math.min(1,zoom/.22)).toFixed(2):0);
     if(tt>.4||tw>=0)form=Math.min(1.2,form+dt/(tw>=0?1.1:3.4));
     if(tw<0&&(!down||!down.moved)){
      const rv=rotvec(q),Ks=1.0,Cs=2.3;
@@ -1612,7 +1631,7 @@ void main(){
      if(w>1e-5)q=qnorm(qmul(qaxis(om[0],om[1],om[2],w*dt),q));
     }
     mvx*=Math.exp(-dt*6);mvy*=Math.exp(-dt*6);
-    let earthA=1,f=0,gf=1,hy=0,wh=0;
+    let earthA=1,f=0,gf=1,hy=0,wh=0,setA=0;
     if(tw<0){
      if(performance.now()-lastWheel>520)zoom=Math.max(0,zoom-dt*.4);
      zs+=(zoom-zs)*Math.min(1,dt*7);
@@ -1638,8 +1657,8 @@ void main(){
       cv.style.transform='translate('+(ex-cx).toFixed(1)+'px,'+(ey-cy).toFixed(1)+'px) scale('+gs.toFixed(4)+')';
      }
      if(tw>=FLIGHT){
-      if(!outed){outed=true;root.classList.add('intro-out');}
-      wh=1;hy=1; /* the rest of the stars come back slowly (not on phones) */
+      if(!outed){outed=true;gc.style.display='block';gc.style.pointerEvents='none';root.classList.add('intro-out');root.classList.remove('intro');lastHome=false;}
+      wh=1;hy=1;setA=ss(FLIGHT,FLIGHT+.5,tw); /* the stars that are left stop dead and become the backdrop */
       intro.starA=ss(FLIGHT+.4,FLIGHT+4.6,tw);gc.style.opacity=(1-ss(FLIGHT+3,FLIGHT+5.6,tw)).toFixed(3);
       if(tw>=FLIGHT+5.8){finish();return;}
      }
@@ -1660,7 +1679,7 @@ void main(){
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,bufI);
     gl.uniformMatrix3fv(uP.rot,false,MC);
     gl.uniform3f(uP.cam,C[0],C[1],C[2]);
-    gl.uniform1f(uP.cam0,CAM0);gl.uniform1f(uP.form,form);gl.uniform1f(uP.t,tt);gl.uniform1f(uP.focal,focal);gl.uniform1f(uP.len,uLen);gl.uniform1f(uP.earthA,earthA);gl.uniform1f(uP.gf,gf);gl.uniform1f(uP.mob,coarse?1:0);gl.uniform1f(uP.hy,hy);gl.uniform1f(uP.wh,wh);gl.uniform1f(uP.tf,tf);gl.uniform1f(uP.fz,tw>=0&&!quick?1:0);gl.uniform1f(uP.cs,CS[2]);
+    gl.uniform1f(uP.cam0,CAM0);gl.uniform1f(uP.form,form);gl.uniform1f(uP.t,tt);gl.uniform1f(uP.focal,focal);gl.uniform1f(uP.len,uLen);gl.uniform1f(uP.earthA,earthA);gl.uniform1f(uP.gf,gf);gl.uniform1f(uP.mob,coarse?1:0);gl.uniform1f(uP.hy,hy);gl.uniform1f(uP.wh,wh);gl.uniform1f(uP.tf,tf);gl.uniform1f(uP.fz,tw>=0&&!quick?1:0);gl.uniform1f(uP.cs,CS[2]);gl.uniform1f(uP.set,setA);
     gl.uniform2f(uP.res,W0,H0);
     gl.drawElements(gl.TRIANGLES,NS*6,gl.UNSIGNED_SHORT,0);
    }catch(err){finish();return;}
