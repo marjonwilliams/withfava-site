@@ -386,7 +386,7 @@ body.at-home .mitem[data-home]{display:none}
 }
 @media (prefers-reduced-motion:reduce){.live-dot,.spin,.live.swap,.timeline li.now .a::after{animation:none}.live-dot{opacity:1;transform:none}.panel{transition:opacity .3s}}
 </style>
-<script>(function(){try{var d=document.documentElement;if(/[?&]nointro/.test(location.search)||/^#\/bot\//.test(location.hash)||matchMedia("(prefers-reduced-motion: reduce)").matches)return;d.classList.add("intro");setTimeout(function(){if(!window.__introOn)d.classList.remove("intro")},6000)}catch(e){}})();</script>
+<script>(function(){try{var d=document.documentElement;if(/[?&]nointro/.test(location.search)||/^#\/bot\//.test(location.hash)||matchMedia("(prefers-reduced-motion: reduce)").matches||window.innerWidth<=700||!matchMedia("(hover:hover) and (pointer:fine)").matches)return;d.classList.add("intro");setTimeout(function(){if(!window.__introOn)d.classList.remove("intro")},6000)}catch(e){}})();</script>
 </head>
 <body class="at-home"><script>if(document.documentElement.classList.contains("intro"))document.body.classList.remove("at-home")</script>
 <canvas id="fxTop" aria-hidden="true"></canvas>
@@ -1242,7 +1242,7 @@ const SC=['#DDE6F7','#9EC3FF','#FFC8A0','#FF9ED2','#8FEBE3','#C7B4FF'];
  const root=document.documentElement;
  const parts=['galaxy','nebula'].map(id=>document.getElementById(id));
  function strip(){root.classList.remove('intro','intro-out','intro-quick');parts.forEach(n=>n&&n.remove());document.body.classList.add('at-home');}
- if(!INTRO_ON||reduce||/[?&]nointro/.test(location.search)||/^#\/bot\//.test(location.hash)||!root.classList.contains('intro')){strip();return;}
+ if(!INTRO_ON||reduce||/[?&]nointro/.test(location.search)||/^#\/bot\//.test(location.hash)||!finePointer||window.innerWidth<=700||!root.classList.contains('intro')){strip();return;}
  let ok=false;
  try{ok=boot();}catch(err){ok=false;}
  if(!ok){intro.on=false;intro.hold=false;intro.clear=false;intro.starA=1;strip();}
@@ -1252,17 +1252,17 @@ const SC=['#DDE6F7','#9EC3FF','#FFC8A0','#FF9ED2','#8FEBE3','#C7B4FF'];
   const gl=gc.getContext('webgl',{alpha:true,premultipliedAlpha:true,antialias:false,depth:false,stencil:false,powerPreference:'high-performance'});
   if(!gl)return false;
   const coarse=!finePointer||window.innerWidth<=700,F=coarse?.62:1;
-  const CAM0=2.7,PITCH0=1.0,DST=.03,FLIGHT=2.7;
+  const CAM0=2.7,PITCH0=1.3,DST=.03,FLIGHT=2.3;
 
   /* ----- shaders: every star is a soft sprite that stretches into a streak when the camera is moving ----- */
   const VS=`precision highp float;
 attribute vec3 a_p;attribute vec3 a_c;attribute vec4 a_s;attribute vec2 a_k;attribute vec2 a_o;
 uniform mat3 u_rot;uniform vec3 u_cam;
-uniform float u_cam0,u_form,u_t,u_focal,u_len,u_earthA,u_gf,u_mob,u_hy;
+uniform float u_cam0,u_form,u_t,u_focal,u_len,u_earthA,u_gf,u_mob,u_hy,u_wh,u_tf;
 uniform vec2 u_res;
 varying vec3 v_c;varying float v_a;varying vec2 v_l;varying float v_hl;varying float v_r;varying float v_big;
 void main(){
- float kind=a_s.w;vec3 p=a_p;float al=1.0;float sz=a_s.x;
+ float zr=fract(a_s.z);float zi=floor(a_s.z);float kind=a_s.w;vec3 p=a_p;float al=1.0;float sz=a_s.x;
  if(kind<0.5){
   if(u_mob>0.5){
    float lt=clamp((u_form-(a_s.y*0.45+length(a_p.xz)*0.2))/0.4,0.0,1.0);
@@ -1270,30 +1270,45 @@ void main(){
    float r=length(p.xz);float ang=inv*inv*(3.0+2.0*r);
    float ca=cos(ang),sa=sin(ang);
    p.xz=vec2(ca*p.x-sa*p.z,sa*p.x+ca*p.z);
-   p*=1.0+inv*(1.6+a_s.z*3.2);
-   p+=inv*vec3(sin(a_s.z*40.0+u_t*0.8),cos(a_s.z*31.0+u_t*0.6),sin(a_s.z*57.0-u_t*0.7))*0.3;
-   float ph=a_s.y*6.2832+u_t*(0.3+a_s.z*0.45);
-   p+=e*vec3(cos(ph),sin(ph*1.3)*0.8,sin(ph))*0.0075*(0.5+a_s.z);
-   al=mix(0.28,1.0,smoothstep(0.0,0.6,lt));sz*=mix(0.55,1.0,e);
+   p*=1.0+inv*(1.6+zr*3.2);
+   p+=inv*vec3(sin(zr*40.0+u_t*0.8),cos(zr*31.0+u_t*0.6),sin(zr*57.0-u_t*0.7))*0.3;
+   float ph=a_s.y*6.2832+u_t*(0.3+zr*0.45);
+   p+=e*vec3(cos(ph),sin(ph*1.3)*0.8,sin(ph))*0.0075*(0.5+zr);
+   al=mix(0.28,1.0,smoothstep(0.0,0.6,lt))*smoothstep(a_s.y*1.3,a_s.y*1.3+0.6,u_t);sz*=mix(0.55,1.0,e);
    p=u_rot*p;
   }else{
   float lt=clamp((u_form-(a_s.y*0.6+length(a_p.xz)*0.12))/0.35,0.0,1.0);
   float e=lt*lt*(3.0-2.0*lt);
-  vec3 h=vec3(fract(sin(a_s.y*91.7+a_s.z*17.3)*437.5),fract(sin(a_s.y*47.1+a_s.z*83.9)*951.3),fract(sin(a_s.y*13.9+a_s.z*61.7)*217.7));
+  vec3 h=vec3(fract(sin(a_s.y*91.7+zr*17.3)*437.5),fract(sin(a_s.y*47.1+zr*83.9)*951.3),fract(sin(a_s.y*13.9+zr*61.7)*217.7));
   vec3 p0=vec3((h.x*2.0-1.0)*1.7,(h.y*2.0-1.0)*1.05,(h.z*2.0-1.0)*0.7);
-  float ph=a_s.y*6.2832+u_t*(0.3+a_s.z*0.45);
-  vec3 pf=p+e*vec3(cos(ph),sin(ph*1.3)*0.8,sin(ph))*0.0075*(0.5+a_s.z);
+  vec3 pb=p;float flowA=1.0;
+  if(zi<4.5){
+   float K=zi<0.5?2.9:zi<1.5?3.2:zi<2.5?2.8:zi<3.5?3.3:3.0;
+   float rmx=zi<0.5?1.04:zi<1.5?0.6:zi<2.5?0.86:zi<3.5?0.48:0.74;
+   float rmn=zi<0.5?0.09:zi<1.5?0.12:zi<2.5?0.09:zi<3.5?0.16:0.1;
+   float amp=zi<0.5?0.2:zi<1.5?-0.17:zi<2.5?0.12:zi<3.5?-0.15:0.09;
+   float r0=max(length(p.xz),0.02);
+   float u0=clamp((rmx-r0)/(rmx-rmn),0.001,0.999);
+   float u=fract(u0+u_tf*0.045);
+   float r1=rmx-u*(rmx-rmn);
+   float th=atan(p.z,p.x)+K*log(r1/r0);
+   pb.xz=r1*vec2(cos(th),sin(th));
+   pb.y=p.y+amp*(pow(r1,1.25)-pow(r0,1.25));
+   flowA=smoothstep(0.0,0.07,u)*(1.0-smoothstep(0.9,1.0,u));
+  }
+  float ph=a_s.y*6.2832+u_t*(0.3+zr*0.45);
+  vec3 pf=pb+e*vec3(cos(ph),sin(ph*1.3)*0.8,sin(ph))*0.0075*(0.5+zr);
   vec3 pw=u_rot*pf;
   vec3 bow=cross(pw-p0,vec3(0.0,1.0,0.0))*0.3*sin(3.14159*e);
   p=mix(p0,pw,e)+bow;
-  al=mix(0.5,1.0,smoothstep(0.0,1.0,lt))*smoothstep(0.0,1.2,u_t);
+  al=mix(0.5,1.0,smoothstep(0.0,1.0,lt))*smoothstep(a_s.y*1.3,a_s.y*1.3+0.6,u_t)*flowA;
   sz=mix(min(sz,1.15),sz,e);
   }
  }else{
-  al=(0.55+0.45*sin(u_t*(0.5+a_s.z*1.6)+a_s.y*40.0))*smoothstep(0.0,1.2,u_t);
+  al=(0.55+0.45*sin(u_t*(0.5+zr*1.6)+a_s.y*40.0))*smoothstep(a_s.y*1.5,a_s.y*1.5+0.6,u_t);
  }
- if(kind<0.5){if(a_s.z>1.5)al*=u_earthA;}
- {float hh=fract(sin(a_s.y*127.1+a_s.z*311.7+a_s.w*7.0)*43758.5453);float keep=kind<0.5?0.07:0.13;if(a_s.z>1.5)keep=2.0;float tg=0.12+0.88*clamp((hh-keep)/(1.0-keep),0.0,1.0);al*=hh<keep?1.0:1.0-smoothstep(tg-0.3,tg,u_hy);}
+ if(kind<0.5){if(a_s.z>9.5)al*=u_earthA;}
+ {float hh=fract(sin(a_s.y*127.1+zr*311.7+a_s.w*7.0)*43758.5453);float keep=kind<0.5?0.07:0.13;if(a_s.z>9.5)keep=2.0;float tg=0.12+0.88*clamp((hh-keep)/(1.0-keep),0.0,1.0);al*=hh<keep?1.0:1.0-smoothstep(tg-0.3,tg,u_hy);}
  vec3 rel=p-u_cam;
  float d=-rel.z;float dc=max(d,0.02);
  vec2 sp=rel.xy/dc*u_focal+a_o;
@@ -1302,7 +1317,8 @@ void main(){
  if(kind<0.5)al*=mix(0.5,1.15,smoothstep(4.0,1.6,dc));
  else if(kind<1.5)al*=mix(1.0,0.5,smoothstep(6.0,28.0,dc));
  float szp=sz*clamp(u_cam0/dc,0.55,1.9);
- if(a_s.z>1.5&&kind<0.5)szp*=1.0+3.5*smoothstep(1.8,0.5,dc);
+ if(kind<0.5&&zr<1.5)szp=min(szp,mix(60.0,2.6,smoothstep(2.0,0.9,dc)));
+ if(a_s.z>9.5&&kind<0.5)szp*=1.0+3.5*smoothstep(1.8,0.5,dc);
  vec2 ax=tl-sp;float L=length(ax);vec2 dir=L>0.0001?ax/L:vec2(1.0,0.0);
  al*=1.0+min(L/(szp*2.0+8.0),2.0)*0.3;
  float R=max(szp*2.2,1.5);R*=1.0-0.86*smoothstep(4.0,70.0,L);R=max(R,1.1);al*=mix(1.0,0.6,smoothstep(20.0,220.0,L));
@@ -1310,7 +1326,7 @@ void main(){
  vec2 pos=mid+dir*a_k.x*(hl+R)+perp*a_k.y*R;
  if(al<0.003)pos=vec2(99999.0);
  gl_Position=vec4(pos/(u_res*0.5),0.0,1.0);
- v_c=a_c;v_a=al;v_l=vec2(a_k.x*(hl+R),a_k.y*R);v_hl=hl;v_r=R;v_big=smoothstep(3.5,6.0,a_s.x);
+ v_c=mix(a_c,vec3(max(a_c.r,max(a_c.g,a_c.b))),u_wh);v_a=al;v_l=vec2(a_k.x*(hl+R),a_k.y*R);v_hl=hl;v_r=R;v_big=smoothstep(3.5,6.0,a_s.x);
 }`;
   const FS=`precision mediump float;
 varying vec3 v_c;varying float v_a;varying vec2 v_l;varying float v_hl;varying float v_r;varying float v_big;
@@ -1331,7 +1347,7 @@ void main(){
   const PP=gl.createProgram();gl.attachShader(PP,sh(gl.VERTEX_SHADER,VS));gl.attachShader(PP,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(PP);
   if(!gl.getProgramParameter(PP,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(PP));
   const U=n=>gl.getUniformLocation(PP,n);
-  const uP={rot:U('u_rot'),cam:U('u_cam'),cam0:U('u_cam0'),form:U('u_form'),t:U('u_t'),focal:U('u_focal'),len:U('u_len'),earthA:U('u_earthA'),gf:U('u_gf'),mob:U('u_mob'),hy:U('u_hy'),res:U('u_res')};
+  const uP={rot:U('u_rot'),cam:U('u_cam'),cam0:U('u_cam0'),form:U('u_form'),t:U('u_t'),focal:U('u_focal'),len:U('u_len'),earthA:U('u_earthA'),gf:U('u_gf'),wh:U('u_wh'),tf:U('u_tf'),mob:U('u_mob'),hy:U('u_hy'),res:U('u_res')};
 
   /* ----- the stars ----- */
   const gauss=()=>(Math.random()+Math.random()+Math.random()+Math.random()-2)*1.73;
@@ -1340,13 +1356,14 @@ void main(){
   const stars=[]; /* [x,y,z,r,g,b,size,rand1,rand2,kind] */
   const BW=[.78,.88,1],WH=[1,1,1],WARM=[1,.74,.52];
   const pick=()=>{const u=Math.random();return u<.55?BW:u<.78?WH:WARM;};
-  function add(x,y,z,c,br,size,kind){stars.push([x,y,z,c[0]*br,c[1]*br,c[2]*br,size,Math.random(),Math.random(),kind]);}
+  let curArm=5;
+  function add(x,y,z,c,br,size,kind){stars.push([x,y,z,c[0]*br,c[1]*br,c[2]*br,size,Math.random(),curArm+Math.random()*.999,kind]);}
   const R0=.07,ARMS=[{off:0,rmax:1.04,rmin:.09,K:2.9},{off:1.3,rmax:.6,rmin:.12,K:3.2},{off:2.55,rmax:.86,rmin:.09,K:2.8},{off:3.85,rmax:.48,rmin:.16,K:3.3},{off:5.0,rmax:.74,rmin:.1,K:3.0}];
   const armTh=(r,a)=>a.off+a.K*Math.log(r/R0);
   const thick=r=>.02+.03*r;
   const LIFT=[.2,-.17,.12,-.15,.09];
   const warp=(r,th,ai)=>LIFT[ai]*Math.pow(r,1.25);  /* each arm sits on its own layer: some curve up, some down */
-  for(let ai=0;ai<ARMS.length;ai++){const a=ARMS[ai];
+  for(let ai=0;ai<ARMS.length;ai++){const a=ARMS[ai];curArm=ai;
    const nc=Math.round(95*a.rmax*F);
    for(let j=0;j<nc;j++){ /* star clusters: one bright star with smaller companions */
     const r=a.rmin+(a.rmax-a.rmin)*Math.random(),th=armTh(r,a)+gauss()*.035,cx=r*Math.cos(th),cz=r*Math.sin(th),cy=gauss()*thick(r)*1.1+warp(r,th,ai);
@@ -1360,6 +1377,7 @@ void main(){
     add(r*Math.cos(th)-Math.sin(th)*off,gauss()*thick(r)+warp(r,th,ai),r*Math.sin(th)+Math.cos(th)*off,pick(),rnd(.3,.62),rnd(.6,1.25),0);
    }
   }
+  curArm=5;
   for(let i=0;i<Math.round(260*F);i++){ /* bulge: a round swarm, much thicker than the disc */
    const rr=Math.abs(gauss())*.075+.008,th=Math.random()*6.2832,ph=Math.acos(2*Math.random()-1),br=rnd(.45,.8);
    add(rr*Math.sin(ph)*Math.cos(th),rr*Math.cos(ph)*.55,rr*Math.sin(ph)*Math.sin(th),[1,.9-rr*1.2,.72-rr*1.5],br,rnd(.7,1.8),0);
@@ -1409,7 +1427,7 @@ void main(){
     let r,g,b;
     if(t<.5){const k=ss(.3,.5,t);r=mix(BL[0],VI[0],k);g=mix(BL[1],VI[1],k);b=mix(BL[2],VI[2],k);}
     else{const k=ss(.55,.72,t);r=mix(VI[0],OR[0],k);g=mix(VI[1],OR[1],k);b=mix(VI[2],OR[2],k);}
-    const o=(y*w+x)*4;dd[o]=r;dd[o+1]=g;dd[o+2]=b;dd[o+3]=Math.min(255,edge*cloud*.3*255);
+    const o=(y*w+x)*4;dd[o]=r;dd[o+1]=g;dd[o+2]=b;dd[o+3]=Math.min(255,edge*cloud*.09*255);
    }
    c.putImageData(img,0,0);
   }
@@ -1419,7 +1437,7 @@ void main(){
   let W0=0,H0=0,scalePx=1,focal=1,form=0,tt=0,zoom=0,zs=0,lastWheel=0,tw=-1,P0=0,Ppath=0,uLen=0,revealed=false,outed=false,done=false,quick=false,quickT=0,raf=0;
   let down=null,lx=0,ly=0,lmt=0,lastT=performance.now();
   const E=[0,0,0],CS=[0,0,CAM0],CT=[0,0,0],C=[0,0,CAM0],Cprev=[0,0,CAM0];
-  let qex=[0,0,0,1],exAxis=[0,1,0],exAng=0,ttr=0,frozen=false;
+  let qex=[0,0,0,1],exAxis=[0,1,0],exAng=0,ttr=0,tf=0,frozen=false;
   /* free rotation on every axis, easing slowly back to the resting pose */
   let q=[0,0,0,1],om=[0,0,0];
   const qmul=(a,b)=>[a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1],a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0],a[3]*b[2]+a[0]*b[1]-a[1]*b[0]+a[2]*b[3],a[3]*b[3]-a[0]*b[0]-a[1]*b[1]-a[2]*b[2]];
@@ -1530,6 +1548,7 @@ void main(){
   function onClickCap(e){
    if(!intro.on)return;
    const t=e.target;if(!t||!t.closest||!t.closest('.top,.menu'))return;
+   if(t.closest('#menuBtn,#joinBtn,button.pill'))return; /* opening the menu or a sign-in box leaves the galaxy running */
    if(t.closest('[data-home],.wordmark')){e.stopPropagation();e.preventDefault();commit();return;}
    if(tw>=0||quick){e.stopPropagation();e.preventDefault();return;}
    quickFinish();
@@ -1544,14 +1563,14 @@ void main(){
    /* the Earth is one of the small stars already in the spiral, whichever sits closest to the middle of the screen */
    let best=-1,bd=1e9;
    for(let i=0;i<NS;i++){
-    if(KND[i]!==0)continue;const sz0=stars[i][6];if(sz0>2.3||sz0<.8)continue;
-    const px=POS[i*3],py=POS[i*3+1],pz=POS[i*3+2],r=Math.hypot(px,pz);if(r<.12||r>.75)continue;
+    if(KND[i]!==0||stars[i][8]<5)continue;const sz0=stars[i][6];if(sz0>3.6||sz0<.7)continue;
+    const px=POS[i*3],py=POS[i*3+1],pz=POS[i*3+2],r=Math.hypot(px,pz);if(r<.08||r>.8)continue;
     const x=MR[0]*px+MR[1]*py+MR[2]*pz,y=MR[3]*px+MR[4]*py+MR[5]*pz,z=MR[6]*px+MR[7]*py+MR[8]*pz,d=C[2]-z;if(d<1)continue;
     const dd=Math.hypot((x-C[0])/d*focal,(y-C[1])/d*focal);if(dd<bd){bd=dd;best=i;}
    }
    if(best<0)best=0;
    EI=best;KND[EI]=2;EPOS[0]=POS[EI*3];EPOS[1]=POS[EI*3+1];EPOS[2]=POS[EI*3+2];
-   for(let c=0;c<4;c++){const o=(EI*4+c)*ST;vb[o+3]=.55;vb[o+4]=.76;vb[o+5]=1;vb[o+6]=Math.max(vb[o+6],2.2);vb[o+8]=2.0;}
+   for(let c=0;c<4;c++){const o=(EI*4+c)*ST;vb[o+3]=.55;vb[o+4]=.76;vb[o+5]=1;vb[o+6]=Math.max(vb[o+6],2.2);vb[o+8]=10.5;}
    gl.bindBuffer(gl.ARRAY_BUFFER,bufP);gl.bufferSubData(gl.ARRAY_BUFFER,EI*4*ST*4,vb.subarray(EI*4*ST,(EI*4+4)*ST));
    const ex=MR[0]*EPOS[0]+MR[1]*EPOS[1]+MR[2]*EPOS[2],ey=MR[3]*EPOS[0]+MR[4]*EPOS[1]+MR[5]*EPOS[2],ez=MR[6]*EPOS[0]+MR[7]*EPOS[1]+MR[8]*EPOS[2],rE=ez;
    exAxis=[0,1,0];exAng=0;E[0]=ex;E[1]=ey;E[2]=ez;
@@ -1580,9 +1599,9 @@ void main(){
   /* ----- frame ----- */
   function draw(now){
    try{
-    const dt=Math.min(.05,(now-lastT)/1000);lastT=now;tt+=dt;if(!frozen)ttr+=dt;
+    const dt=Math.min(.05,(now-lastT)/1000);lastT=now;tt+=dt;if(!frozen){ttr+=dt;tf+=dt;}
     resize();
-    if(coarse||tt>1.6||tw>=0)form=Math.min(1.2,form+dt/(tw>=0?1.1:(coarse?5.5:7)));
+    if(tt>.4||tw>=0)form=Math.min(1.2,form+dt/(tw>=0?1.1:2.8));
     if(tw<0&&(!down||!down.moved)){
      const rv=rotvec(q),Ks=1.0,Cs=2.3;
      for(let i=0;i<3;i++)om[i]+=(-Ks*rv[i]-Cs*om[i])*dt;
@@ -1590,17 +1609,17 @@ void main(){
      if(w>1e-5)q=qnorm(qmul(qaxis(om[0],om[1],om[2],w*dt),q));
     }
     mvx*=Math.exp(-dt*6);mvy*=Math.exp(-dt*6);
-    let earthA=1,f=0,gf=1,hy=0;
+    let earthA=1,f=0,gf=1,hy=0,wh=0;
     if(tw<0){
      if(performance.now()-lastWheel>520)zoom=Math.max(0,zoom-dt*.4);
      zs+=(zoom-zs)*Math.min(1,dt*7);
      C[0]=0;C[1]=0;C[2]=CAM0-.25*smooth(zs);
     }else if(!quick){
      tw+=dt;
-     const tau=Math.min(tw/FLIGHT,1);f=tau<.88?.9*Math.pow(tau/.88,4):.9+.1*(1-Math.pow(1-(tau-.88)/.12,3)); /* a brief stretch, then a jump, then dead still at the Earth */
-     hy=tau;
+     const tau=Math.min(tw/FLIGHT,1);{const a=Math.pow(tau,3.4),b=Math.pow(1-tau,3.4);f=a/(a+b);} /* steep ease in, steep ease out */
+     hy=tau;wh=Math.min(1,tau*5);
      qex=qaxis(exAxis[0],exAxis[1],exAxis[2],exAng*smooth(Math.min(1,tw/1.8)));
-     for(let i=0;i<3;i++)C[i]=CS[i]+(CT[i]-CS[i])*f;
+     const fl=ss(0,.4,tau);C[0]=CS[0]+(CT[0]-CS[0])*fl;C[1]=CS[1]+(CT[1]-CS[1])*fl;C[2]=CS[2]+(CT[2]-CS[2])*f;
     }
     rotMat();
     if(tw>=0&&!quick){
@@ -1617,7 +1636,7 @@ void main(){
      }
      if(tw>=FLIGHT){
       if(!outed){outed=true;root.classList.add('intro-out');}
-      hy=1-ss(FLIGHT+.2,FLIGHT+3.4,tw); /* the rest of the stars come back slowly */
+      wh=1;hy=coarse?1:1-ss(FLIGHT+.2,FLIGHT+3.4,tw); /* the rest of the stars come back slowly (not on phones) */
       intro.starA=ss(FLIGHT+.4,FLIGHT+4.6,tw);gc.style.opacity=(1-ss(FLIGHT+3,FLIGHT+5.6,tw)).toFixed(3);
       if(tw>=FLIGHT+5.8){finish();return;}
      }
@@ -1626,7 +1645,7 @@ void main(){
     const vx=C[0]-Cprev[0],vy=C[1]-Cprev[1],vz=C[2]-Cprev[2],spd=Math.sqrt(vx*vx+vy*vy+vz*vz)/Math.max(dt,.001);
     Cprev[0]=C[0];Cprev[1]=C[1];Cprev[2]=C[2];
     uLen+=(Math.min(1.2,spd*.55)-uLen)*.4;
-    stirStep(dt);
+    if(tw<0)stirStep(dt);
     gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
     gl.useProgram(PP);
     gl.bindBuffer(gl.ARRAY_BUFFER,bufP);
@@ -1638,7 +1657,7 @@ void main(){
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,bufI);
     gl.uniformMatrix3fv(uP.rot,false,MC);
     gl.uniform3f(uP.cam,C[0],C[1],C[2]);
-    gl.uniform1f(uP.cam0,CAM0);gl.uniform1f(uP.form,form);gl.uniform1f(uP.t,tt);gl.uniform1f(uP.focal,focal);gl.uniform1f(uP.len,uLen);gl.uniform1f(uP.earthA,earthA);gl.uniform1f(uP.gf,gf);gl.uniform1f(uP.mob,coarse?1:0);gl.uniform1f(uP.hy,hy);
+    gl.uniform1f(uP.cam0,CAM0);gl.uniform1f(uP.form,form);gl.uniform1f(uP.t,tt);gl.uniform1f(uP.focal,focal);gl.uniform1f(uP.len,uLen);gl.uniform1f(uP.earthA,earthA);gl.uniform1f(uP.gf,gf);gl.uniform1f(uP.mob,coarse?1:0);gl.uniform1f(uP.hy,hy);gl.uniform1f(uP.wh,wh);gl.uniform1f(uP.tf,tf);
     gl.uniform2f(uP.res,W0,H0);
     gl.drawElements(gl.TRIANGLES,NS*6,gl.UNSIGNED_SHORT,0);
    }catch(err){finish();return;}
