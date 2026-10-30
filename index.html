@@ -1557,17 +1557,30 @@ function extras(){
    if(r<.5){say(a,DRAGSAY[Math.random()*DRAGSAY.length|0],2.6,0);expr(a,'wow',1.6);}else if(r<.8){a.indCd=0;ind(a,Math.random()<.6?'bang':'sweat');expr(a,'shock',1.4);a.anim={type:'jump',t:0,dur:.75};}else{a.indCd=0;ind(a,'q');}}}
  if(lock&&lvl<=1&&!sel&&!drag){lockT+=.25;if(lockT>8&&Math.random()<.1&&!lock.say&&!lock.ind&&(lock.st==='walk'||lock.st==='idle')){expr(lock,'look',2.4);say(lock,WATCH[Math.random()*WATCH.length|0],3.2,.2);lockT=-40;}}else if(!lock)lockT=0;
 }
+let dropT=180,lastOwner='';
+function dropAt(b,x,y,cid){const f=mkActor(b,x,y,'land');f.castId=cid;f.fall=H/2/Math.max(.5,cam.s)+170;f.tf=Math.sqrt(2*f.fall/GRAV)+.04;f.lt=-f.tf;f.al=1;initPieces(f);actors.push(f);return f;}
+/* every ~3 minutes somebody is dropped in: the main bot's own people when their turn is near, otherwise a friend of some other bot */
+function scheduledDrop(){
+ const c=cast;if(!c||!c.focus)return;const fn=c.focus.b.name;
+ if(!c.retiring&&c.pool&&c.pool.length&&c.rot!==undefined&&c.age>=c.rot-120&&lastOwner!==fn){
+  const cand=actors.filter(a=>a.castId===c.id&&!a.isFocus&&a.st!=='exit'&&a.st!=='land'&&a.st!=='greet'&&a.st!=='meet'&&a.st!=='drag'&&a.leaveAt<0);
+  if(cand.length){const o=cand[Math.random()*cand.length|0];o.leaveAt=c.age;c.pool.push(o.b);c.dropQ.push({b:c.pool.shift(),at:c.age+7});c.rot=c.age+rnd(720,960);lastOwner=fn;return;}}
+ const owners=bots.filter(b=>b.name!==lastOwner&&b.name!==fn);let owner=owners.length?owners[Math.random()*owners.length|0]:null;if(!owner)owner=c.focus.b;
+ const names=new Set(actors.map(a=>a.b.name)),opts=pickComps(owner).filter(x=>!names.has(x.name));if(!opts.length)return;const b=opts[Math.random()*opts.length|0];
+ const v=view(),p=clampW(cam.x+rnd(-.6,.6)*v.w,cam.y+rnd(-.5,.5)*v.h,140),f=dropAt(b,p.x,p.y,0);f.crowd=true;f.hx=p.x;f.hy=p.y;lastOwner=owner.name;
+ const mg=140,far=actors.filter(a=>a.crowd&&a.b.fake&&a!==f&&a.st!=='land'&&(Math.abs(a.x-cam.x)>v.w+mg||Math.abs(a.y-cam.y)>v.h+mg));if(far.length)far[Math.random()*far.length|0].dead=true;
+}
 function manage(dt){
  if(sel||!cast)return;
- cast.age+=dt;
+ cast.age+=dt;dropT-=dt;if(dropT<=0&&cast.landed&&!actors.some(a=>a.st==='land')){dropT=rnd(165,195);scheduledDrop();}
  if(cast.landed&&cast.pending.length&&cast.age>=cast.nextArr){
   if(cast.landT===undefined)cast.landT=cast.age;
   if(cast.age-cast.landT>(cast.first?.6:.5)){const b=cast.pending.shift(),p=edgePoint(),a=mkActor(b,p.x,p.y,'enter');a.castId=cast.id;const f=cast.focus,an=Math.random()*6.28,r=rnd(380,640),q=clampW(f.x+Math.cos(an)*r,f.y+Math.sin(an)*r*.6,80);a.tx=q.x;a.ty=q.y;actors.push(a);cast.nextArr=cast.age+rnd(2.4,4.6);}}
  if(cast.landed&&!cast.retiring&&cast.pool){
   if(cast.rot===undefined)cast.rot=cast.age+rnd(720,960);
-  if(cast.age>=cast.rot&&!cast.dropQ.length&&cast.pool.length){const cand=actors.filter(a=>a.castId===cast.id&&!a.isFocus&&a.st!=='exit'&&a.st!=='land'&&a.st!=='greet'&&a.st!=='meet'&&a.st!=='drag'&&a.leaveAt<0);
+  if(false){const cand=actors.filter(a=>a.castId===cast.id&&!a.isFocus&&a.st!=='exit'&&a.st!=='land'&&a.st!=='greet'&&a.st!=='meet'&&a.st!=='drag'&&a.leaveAt<0);
    if(cand.length){const o=cand[Math.random()*cand.length|0];o.leaveAt=cast.age;cast.pool.push(o.b);cast.dropQ.push({b:cast.pool.shift(),at:cast.age+7});cast.rot=cast.age+rnd(720,960);}else cast.rot=cast.age+30;}
-  if(cast.dropQ.length&&cast.age>=cast.dropQ[0].at&&!actors.some(a=>a.st==='land')){const q=cast.dropQ.shift(),fc=cast.focus;if(fc&&actors.includes(fc)){const p=clampW(fc.x+rnd(-260,260),fc.y+rnd(-160,160),120);const f=mkActor(q.b,p.x,p.y,'land');f.castId=cast.id;f.fall=H/2/Math.max(.5,cam.s)+170;f.tf=Math.sqrt(2*f.fall/GRAV)+.04;f.lt=-f.tf;f.al=1;initPieces(f);actors.push(f);}}}
+  if(cast.dropQ.length&&cast.age>=cast.dropQ[0].at&&!actors.some(a=>a.st==='land')){const q=cast.dropQ.shift(),fc=cast.focus;if(fc&&actors.includes(fc)){const p=clampW(fc.x+rnd(-260,260),fc.y+rnd(-160,160),120);dropAt(q.b,p.x,p.y,cast.id);}}}
  if(cast.landed&&!cast.retiring&&cast.age>cast.life&&!cast.pending.length)retire();
  if(cast.retiring){const v=view(),mg=90;for(const a of actors)if(a.castId===cast.id&&a.st!=='land'&&(Math.abs(a.x-cam.x)>v.w+mg||Math.abs(a.y-cam.y)>v.h+mg))a.dead=true;}
  if(cast.retiring&&!actors.some(a=>a.castId===cast.id)){cast=null;setTimeout(()=>{if(pgOn&&!cast)startCast(false);},900);}
@@ -1892,7 +1905,7 @@ function openPG(){
  setTimeout(()=>{pill.style.opacity='0';pill.style.transition='none';pill.style.background='';pg.classList.add('in');busy=false;btn.style.transition='';btn.style.opacity='';},1300);
 }
 function setupWorld(){
- pg.classList.toggle('dark',DARK);bgT=DARK?1:0;setPop.classList.remove('on');sOpen(false);actors=[];fx=[];cast=null;sel=null;hover=null;lock=null;blur=0;pairCd=new Map();recent=[];ts=1;tsT=1;bub.classList.remove('on');
+ dropT=rnd(170,200);lastOwner='';pg.classList.toggle('dark',DARK);bgT=DARK?1:0;setPop.classList.remove('on');sOpen(false);actors=[];fx=[];cast=null;sel=null;hover=null;lock=null;blur=0;pairCd=new Map();recent=[];ts=1;tsT=1;bub.classList.remove('on');
  firstRun=!seen;cam.x=0;cam.y=-24;
  if(firstRun){lvl=0;prevLvl=1;cam.s=LV[0];follow0=true;startCast(true);spawnCrowd(true);try{localStorage.setItem('fava-pg-seen','1');}catch(e){}seen=true;
   const wz=setInterval(()=>{if(!pgOn){clearInterval(wz);return;}if(cast&&cast.landT!==undefined&&cast.age-cast.landT>3.4){if(follow0){lvl=1;follow0=false;}clearInterval(wz);}},200);}
