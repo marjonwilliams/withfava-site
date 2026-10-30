@@ -1351,7 +1351,7 @@ function mkActor(b,x,y,state){const a={uid:++UID,b,x,y,h:0,hop:0,st:state||'idle
 const TL=[[3.9,1.4],[2.8,1.4],[.4,.9],[.8,1.4],[1.7,1.3]],EYT=[5.4,.55],LAND_T=9.2;
 function pickFocus(){const mine=myBot();let c=bots.filter(b=>!recent.includes(b.name));if(!c.length)c=bots.slice();if(mine&&!seen&&!recent.length)return mine;return c[Math.random()*c.length|0];}
 /* friends and family of a bot: made-up people for now (they can't be chatted with) */
-function pickComps(f){const fc=botCol(f);return FR.filter(n=>n!==f.name).sort((a,b)=>hash(f.name+a)-hash(f.name+b)).slice(0,5).map(n=>{const s=score(f.name,n),fam=s>=.7&&hash(f.name+n+'fam')<.5;return {name:n,fake:true,of:f.name,rel:fam?'Family':s>=.7?'Best friend':'Friend',col:tint(fc,(fam?.3:s>=.7?.46:.6)+(hash(n+'t')-.5)*.1)};});}
+function pickComps(f){const fc=botCol(f);return FR.filter(n=>n!==f.name).sort((a,b)=>hash(f.name+a)-hash(f.name+b)).slice(0,8).map(n=>{const s=score(f.name,n),fam=s>=.7&&hash(f.name+n+'fam')<.5;return {name:n,fake:true,of:f.name,rel:fam?'Family':s>=.7?'Best friend':'Friend',col:tint(fc,(fam?.3:s>=.7?.46:.6)+(hash(n+'t')-.5)*.1)};});}
 const view=()=>({w:W/2/cam.s,h:H/2/cam.s});
 function edgePoint(){const v=view(),m=110,side=Math.random()*4|0,u=Math.random()*2-1;
  return side===0?{x:cam.x-v.w-m,y:cam.y+u*v.h*.8}:side===1?{x:cam.x+v.w+m,y:cam.y+u*v.h*.8}:side===2?{x:cam.x+u*v.w*.8,y:cam.y-v.h-m}:{x:cam.x+u*v.w*.8,y:cam.y+v.h+m};}
@@ -1361,12 +1361,12 @@ function startCast(first){
  const f=mkActor(fb,rnd(-60,60),rnd(-30,30),'land');castN++;f.castId=castN;f.isFocus=true;
  if(first){f.h0=H/2/LV[0]+170;}else{f.h0=H/2/Math.max(.5,cam.s)+170;f.x=Math.max(-AX+200,Math.min(AX-200,cam.x+rnd(-80,80)));f.y=Math.max(-AY+150,Math.min(AY-150,cam.y+rnd(-40,40)));}
  f.fall=f.h0;f.tf=Math.sqrt(2*f.h0/GRAV)+.04;f.lt=-f.tf;f.al=1;initPieces(f);actors.push(f);
- const cs=pickComps(fb);cast={id:castN,focus:f,comps:cs,pending:cs.slice(),age:0,landed:false,nextArr:0,life:rnd(1500,2100),retiring:false,first:!!first,landT:f.tf};return cast;
+ const cs=pickComps(fb);cast={id:castN,focus:f,comps:cs,pending:cs.slice(0,5),pool:cs.slice(5),age:0,landed:false,nextArr:0,life:rnd(1500,2100),retiring:false,first:!!first,landT:f.tf};return cast;
 }
 function startRevisit(){
  const fb=pickFocus();recent.push(fb.name);actors.forEach(q=>{if(q.crowd&&q.b.name===fb.name)q.dead=true;});const f=mkActor(fb,rnd(-100,100),rnd(-60,60),'walk');castN++;f.castId=castN;f.isFocus=true;actors.push(f);
- const cs=pickComps(fb);f.al=0;f.fd=rnd(.1,.6);cs.forEach(b=>{const a=mkActor(b,f.x+rnd(-380,380),f.y+rnd(-230,230),'walk');a.castId=castN;a.al=0;a.fd=rnd(.3,2.0);actors.push(a);});
- cast={id:castN,focus:f,comps:cs,pending:[],age:0,landed:true,nextArr:0,life:rnd(1500,2100),retiring:false,first:false};
+ const cs=pickComps(fb);f.al=0;f.fd=rnd(.1,.6);cs.slice(0,5).forEach(b=>{const a=mkActor(b,f.x+rnd(-380,380),f.y+rnd(-230,230),'walk');a.castId=castN;a.al=0;a.fd=rnd(.3,2.0);actors.push(a);});
+ cast={id:castN,focus:f,comps:cs,pending:[],pool:cs.slice(5),age:0,landed:true,nextArr:0,life:rnd(1500,2100),retiring:false,first:false};
 }
 const say=(a,txt,dur,delay)=>{a.say={t:0,txt,dur:dur||3,delay:delay||0};};
 function ind(a,type){if((type==='heart'||type==='q')){if(a.indCd>0)return;a.indCd=rnd(10,20);}a.ind={type,t:0,dur:1.5};const m={heart:'love',bang:'annoyed',q:'look',note:'happy',sweat:'shock',z:'sleepy'}[type];if(m)expr(a,m,1.5);}
@@ -1375,14 +1375,24 @@ function retire(){if(!cast||cast.retiring)return;cast.retiring=true;const mine=a
 function goExit(a){let dx=a.x-cam.x,dy=a.y-cam.y;if(Math.hypot(dx,dy)<30){dx=Math.random()-.5;dy=Math.random()-.5;}const l=Math.hypot(dx,dy);a.tx=a.x+dx/l*4000;a.ty=a.y+dy/l*4000;a.st='exit';a.say=null;a.greetT=0;}
 const clampW=(x,y,m)=>({x:Math.max(-AX+m,Math.min(AX-m,x)),y:Math.max(-AY+m,Math.min(AY-m,y))});
 const anchor=()=>cast&&cast.focus&&actors.includes(cast.focus)?cast.focus:{x:0,y:0};
-const ANIMS=[['jump',.75,.1],['wave',1.4,.3],['spin',.9,.1],['hop2',1.1,.1],['stretch',1.2,.4]];
+const ANIMS=[['jump',.75,.08],['wave',1.4,.16],['spin',.9,.07],['hop2',1.1,.07],['stretch',1.2,.16],['think',2.6,.16],['jacks',3.2,.1],['squats',2.8,.08],['shrug',1.5,.12]];
 const RX=['happy','wow','sleepy','star','sad','wink','smug','sparkle','shock','annoyed','love','blank','happy','wow'];
-function startAnim(a){let r=Math.random(),k=0;for(let i=0;i<ANIMS.length;i++){r-=ANIMS[i][2];k=i;if(r<=0)break;}const [t,d]=ANIMS[k];a.anim={type:t,t:0,dur:d};if(t!=='stretch'&&Math.random()<.7)expr(a,Math.random()<.7?'happy':'star',d);}
+function startAnim(a){let r=Math.random(),k=0;for(let i=0;i<ANIMS.length;i++){r-=ANIMS[i][2];k=i;if(r<=0)break;}let [t,d]=ANIMS[k];const still=t==='think'||t==='jacks'||t==='squats'||t==='shrug';
+ if(still&&!(a.st==='walk'||a.st==='idle')){t='wave';d=1.4;}
+ if(still&&(t==='think'||t==='jacks'||t==='squats'||t==='shrug')){a.st='idle';a.wt=d+.5;a.tx=a.x;a.ty=a.y;a.spd=0;}
+ a.anim={type:t,t:0,dur:d};
+ if(t==='think'){expr(a,Math.random()<.5?'look':'smug',d);if(Math.random()<.3)setTimeout(()=>{if(actors.includes(a)&&a.anim&&a.anim.type==='think')ind(a,'q');},1100);}
+ else if(t==='shrug')expr(a,'smug',d);else if(t==='jacks')expr(a,'happy',d);else if(t==='squats')expr(a,'annoyed',d);
+ else if(t!=='stretch'&&Math.random()<.7)expr(a,Math.random()<.7?'happy':'star',d);}
 /* ---- falling apart: each piece is a little rigid disc with gravity, bounce, friction and rolling ---- */
 const GRAV=1500;
 const HOME=[[0,-80],[-6,-13],[0,-43],[24,-40],[-24,-40],[6,-13]],PHY=[[15,1,.42,1],[9,.7,.2,0],[19,2.5,.28,0],[6,.3,.55,1],[6,.3,.55,1],[9,.7,.2,0]];
 const nrm=a=>{a%=6.2832;return a>3.1416?a-6.2832:a<-3.1416?a+6.2832:a;};
 function initPieces(a){a.P=HOME.map((h,i)=>{const o=a.pp[i];return {x:h[0]+o.dx,y:h[1]+o.dy-(a.fall||0),vx:o.dx*.3+rnd(-26,26),vy:0,a:rnd(-1.2,1.2),w:o.w*.8,r:PHY[i][0],m:PHY[i][1],e:PHY[i][2],round:PHY[i][3]};});a.rest=null;}
+function dropScare(a){for(const o of actors){if(o===a||o.st==='land'||o.st==='drag'||o.st==='exit'||o===sel)continue;const d=Math.hypot(o.x-a.x,o.y-a.y);if(d>520||Math.random()>.88)continue;
+  setTimeout(()=>{if(!actors.includes(o)||o.st==='land'||o.st==='drag')return;o.anim={type:'jump',t:0,dur:.75};o.indCd=0;o.say=null;ind(o,Math.random()<.5?'bang':'sweat');expr(o,'shock',1.4);o.face=a.x>o.x?-1:1;
+   if(Math.random()<.75)setTimeout(()=>{if(actors.includes(o)&&!o.say&&o.st!=='drag'){o.indCd=0;o.ind=null;ind(o,'q');}},1700);
+   if(Math.random()<.35){const ax=o.x-a.x,ay=o.y-a.y,al=Math.hypot(ax,ay)||1;setTimeout(()=>{if(!actors.includes(o)||(o.st!=='idle'&&o.st!=='walk')||o===sel)return;const q=clampW(o.x+ax/al*160,o.y+ay/al*110,60);o.st='walk';o.tx=q.x;o.ty=q.y;o.runT=1.1;o.spd=1;},500);}},rnd(80,700)+d*.9);}}
 function puff(a,p,k){const n=Math.ceil(2+3*k);for(let i=0;i<n;i++)fx.push({d:1,x:a.x+a.face*p.x,y:a.y,vx:rnd(-70,70)*(.5+k),u:rnd(.5,1.2)*(.6+k),s:rnd(.7,1.3)*(.7+.5*k),t:0});}
 const RGK=[[.05,.03],[.07,.04],[.02,.02],[.08,.05],[.08,.05],[.07,.04]];
 function ragStep(a,dt,vx,vy,limp){
@@ -1398,7 +1408,7 @@ function stepPieces(a,dt){
  for(let s0=0;s0<n;s0++){
   for(const p of P){p.vy+=GRAV*h;p.x+=p.vx*h;p.y+=p.vy*h;p.a+=p.w*h;if(p.vx>230)p.vx=230;if(p.vx<-230)p.vx=-230;if(p.x>135){p.x=135;p.vx*=-.3;}if(p.x<-135){p.x=-135;p.vx*=-.3;}
    if(late){const k=1-late*3*h;p.vx*=k;p.w*=k;}
-   if(p.y+p.r>0){p.y=-p.r;if(p.vy>350&&!a.ringed){a.ringed=1;fx.push({x:a.x+a.face*p.x,y:a.y,t:0});}if(p.vy>70)p.vy=-p.vy*p.e;else p.vy=0;
+   if(p.y+p.r>0){p.y=-p.r;if(p.vy>350&&!a.ringed){a.ringed=1;fx.push({x:a.x+a.face*p.x,y:a.y,t:0});dropScare(a);}if(p.vy>70)p.vy=-p.vy*p.e;else p.vy=0;
     const roll=p.vx/p.r;p.w+=(roll-p.w)*Math.min(1,(p.round?10:3)*h);p.vx*=1-(p.round?2.8:4.5)*h;if(!p.round)p.w*=1-3*h;}}
   for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const A=P[i],B=P[j];let dx=B.x-A.x,dy=B.y-A.y,d=Math.hypot(dx,dy),R=A.r+B.r;if(d>=R||d<.001)continue;
    const nx=dx/d,ny=dy/d,pen=R-d,im=1/A.m+1/B.m;A.x-=nx*pen*(1/A.m)/im;A.y-=ny*pen*(1/A.m)/im;B.x+=nx*pen*(1/B.m)/im;B.y+=ny*pen*(1/B.m)/im;
@@ -1412,6 +1422,7 @@ function updActor(a,dt){
  if(a.st==='drop'){a.dt+=dt;const p=Math.min(1,a.dt/a.dur);a.h=a.h0*(1-p*p);a.vimp=2*a.h0/a.dur;a.split=1;a.spin+=dt;a.squash=0;
   if(p>=1){a.st='land';a.lt=0;a.h=0;initPieces(a);fx.push({x:a.x,y:a.y,t:0});if(a.isFocus&&cast&&a.castId===cast.id)cast.landT=cast.age;}return;}
  if(a.st==='land'){a.lt+=dt;if(!a.P)initPieces(a);a.squash=0;if(a.lt<2.0)stepPieces(a,dt);else if(!a.rest){a.rest=a.P.map(p=>({x:p.x,y:p.y,a:nrm(p.a)}));a.plan=buildPlan(a.rest);if(cast&&a.castId===cast.id&&a.isFocus)cast.landed=true;}if(a.plan&&a.lt-2.3>a.plan.end){a.x+=a.face*a.plan.fx;a.P=null;a.rest=null;a.plan=null;a.st='idle';a.wt=.7;a.spd=0;a.ph=0;a.tx=a.x;a.ty=a.y;a.split=0;a.squash=0;a.spin=0;if(cast&&a.castId===cast.id)cast.landed=true;}return;}
+ a.gz=(drag&&drag!==a&&a.st!=='land'&&Math.hypot(drag.x-a.x,drag.y-a.y)<560)?{x:drag.x,y:drag.y-drag.h-90}:null;if(a.gz&&a.st==='idle')a.face=drag.x>a.x?1:-1;
  a.scCd=(a.scCd||0)-dt;if(a.runT>0)a.runT-=dt;
  if(a.b.fake&&(a.st==='walk'||a.st==='idle')&&a!==sel&&!sel&&!drag&&a.scCd<=0&&!a.say&&performance.now()-curT<1400&&Math.hypot(mw.x-a.x,mw.y-a.y+45)<64&&Math.random()<dt*.02&&performance.now()-(window.__lastScare||0)>30000){window.__lastScare=performance.now();
   a.scCd=rnd(60,120);a.anim=null;a.st='idle';a.wt=.5;a.tx=a.x;a.ty=a.y;a.spd=0;ind(a,'bang');expr(a,'shock',1.5);a.anim={type:'jump',t:0,dur:.75};a.face=mw.x>a.x?-1:1;
@@ -1422,7 +1433,7 @@ function updActor(a,dt){
  if(a.squash>0&&a.st!=='land')a.squash=Math.max(0,a.squash-dt*.5);
  if(a!==sel&&!a.expr&&!a.ind&&a.st!=='greet'){a.exCd-=dt;if(a.exCd<=0){const t=RX[Math.random()*RX.length|0];if(t==='sleepy'&&Math.random()<.5)ind(a,'z');else expr(a,t,rnd(1.3,2.6));a.exCd=rnd(2.5,6.5);}}
  /* little random shows, even when alone */
- if(a.anim){a.anim.t+=dt;const p=a.anim.t/a.anim.dur;a.hop=a.anim.type==='jump'?Math.sin(Math.PI*Math.min(1,p))*38:a.anim.type==='hop2'?Math.abs(Math.sin(Math.PI*2*Math.min(1,p)))*26:0;if(p>=1){a.anim=null;a.hop=0;}}
+ if(a.anim){a.anim.t+=dt;const p=a.anim.t/a.anim.dur;a.hop=a.anim.type==='jump'?Math.sin(Math.PI*Math.min(1,p))*38:a.anim.type==='hop2'?Math.abs(Math.sin(Math.PI*2*Math.min(1,p)))*26:a.anim.type==='jacks'?Math.max(0,Math.sin(a.anim.t*9))*10:0;if(p>=1){a.anim=null;a.hop=0;}}
  else{a.animCd-=dt;if(a.animCd<=0&&a!==sel&&a.st!=='greet'&&a.st!=='exit'){startAnim(a);a.animCd=rnd(10,24);}}
  if(a===sel){if((a.st==='walk'||a.st==='enter'||a.st==='meet')&&dt>0){if(a.spd===undefined)a.spd=1;if(a.spd>.01){a.spd=Math.max(0,a.spd-dt*3);const sp=(a.st==='meet'?70:a.isFocus?58:50)*a.spd*a.spd*(3-2*a.spd),dx=a.tx-a.x,dy=a.ty-a.y,d=Math.hypot(dx,dy);if(d>3){a.x+=dx/d*sp*dt;a.y+=dy/d*sp*dt;a.ph+=dt*sp*.085;}}}return;}
  if(a.st==='walk'&&!a.say&&!a.ind&&Math.random()<dt*.007&&!actors.some(o=>o!==a&&Math.hypot(o.x-a.x,o.y-a.y)<260))say(a,SELF[Math.random()*SELF.length|0],2.2,0);
@@ -1440,15 +1451,17 @@ function updActor(a,dt){
  else if(a.leaveAt>=0&&cast&&a.castId===cast.id&&cast.age>=a.leaveAt&&sel!==a)goExit(a);
  else if(a.leaveAt>=0&&cast&&a.castId!==cast.id&&sel!==a)goExit(a);
 }
-const SELF=['Hmm...','I wonder what time it is','Need a snack','Nice day, huh','Where did I put that...','La la la...','Okay, okay','Huh.'];
+const SELF=['I wish there was a TV here','This place needs a couch','Hmm...','I wonder what time it is','Need a snack','Nice day, huh','Where did I put that...','La la la...','Okay, okay','Huh.'];
 const SCRIPTS={
  like:[["Hey you!","Hey! I was just thinking about you","Were you? Only good things, I hope","Obviously. Walk with me?","Always."],["Missed you!","Same! It\u2019s been forever","We should grab food later","Yes please, I\u2019m starving","Race you there"],["Look who it is","Ha, hi!","You look happy today","Something good is coming, I can feel it","Then I\u2019m sticking with you"]],
- mid:[["Oh, hi","Hey! How\u2019s your day going?","Pretty quiet, honestly","Same here. Nice weather though","Can\u2019t complain"],["What\u2019s up?","Not much. You?","Just wandering","Fair enough","Alright, enjoy the walk"],["Morning","Morning! Sleep okay?","Not really","Ha, me neither","Coffee fixes everything"]],
+ mid:[["Nice spot, huh?","I wish there was a TV here","Right? And a couch","And snacks!","Now we\u2019re talking"],["Oh, hi","Hey! How\u2019s your day going?","Pretty quiet, honestly","Same here. Nice weather though","Can\u2019t complain"],["What\u2019s up?","Not much. You?","Just wandering","Fair enough","Alright, enjoy the walk"],["Morning","Morning! Sleep okay?","Not really","Ha, me neither","Coffee fixes everything"]],
  dis:[["Oh. It\u2019s you.","Hm. Hi.","Still mad about earlier?","Maybe a little","...Okay."],["Hey, I guess","Mm.","Nice weather","Sure.","Whatever"],["Not now","I didn\u2019t say anything","You were about to","Fine. Go ahead","Never mind"]]};
 function startMeet(a,b){a.st=b.st='meet';a.partner=b;b.partner=a;a.meetT=b.meetT=9;a.anim=b.anim=null;a.hop=b.hop=0;}
 function startConvo(a,b){
  const nowS=performance.now()/1000;a.convCd=b.convCd=nowS+rnd(30,60);a.partner=b;b.partner=a;
- const rel=relOf(a,b),S=SCRIPTS[rel],sc=S[Math.random()*S.length|0];
+ const known=(a.castId&&a.castId===b.castId)||a.b.of===b.b.name||b.b.of===a.b.name||hash([a.b.name,b.b.name].sort().join('+')+'known')<.3,rel=known?relOf(a,b):'mid',A=a.b.name,B=b.b.name,
+  INTRO=[['Hello, my name is '+A,'Hi '+A+', I\u2019m '+B,'Nice to meet you!','Do you come here often?','Every day, apparently'],['Hi there! I\u2019m '+A+', I don\u2019t think we\u2019ve met','I\u2019m '+B+'. Nice to meet you','Lovely day for a walk','It really is','Well, enjoy it!'],['Excuse me, hi. I\u2019m '+A,'Oh, hello! I\u2019m '+B,'I wish there was a TV here','Ha, or a couch','Right? Anyway, good to meet you']],
+  S=SCRIPTS[rel],sc=known?S[Math.random()*S.length|0]:INTRO[Math.random()*INTRO.length|0];
  a.st=b.st='greet';a.anim=b.anim=null;a.hop=b.hop=0;a.face=b.x>a.x?1:-1;b.face=-a.face;
  const ra=rel==='like'?(Math.random()<.65?'heart':null):rel==='dis'?(Math.random()<.75?'bang':null):(Math.random()<.2?'note':null);
  if(ra)ind(a,ra);if(ra==='heart'&&Math.random()<.6)setTimeout(()=>{if(actors.includes(b))ind(b,'heart');},700);else if(ra==='bang')setTimeout(()=>{if(actors.includes(b))ind(b,'sweat');},700);
@@ -1466,7 +1479,7 @@ function dropReact(a){
  else expr(a,'happy',1.4);
 }
 function pairs(dt){
- clock+=dt;if(clock<.25)return;clock=0;const now=performance.now()/1000;
+ clock+=dt;if(clock<.25)return;clock=0;const now=performance.now()/1000;extras();
  const free=a=>a!==sel&&a.st!=='drop'&&a.st!=='land'&&a.st!=='exit'&&a.st!=='greet'&&a.st!=='meet'&&a.st!=='drag'&&a.st!=='fall2'&&!a.say&&!a.ind;
  for(let i=0;i<actors.length;i++){const a=actors[i];if(!free(a))continue;
   for(let j=i+1;j<actors.length;j++){const b=actors[j];if(!free(b))continue;
@@ -1483,12 +1496,20 @@ function pairs(dt){
    expr(a,['wow','blank','smug','shock'][Math.random()*4|0],1.7);
    if(n&&Math.random()<.5){a.face=n.x>a.x?1:-1;setTimeout(()=>{if(actors.includes(a)&&a.st==='idle'&&!a.say)ind(a,'q');},1000);if(Math.random()<.5)setTimeout(()=>{if(actors.includes(n)&&(n.st==='idle'||n.st==='walk')&&!n.say)ind(n,'q');},2100);}}}
 }
+const DRAGSAY=['What was that?','Whoa, did you see that?','Put them down!','Is that... flying?','Hey, careful up there!','That looks fun, actually','Okay, that\u2019s new'],WATCH=['I feel like someone\u2019s watching me...','Why do I feel so observed?','Hello? Is someone there?','Weird. I swear something\u2019s looking at me'],PLACE=['I wish there was a TV here','This place could use a couch','Is there a snack bar around here?','A bench would be nice','Why is it so quiet?','This floor is really clean, huh'];
+let lockT=0;
+function extras(){
+ if(drag){for(const a of actors){if(a===drag||a===sel||a.st==='land'||a.st==='exit'||a.st==='drag'||a.say||a.ind||a.st==='greet')continue;if(Math.hypot(drag.x-a.x,drag.y-a.y)>520)continue;a.dragCd=(a.dragCd||0)-.25;if(a.dragCd>0||Math.random()>.07)continue;a.dragCd=rnd(7,14);const r=Math.random();
+   if(r<.5){say(a,DRAGSAY[Math.random()*DRAGSAY.length|0],2.6,0);expr(a,'wow',1.6);}else if(r<.8){a.indCd=0;ind(a,Math.random()<.6?'bang':'sweat');expr(a,'shock',1.4);a.anim={type:'jump',t:0,dur:.75};}else{a.indCd=0;ind(a,'q');}}}
+ if(lock&&lvl<=1&&!sel&&!drag){lockT+=.25;if(lockT>8&&Math.random()<.1&&!lock.say&&!lock.ind&&(lock.st==='walk'||lock.st==='idle')){expr(lock,'look',2.4);say(lock,WATCH[Math.random()*WATCH.length|0],3.2,.2);lockT=-40;}}else if(!lock)lockT=0;
+}
 function manage(dt){
  if(sel||!cast)return;
  cast.age+=dt;
  if(cast.landed&&cast.pending.length&&cast.age>=cast.nextArr){
   if(cast.landT===undefined)cast.landT=cast.age;
   if(cast.age-cast.landT>(cast.first?.6:.5)){const b=cast.pending.shift(),p=edgePoint(),a=mkActor(b,p.x,p.y,'enter');a.castId=cast.id;const f=cast.focus,an=Math.random()*6.28,r=rnd(380,640),q=clampW(f.x+Math.cos(an)*r,f.y+Math.sin(an)*r*.6,80);a.tx=q.x;a.ty=q.y;actors.push(a);cast.nextArr=cast.age+rnd(2.4,4.6);}}
+ if(cast.landed&&!cast.retiring&&cast.pool&&cast.pool.length){if(cast.rot===undefined)cast.rot=cast.age+rnd(240,360);if(cast.age>=cast.rot&&!cast.pending.length){const cand=actors.filter(a=>a.castId===cast.id&&!a.isFocus&&a.st!=='exit'&&a.st!=='land'&&a.st!=='greet'&&a.st!=='meet'&&a.st!=='drag'&&a.leaveAt<0);if(cand.length){const o=cand[Math.random()*cand.length|0];o.leaveAt=cast.age;cast.pool.push(o.b);cast.pending.push(cast.pool.shift());cast.nextArr=cast.age+rnd(5,10);cast.rot=cast.age+rnd(240,360);}else cast.rot=cast.age+20;}}
  if(cast.landed&&!cast.retiring&&cast.age>cast.life&&!cast.pending.length)retire();
  if(cast.retiring){const v=view(),mg=90;for(const a of actors)if(a.castId===cast.id&&a.st!=='land'&&(Math.abs(a.x-cam.x)>v.w+mg||Math.abs(a.y-cam.y)>v.h+mg))a.dead=true;}
  if(cast.retiring&&!actors.some(a=>a.castId===cast.id)){cast=null;setTimeout(()=>{if(pgOn&&!cast)startCast(false);},900);}
@@ -1547,7 +1568,7 @@ const SX=x=>(x-cam.x)*cam.s+W/2,SY=y=>(y-cam.y)*cam.s+H/2;
 function eyes(a){
  /* eyes are tiny text faces: dots normally, characters for feelings; they follow the cursor when it is near */
  const ex=a.expr&&a.expr.type,swF=a.face;
- let lx=0,ly=0;const hx=a.x+0,hy=a.y-a.h-a.hop-80,dx=mw.x-hx,dy=mw.y-hy,dd=Math.hypot(dx,dy);if((dd*cam.s<150||a===sel||a.st==='drag')&&a.st!=='drop'&&a.st!=='land'){const k=Math.min(1,Math.max(.4,dd*cam.s/70));lx=dx/dd*k*2.3*swF;ly=dy/dd*k*2.1;}
+ let lx=0,ly=0;const hx=a.x+0,hy=a.y-a.h-a.hop-80,dx=(a.gz||mw).x-hx,dy=(a.gz||mw).y-hy,dd=Math.hypot(dx,dy)||1;if((dd*cam.s<150||a.gz||a===sel||a.st==='drag')&&a.st!=='drop'&&a.st!=='land'){const k=Math.min(1,Math.max(.4,dd*cam.s/70));lx=dx/dd*k*2.3*swF;ly=dy/dd*k*2.1;}
  if(ex==='look'){lx=-1.2*swF;ly=-2.6;}
  if(a.gx===undefined){a.gx=lx;a.gy=ly;}const gk=Math.min(1,gdt*5.5);a.gx+=(lx-a.gx)*gk;a.gy+=(ly-a.gy)*gk;lx=a.gx;ly=a.gy;
  const P=[-3.2,6];
@@ -1641,8 +1662,8 @@ function landDraw(a,c){
 function fig(a){
  const c=a.col,mv=a.st==='walk'||a.st==='enter'||a.st==='exit'||a.st==='drag'||a.st==='meet',swing=mv&&a.st!=='drag'?Math.sin(a.ph)*.7*(a.spd===undefined?1:Math.min(1,a.spd*2)):0,bob=mv&&a.st!=='drag'?Math.abs(Math.sin(a.ph))*3:0;
  let sq=a.squash||0,sxx=1;const an=a.anim,ap=an?an.t/an.dur:0;
- if(an){if(an.type==='spin')sxx=Math.cos(Math.PI*2*Math.min(1,ap));if(an.type==='stretch')sq=-Math.sin(Math.PI*Math.min(1,ap))*.16;if(an.type==='jump'||an.type==='hop2')sq=Math.max(0,.14-Math.abs(Math.sin(Math.PI*Math.min(1,ap)))*.5)*(ap<.12||ap>.88?1:0)*.5;}
- const sx=(1+sq)*sxx,sy=1-sq,landing=a.st==='land'&&!!a.P,air=a.st==='drop',rag=!!a.rg&&a.st!=='land',sp=air?a.split:0,burst=0;
+ if(an){if(an.type==='spin')sxx=Math.cos(Math.PI*2*Math.min(1,ap));if(an.type==='stretch')sq=-Math.sin(Math.PI*Math.min(1,ap))*.16;if(an.type==='squats')sq=Math.pow(Math.abs(Math.sin(Math.PI*Math.min(1,ap)*3)),1.3)*.2;if(an.type==='jump'||an.type==='hop2')sq=Math.max(0,.14-Math.abs(Math.sin(Math.PI*Math.min(1,ap)))*.5)*(ap<.12||ap>.88?1:0)*.5;}
+ const sx=(1+sq)*sxx,sy=1-sq,landing=a.st==='land'&&!!a.P,air=a.st==='drop',rag=!!a.rg&&a.st!=='land',jk=an&&an.type==='jacks'?Math.max(0,Math.sin(an.t*9)):0,sp=air?a.split:0,burst=0;
  g.save();g.scale(a.face*sx,sy);
  if(landing&&a.P){landDraw(a,c);g.restore();return;}
  const skin=shade(c,.62),hair=shade(c,.4),P=a.pp,spin=a.spin;
@@ -1653,8 +1674,11 @@ function fig(a){
   else if(sp!==0){const o=P[i];ox=o.dx*sp;oy=o.dy*sp;rr=o.w*spin*sp;}
   else if(rag){const o=a.rg.o[i];ox=o.x;oy=o.y;rr=i===1||i===5?o.x*.035:i===0?o.x*.015:o.x*.008;}
   if(ox||oy||rr){g.translate(px+ox,py+oy);g.rotate(rr);g.translate(-px,-py);}fn();g.restore();};
- const legL=()=>{g.lineCap='round';g.lineWidth=7;g.strokeStyle='#23242b';g.beginPath();g.moveTo(-6,-24);g.lineTo(-6+Math.sin(swing)*9,-2);g.stroke();},legR=()=>{g.lineCap='round';g.lineWidth=7;g.strokeStyle='#23242b';g.beginPath();g.moveTo(6,-24);g.lineTo(6-Math.sin(swing)*9,-2);g.stroke();};
+ const legL=()=>{g.lineCap='round';g.lineWidth=7;g.strokeStyle='#23242b';g.beginPath();g.moveTo(-6,-24);g.lineTo(-6+(jk?-9*jk:Math.sin(swing)*9),-2);g.stroke();},legR=()=>{g.lineCap='round';g.lineWidth=7;g.strokeStyle='#23242b';g.beginPath();g.moveTo(6,-24);g.lineTo(6+(jk?9*jk:-Math.sin(swing)*9),-2);g.stroke();};
  const hand=(sd,i)=>{let hx=24*sd,hy=-40+Math.sin(swing+(sd>0?0:Math.PI))*7*(mv?1:0);if(an&&((an.type==='wave'&&sd>0)||an.type==='wave2')){hy=-72+Math.sin(an.t*14+(sd>0?0:1.6))*6;hx=27*sd;}
+  if(an&&an.type==='think'){const k2=Math.max(0,Math.min(1,an.t/.35,(an.dur-an.t)/.35));if(sd>0){hx=24+(8-24)*k2;hy=-40+(-63+40)*k2;}else{hx=-24+(-9+24)*k2;hy=-40+(-47+40)*k2;}}
+  if(an&&an.type==='shrug'){const k2=Math.max(0,Math.min(1,an.t/.25,(an.dur-an.t)/.25));hx=24*sd+sd*7*k2;hy=-40-13*k2;}
+  if(an&&an.type==='jacks'){hx=24*sd+sd*(3+7*jk);hy=-40-40*jk;}
   part(i,24*sd,-40,()=>{g.fillStyle=skin;g.beginPath();g.arc(hx,hy,5.6,0,6.2832);g.fill();});};
  const eq=landing?Math.max(0,Math.min(1,(a.lt-EYT[0])/EYT[1])):1;
  g.translate(0,-bob*.3);if(rag){g.translate(0,-96);g.rotate(a.rg.b);g.translate(0,96);}
@@ -1691,7 +1715,9 @@ function bubbleDraw(a,x,y){
 function drawActor(a){if(a.al<=.01)return;if(SX(a.x)<-140||SX(a.x)>W+140||SY(a.y)<-60-(a.h+110)*cam.s||SY(a.y)>H+180)return;const x=SX(a.x),y=SY(a.y),k=cam.s,hh=a.h+a.hop,sh=Math.max(.5,1-hh/600);g.save();g.globalAlpha=a.al;
  if(a.st==='land'&&a.P){const T=a.lt-2.3,pl=a.plan;if(pl&&T>=pl.w0){const q=Math.min(1,(T-pl.w0)/.32),al=q*q*(3-2*q),tx=landPose(a,2).x;g.fillStyle='rgba(16,17,20,'+(.13*al)+')';g.beginPath();g.ellipse(x+a.face*tx*k,y,22*k*(.6+.4*al),6.5*k*(.6+.4*al),0,0,6.2832);g.fill();}}
  else{g.fillStyle='rgba(16,17,20,'+(.13*Math.max(.25,1-hh/500))+')';g.beginPath();g.ellipse(x,y,22*k*sh,6.5*k*sh,0,0,6.2832);g.fill();}
- g.save();g.setTransform(dpr*k,0,0,dpr*k,dpr*x,dpr*(y-hh*k));fig(a);g.restore();g.restore();}
+ g.save();g.setTransform(dpr*k,0,0,dpr*k,dpr*x,dpr*(y-hh*k));fig(a);g.restore();
+ if(!a.b.fake&&!a.ind&&!a.say&&a!==sel&&a.st!=='land'){const pu=.5+.5*Math.sin(performance.now()/380+a.uid),rr=Math.max(3,4.2*k)*(1+.1*pu),yy=y-(hh+114)*k;g.fillStyle='rgba(235,40,60,'+(.28*(1-pu))+')';g.beginPath();g.arc(x,yy,rr*(1.5+1.5*pu),0,6.2832);g.fill();g.fillStyle='#e8283c';g.beginPath();g.arc(x,yy,rr,0,6.2832);g.fill();}
+ g.restore();}
 function draw(){
  g.setTransform(dpr,0,0,dpr,0,0);g.filter='none';g.fillStyle='#fbfbfa';g.fillRect(0,0,W,H);
  const bl=blur>.03&&sel;if(bl)g.filter='blur('+(blur*7).toFixed(1)+'px)';
