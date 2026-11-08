@@ -395,35 +395,48 @@ body.at-home .mitem[data-home]{display:none}
  .stat:nth-child(n+3){border-top:1px solid var(--edge)}
 }
 @media (prefers-reduced-motion:reduce){.live-dot,.spin,.live.swap,.timeline li.now .a::after{animation:none}.live-dot{opacity:1;transform:none}.panel{transition:opacity .3s}}
+/* ---- chat is home once you are signed in ---- */
+body.home-mode #globe,body.home-mode #fxTop,body.home-mode .legend,body.home-mode .panel,body.home-mode #pgBtn{display:none!important}
+body.home-mode .chat{background:var(--navy);-webkit-backdrop-filter:none;backdrop-filter:none}
+body.home-mode #chatClose{display:none}
+body.home-mode.chat-open .top-right{opacity:1;visibility:visible;pointer-events:auto}
+body.home-mode .live{display:none}
+body.home-mode .center-nav .nav:not(.homeonly):not([data-home]){max-width:0;margin-left:-30px;opacity:0;visibility:hidden;transform:translateY(-18px);pointer-events:none}
+body:not(.home-mode) .center-nav .homeonly,body:not(.home-mode) .mitem.homeonly{max-width:0;margin-left:-30px;opacity:0;visibility:hidden;transform:translateY(-18px);pointer-events:none}
+body:not(.home-mode) .mitem.homeonly{display:none}
+body.home-mode .mitem:not(.homeonly):not([data-home]):not(#menuLogin):not(.signout){display:none}
+@media (max-width:900px),(pointer:coarse){.homeonly,.mitem.homeonly{display:none!important}}
+.dtabs{display:flex;gap:6px;margin:6px 0 14px}
+.dtabs button{border:1px solid var(--edge-strong,rgba(255,255,255,.18));background:none;color:inherit;border-radius:999px;padding:7px 16px;font:inherit;font-size:14px;cursor:pointer;opacity:.7}
+.dtabs button.on{opacity:1;background:rgba(255,255,255,.1)}
+.drow{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:15px}
+.drow span{opacity:.65}
+.dpane .wide{margin-top:16px}
+body.no-earth{background:var(--navy)}
+body.no-earth #globe,body.no-earth #fxTop,body.no-earth .legend,body.no-earth .panel,body.no-earth #pgBtn,body.no-earth .live{display:none!important}
+body.no-earth:not(.signed-in) .center-nav,body.no-earth:not(.signed-in) .top-right{display:none!important}
+body.no-earth:not(.signed-in) .wordmark{cursor:pointer}
 </style>
 <script>(function(){try{var d=document.documentElement;if(/[?&]nointro/.test(location.search)||/^#\/bot\//.test(location.hash)||matchMedia("(prefers-reduced-motion: reduce)").matches||window.innerWidth<=700||!matchMedia("(hover:hover) and (pointer:fine)").matches)return;d.classList.add("intro");setTimeout(function(){if(!window.__introOn)d.classList.remove("intro")},6000)}catch(e){}})();</script>
 <script>(function(){try{var d=document.documentElement,h=location.hash,go='',col='',a='';
 try{go=sessionStorage.getItem('fava-go')||'';col=sessionStorage.getItem('fava-col')||'';sessionStorage.removeItem('fava-go');sessionStorage.removeItem('fava-col');}catch(e){}
 if(/^#(signin|getstarted|playground|sales|chat)$/.test(h)){a=h.slice(1);}
-if(a==='playground')go='playground';if(a==='chat')go='chat';
-if(a==='signin'||a==='getstarted'||a==='sales'||go==='playground'||go==='chat')d.classList.remove('intro');
+window.__arrive=a||go;
+d.classList.remove('intro');
 var ov=null;
-if(go){ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;z-index:2147483000;background:'+(col||'#03060E')+';opacity:1;transition:opacity .9s ease';d.appendChild(ov);}
+if(go){ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;z-index:2147483000;background:'+(col||'#060C1C')+';opacity:1;transition:opacity .9s ease';d.appendChild(ov);}
 function fade(){if(!ov)return;ov.style.opacity='0';setTimeout(function(){ov&&ov.remove();ov=null},1000);}
-addEventListener('load',function(){
- var t0=Date.now();
- (function wait(){
-  if(a==='signin'||a==='getstarted'){setTimeout(function(){var b=document.getElementById(a==='signin'?'loginBtn':'joinBtn');b&&b.click();fade();},300);return;}
-  if(go==='chat'){if(window.__fava&&(window.__fava.ready()||Date.now()-t0>7000)){var cb=document.querySelector('[data-chat]');cb&&cb.click();setTimeout(fade,300);return;}setTimeout(wait,120);return;}
-  if(go==='playground'){if(window.__fava&&window.__fava.ready()){window.__fava.open(true);setTimeout(fade,350);return;}if(Date.now()-t0<9000){setTimeout(wait,120);return;}fade();return;}
-  setTimeout(fade,350);
- })();
-});
+addEventListener('load',function(){setTimeout(fade,450);});
 }catch(e){}})();</script>
 </head>
-<body class="at-home"><script>if(document.documentElement.classList.contains("intro"))document.body.classList.remove("at-home")</script>
+<body class="at-home no-earth"><script>if(document.documentElement.classList.contains("intro"))document.body.classList.remove("at-home")</script>
 <canvas id="fxTop" aria-hidden="true"></canvas>
 <canvas id="nebula" aria-hidden="true"></canvas><canvas id="galaxy" aria-hidden="true"></canvas>
 <div id="introCta"><h2>Meet the team</h2><button type="button">Continue <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg></button></div>
 <canvas id="globe" role="img" tabindex="0" aria-label="A turning dotted Earth showing where the FAVA bots live and where messages come from. Use the arrow keys to turn it."></canvas>
 <header class="top">
  <h1 class="wordmark"><span class="sr-only">FAVA</span><span class="ltr" data-fx="rocket" aria-hidden="true">F</span><span class="ltr" data-fx="teleport" aria-hidden="true">A</span><span class="ltr" data-fx="star" aria-hidden="true">V</span><span class="ltr" data-fx="radar" aria-hidden="true">A</span></h1>
- <nav class="center-nav" aria-label="Main"><button class="nav unpaid" type="button">Pricing</button><button class="nav" type="button" data-chat>Chat</button><button class="nav guest" type="button">About</button><button class="nav member" type="button">My profile</button><button class="nav member" type="button" data-settings>Settings</button><button class="nav" type="button" data-home>Home</button></nav>
+ <nav class="center-nav" aria-label="Main"><button class="nav homeonly" type="button" data-pg>Playground</button><button class="nav unpaid" type="button">Pricing</button><button class="nav" type="button" data-chat>Chat</button><button class="nav guest" type="button">About</button><button class="nav member" type="button">My profile</button><button class="nav member" type="button" data-settings>Settings</button><button class="nav" type="button" data-home>Home</button></nav>
  <div class="top-right">
   <span class="live" id="liveBadge" role="status"><span class="live-dot" aria-hidden="true"></span><span class="spin" aria-hidden="true"></span><span id="liveText">Live</span></span>
   <button class="pill" id="loginBtn" type="button">Log in</button>
@@ -432,7 +445,7 @@ addEventListener('load',function(){
  </div>
 </header>
 <div class="menu" id="menu" hidden>
- <nav aria-label="Menu"><button class="mitem unpaid" type="button">Pricing</button><button class="mitem" type="button" data-chat>Chat</button><button class="mitem guest" type="button">About</button><button class="mitem member" type="button">My profile</button><button class="mitem member" type="button" data-settings>Settings</button><button class="mitem" type="button" data-home>Home</button><button class="mitem" id="menuLogin" type="button">Log in</button><button class="mitem member signout" id="menuSignOut" type="button">Sign out</button></nav>
+ <nav aria-label="Menu"><button class="mitem homeonly" type="button" data-pg>Playground</button><button class="mitem unpaid" type="button">Pricing</button><button class="mitem" type="button" data-chat>Chat</button><button class="mitem guest" type="button">About</button><button class="mitem member" type="button">My profile</button><button class="mitem member" type="button" data-settings>Settings</button><button class="mitem" type="button" data-home>Home</button><button class="mitem" id="menuLogin" type="button">Log in</button><button class="mitem member signout" id="menuSignOut" type="button">Sign out</button></nav>
 </div>
 <section class="legend" aria-labelledby="where">
  <div class="legend-head"><h2 id="where" class="online">Online now</h2></div>
@@ -551,7 +564,9 @@ addEventListener('load',function(){
   <button class="close" data-close type="button" aria-label="Close">×</button>
   <h2 id="dashTitle">Dashboard</h2>
   <p class="who-line" id="dashWho"></p>
-  <p class="soon">Your dashboard is on the way. Your account and bot tools will live here.</p>
+  <div class="dtabs" role="tablist"><button class="on" type="button" data-dt="p" role="tab">Profile</button><button type="button" data-dt="b" role="tab">Billing</button></div>
+  <div class="dpane" id="dp-p"><div class="drow"><span>Email</span><b id="dEmail"></b></div><div class="drow"><span>Plan</span><b id="dPlan">Free</b></div><div class="drow"><span>Name</span><b>Not set</b></div><p class="soon">Profile editing is coming soon.</p></div>
+  <div class="dpane" id="dp-b" hidden><div class="drow"><span>Current plan</span><b id="dPlan2">Free</b></div><div class="drow"><span>Payment method</span><b>None</b></div><div class="drow"><span>Invoices</span><b>None yet</b></div><button class="wide" type="button" disabled>Upgrade (coming soon)</button></div>
   <button class="wide" id="logout" type="button">Sign out</button>
  </div>
 </div>
@@ -773,8 +788,8 @@ const NB=.3,NCOS=Math.cos(NB);
 function frame(now){
  if(window.__pgOn){last=now;requestAnimationFrame(frame);return;}
  if(intro.hold){last=now;requestAnimationFrame(frame);return;}
- const dt=Math.min(.05,(now-last)/1000);last=now;legT+=((user&&!legHold?1:0)-legT)*Math.min(1,dt*4);const homeNow=!focus&&!pageOpen&&chat.hidden;if(homeNow!==lastHome){lastHome=homeNow;document.body.classList.toggle('at-home',homeNow);}const shownNow=!chat.hidden;if(shownNow!==lastShown){lastShown=shownNow;document.body.classList.toggle('chat-shown',shownNow);}
- if(pageOpen){requestAnimationFrame(frame);return;}
+ const dt=Math.min(.05,(now-last)/1000);last=now;legT+=((user&&!legHold?1:0)-legT)*Math.min(1,dt*4);const homeNow=user?(!pageOpen&&!window.__pgOn):(!focus&&!pageOpen&&chat.hidden);if(homeNow!==lastHome){lastHome=homeNow;document.body.classList.toggle('at-home',homeNow);}const shownNow=!chat.hidden;if(shownNow!==lastShown){lastShown=shownNow;document.body.classList.toggle('chat-shown',shownNow);}
+ if(pageOpen||document.body.classList.contains('no-earth')){requestAnimationFrame(frame);return;}
  T+=dt;
  fxLevel+=((fxOn?1:0)-fxLevel)*Math.min(1,dt*1.5);
  if(zStart>=0){const p=Math.min(1,(now-zStart)/1000/ZDUR),e=p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;zt=zFrom+(zTo-zFrom)*e;tilt=tiltA+(tiltB-tiltA)*e;if(zTo===1)rot=rotA+(rotB-rotA)*e;if(p>=1){zStart=-1;if(zTo===0)fadeFocus=null;}}
@@ -911,25 +926,28 @@ const FX={
 };
 function goHome(){if(!chat.hidden)closeChat(false);if(menuIsOpen)closeMenu(false);if(pageOpen)location.hash='';if(focus)closeCity();}
 document.querySelectorAll('[data-home]').forEach(b=>b.addEventListener('click',()=>goHome()));
+document.querySelectorAll('[data-pg]').forEach(b=>b.addEventListener('click',()=>{const f=window.__fava;if(!f||!f.ready())return;if(menuIsOpen)closeMenu(false);if(pageOpen)location.hash='';f.open(false,b);}));
 document.querySelector('.wordmark').addEventListener('click',e=>{if(pageOpen||focus||menuIsOpen||(!chat.hidden&&chat.classList.contains('open'))){goHome();return;}if(!finePointer||W<=700)return;const l=e.target.closest('.ltr');if(l)FX[l.dataset.fx](l);});
 if(!finePointer)document.body.classList.add('touch');
 
 const loginBtn=el('loginBtn'),email=el('email'),pwd=el('pwd'),err=el('loginErr'),note=el('loginNote');let openModal=null,lastFocus=null;
 function showModal(m){lastFocus=document.activeElement;openModal=m;m.hidden=false;const f=m.querySelector('input,button:not(.close)');if(f)f.focus();}
-function hideModal(){if(!openModal)return;openModal.hidden=true;openModal=null;(lastFocus&&document.body.contains(lastFocus)?lastFocus:loginBtn).focus();}
+function hideModal(){if(!openModal)return;const wasLogin=openModal.id==='login';openModal.hidden=true;openModal=null;if(wasLogin&&!user){location.href='index.html';return;}(lastFocus&&document.body.contains(lastFocus)?lastFocus:loginBtn).focus();}
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>{pendingBot=null;hideModal();}));
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m){pendingBot=null;hideModal();}}));
 let loginMode='login';
 function setLoginMode(m){loginMode=m;el('loginTitle').textContent=m==='join'?'Join FAVA':'Log in';el('loginGo').textContent=m==='join'?'Create account':'Log in';el('footText').textContent=m==='join'?'Already have an account?':'New here?';el('create').textContent=m==='join'?'Log in':'Create an account';pwd.setAttribute('autocomplete',m==='join'?'new-password':'current-password');}
 function showLogin(why,mode){setLoginMode(mode||'login');el('loginWhy').textContent=why||'';note.textContent='';err.textContent='';showModal(el('login'));}
-function setUser(u){user=u;document.body.classList.toggle('signed-in',!!u);document.body.classList.toggle('paid',!!(u&&u.paid));if(typeof syncUi==='function')syncUi();renderLegend();if(focus)renderPanel();if(!u&&pageOpen)location.hash='';if(!u)holdLegend(false);chatAccountChanged();}
-function accountClick(){if(user){el('dashWho').textContent='Signed in as '+user.email;showModal(el('dash'));}else showLogin('','login');}
+function setUser(u){user=u;document.body.classList.toggle('signed-in',!!u);document.body.classList.toggle('home-mode',!!u);document.body.classList.toggle('paid',!!(u&&u.paid));if(typeof syncUi==='function')syncUi();renderLegend();if(focus)renderPanel();if(!u&&pageOpen)location.hash='';if(!u)holdLegend(false);chatAccountChanged();if(!u&&!chat.hidden)closeChat(false,true);setTimeout(measureNav,0);}
+function dashTab(k){document.querySelectorAll('.dtabs button').forEach(b=>b.classList.toggle('on',b.dataset.dt===k));el('dp-p').hidden=k!=='p';el('dp-b').hidden=k!=='b';}
+document.querySelectorAll('.dtabs button').forEach(b=>b.addEventListener('click',()=>dashTab(b.dataset.dt)));
+function accountClick(){if(user){el('dashWho').textContent='Signed in as '+user.email;el('dEmail').textContent=user.email;el('dPlan').textContent=el('dPlan2').textContent=user.paid?'Paid':'Free';dashTab('p');showModal(el('dash'));}else showLogin('','login');}
 loginBtn.addEventListener('click',accountClick);
 const menu=el('menu'),menuBtn=el('menuBtn');let menuTimer=0,menuIsOpen=false;
 function syncUi(){const on=!!user&&!legHold;document.body.classList.toggle('ui-in',on);const lab=on?'Dashboard':'Log in';if(loginBtn.textContent!==lab){loginBtn.textContent=lab;el('menuLogin').textContent=lab;loginBtn.classList.remove('swap');void loginBtn.offsetWidth;loginBtn.classList.add('swap');}syncMenuBtn();}
 function syncMenuBtn(){if(menuIsOpen){menuBtn.innerHTML=ICON.x;menuBtn.classList.add('icon');menuBtn.setAttribute('aria-label','Close menu');}else if(user&&!legHold){menuBtn.textContent='Menu';menuBtn.classList.remove('icon');menuBtn.removeAttribute('aria-label');}else{menuBtn.innerHTML=ICON.menu;menuBtn.classList.add('icon');menuBtn.setAttribute('aria-label','Open menu');}menuBtn.setAttribute('aria-expanded',String(menuIsOpen));}
 const menuItems=()=>[...menu.querySelectorAll('.mitem')].filter(n=>n.offsetParent!==null);
-function openMenu(){if(!chat.hidden){clearTimeout(chatTimer);setTimeout(()=>{if(!menuIsOpen)return;chat.classList.add('instant');chat.classList.remove('open');chat.hidden=true;document.body.classList.remove('chat-open');requestAnimationFrame(()=>chat.classList.remove('instant'));},320);}clearTimeout(menuTimer);menuIsOpen=true;document.body.classList.add('menu-open');menu.hidden=false;syncMenuBtn();requestAnimationFrame(()=>requestAnimationFrame(()=>menu.classList.add('open')));setTimeout(()=>{const f=menuItems()[0];if(f)f.focus({preventScroll:true});},50);}
+function openMenu(){if(!chat.hidden&&!user){clearTimeout(chatTimer);setTimeout(()=>{if(!menuIsOpen)return;chat.classList.add('instant');chat.classList.remove('open');chat.hidden=true;document.body.classList.remove('chat-open');requestAnimationFrame(()=>chat.classList.remove('instant'));},320);}clearTimeout(menuTimer);menuIsOpen=true;document.body.classList.add('menu-open');menu.hidden=false;syncMenuBtn();requestAnimationFrame(()=>requestAnimationFrame(()=>menu.classList.add('open')));setTimeout(()=>{const f=menuItems()[0];if(f)f.focus({preventScroll:true});},50);}
 function closeMenu(back){if(!menuIsOpen)return;menuIsOpen=false;document.body.classList.remove('menu-open');menu.classList.remove('open');syncMenuBtn();menuTimer=setTimeout(()=>{menu.hidden=true;},reduce?0:300);if(back!==false)menuBtn.focus({preventScroll:true});}
 menuBtn.addEventListener('click',()=>{menuIsOpen?closeMenu():openMenu();});
 el('menuLogin').addEventListener('click',()=>{closeMenu(false);accountClick();});
@@ -948,8 +966,9 @@ function openChat(bot){clearTimeout(chatTimer);clearTimeout(chatLoadTimer);if(bo
  if(menuIsOpen){chatReturn=menuBtn;chat.classList.add('instant','open');closeMenu(false);requestAnimationFrame(()=>requestAnimationFrame(()=>{chat.classList.remove('instant');ld.classList.add('show');}));}
  else requestAnimationFrame(()=>requestAnimationFrame(()=>{chat.classList.add('open');ld.classList.add('show');}));
  chatLoadTimer=setTimeout(()=>{ld.classList.remove('show');chat.classList.remove('inner-hidden');chatLoadTimer=setTimeout(()=>{ld.hidden=true;stopOrb();},reduce?0:460);setTimeout(()=>chatInput.focus({preventScroll:true}),60);},reduce?300:1400);}
-function closeChat(back){if(chat.hidden)return;holdLegend(false);if(vOn)stopVoice(true);closeHist(true);closeBotMenu();closeChatSet();closeInfo();hideChatLoader();chat.classList.remove('open','inner-hidden');document.body.classList.remove('chat-open');chatTimer=setTimeout(()=>{chat.hidden=true;},reduce?0:300);if(back!==false&&chatReturn&&document.body.contains(chatReturn)&&chatReturn.offsetParent!==null)chatReturn.focus({preventScroll:true});}
-document.querySelectorAll('[data-chat]').forEach(b=>b.addEventListener('click',()=>{chat.hidden||!chat.classList.contains('open')?openChat():closeChat();}));
+function quietChat(){chat.classList.add('instant','open');chat.classList.remove('inner-hidden');chat.hidden=false;document.body.classList.add('chat-open');if(!chatBot)setChatBot(resumeBot());if(!chat.classList.contains('has-msgs'))el('chatHello').textContent=greeting();requestAnimationFrame(()=>requestAnimationFrame(()=>chat.classList.remove('instant')));}
+function closeChat(back,force){if(chat.hidden)return;if(user&&!force)return;holdLegend(false);if(vOn)stopVoice(true);closeHist(true);closeBotMenu();closeChatSet();closeInfo();hideChatLoader();chat.classList.remove('open','inner-hidden');document.body.classList.remove('chat-open');chatTimer=setTimeout(()=>{chat.hidden=true;},reduce?0:300);if(back!==false&&chatReturn&&document.body.contains(chatReturn)&&chatReturn.offsetParent!==null)chatReturn.focus({preventScroll:true});}
+document.querySelectorAll('[data-chat]').forEach(b=>b.addEventListener('click',()=>{if(user){if(menuIsOpen)closeMenu(false);if(pageOpen)location.hash='';if(chat.hidden)openChat();return;}chat.hidden||!chat.classList.contains('open')?openChat():closeChat();}));
 el('chatClose').addEventListener('click',()=>closeChat());
 el('addImg').addEventListener('click',()=>el('fileIn').click());
 function syncSend(){el('sendBtn').classList.toggle('idle',!chatInput.value.trim()&&!pendingImgs.length);}
@@ -1177,17 +1196,15 @@ document.addEventListener('keydown',e=>{if(vOn&&e.key==='Enter'&&!(e.target.clos
 voiceStopBtn.addEventListener('click',()=>stopVoice(true));
 function holdLegend(v){legHold=v;document.body.classList.toggle('hold-legend',v);if(typeof syncUi==='function')syncUi();}
 function previewSignIn(addr){err.textContent='';const toChat=loginMode==='join'&&!pendingBot;holdLegend(true);setUser({email:addr,botId:MOCK.me,paid:false});note.textContent="Preview only. Sign-in isn't connected yet, so this just shows the signed-in view.";setTimeout(()=>{hideModal();
-  /* the loading screen covers everything for a moment: let the list slip into place underneath it, so it is simply there when you come back */
-  if(pendingBot){const b=pendingBot;pendingBot=null;openBot(b);setTimeout(()=>holdLegend(false),800);}
-  else if(toChat){openChat();setTimeout(()=>holdLegend(false),800);}
-  else holdLegend(false);},1300);}
+  if(pendingBot){const b=pendingBot;pendingBot=null;quietChat();openBot(b);setTimeout(()=>holdLegend(false),800);}
+  else{openChat();setTimeout(()=>holdLegend(false),800);}},1300);}
 el('loginGo').addEventListener('click',()=>{previewSignIn(email.value.trim()||'you@example.com');pwd.value='';});
 [email,pwd].forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();el('loginGo').click();}}));
 [email,pwd].forEach(i=>i.addEventListener('input',()=>{err.textContent='';i.removeAttribute('aria-invalid');}));
 el('google').addEventListener('click',()=>previewSignIn('you@example.com'));
 el('create').addEventListener('click',()=>{setLoginMode(loginMode==='join'?'login':'join');email.focus();});
 el('joinBtn').addEventListener('click',()=>showLogin('','join'));
-function signOut(){if(menuIsOpen)closeMenu(false);hideModal();setUser(null);}
+function signOut(){if(menuIsOpen)closeMenu(false);hideModal();setUser(null);location.href='index.html';}
 el('logout').addEventListener('click',signOut);el('signOutBtn').addEventListener('click',signOut);el('menuSignOut').addEventListener('click',signOut);
 
 const orbCv=el('orb'),octx=orbCv.getContext('2d'),ON=240;let orbRAF=0,orbT0=0,pageTimer=0,lastLine=-1;
@@ -1236,13 +1253,15 @@ function route(){const m=location.hash.match(/^#\/bot\/([a-z0-9-]+)/);if(!m){hid
 window.addEventListener('hashchange',route);
 el('bpBack').addEventListener('click',()=>{location.hash='';});
 document.addEventListener('keydown',e=>{
- if(e.key==='Escape'){if(!chat.hidden&&chat.classList.contains('open')){if(infoOpen()){closeInfo();botInfoBtn.focus();return;}if(csOpen()){closeChatSet();csBtn.focus();return;}if(botMenuOpen()){closeBotMenu();botPick.focus();return;}if(menuFor!=null){closeHistMenu();return;}if(histIsOpen()){closeHist();histBtn.focus();return;}closeChat();return;}if(menuIsOpen){closeMenu();return;}if(openModal){pendingBot=null;hideModal();}else if(pageOpen)location.hash='';else if(focus)closeCity();return;}
+ if(e.key==='Escape'){if(!chat.hidden&&chat.classList.contains('open')){if(infoOpen()){closeInfo();botInfoBtn.focus();return;}if(csOpen()){closeChatSet();csBtn.focus();return;}if(botMenuOpen()){closeBotMenu();botPick.focus();return;}if(menuFor!=null){closeHistMenu();return;}if(histIsOpen()){closeHist();histBtn.focus();return;}if(menuIsOpen){closeMenu();return;}if(openModal){pendingBot=null;hideModal();return;}closeChat();return;}if(menuIsOpen){closeMenu();return;}if(openModal){pendingBot=null;hideModal();}else if(pageOpen)location.hash='';else if(focus)closeCity();return;}
  const trap=!chat.hidden?chat:menuIsOpen?menu:openModal;
  if(e.key==='Tab'&&trap){const f=(trap===menu?[menuBtn,...menuItems()]:[...trap.querySelectorAll('button,input,textarea')]).filter(n=>!n.disabled&&n.offsetParent!==null);const first=f[0],lastEl=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();lastEl.focus();}else if(!e.shiftKey&&document.activeElement===lastEl){e.preventDefault();first.focus();}}
 });
 
 setData(MOCK);
 syncMenuBtn();
+document.querySelector('.wordmark').addEventListener('click',e=>{if(!user){e.stopImmediatePropagation();location.href='index.html';}},true);
+(function(){const A=window.__arrive||'';if(user)return;const why=A==='playground'?'Log in to enter the Playground.':A==='chat'?'Log in to start chatting.':'';showLogin(why,A==='getstarted'?'join':'login');})();
 setInterval(()=>{const mt=el('myTime'),mb=myBot();if(mt&&mb)mt.textContent=localParts(mb.tz).text;},15000);
 drop(cities[0]||{x:0,y:0,z:1},.8,2.1,1.2);
 /* ---- Connection quality: "Live" turns into "Poor connection" when the network is slow or down ---- */
@@ -1910,10 +1929,11 @@ back.addEventListener('click',()=>closePG());
 /* ---- opening: the button turns straight into a white circle that grows over the screen; closing: a soft fade back to Earth ---- */
 let btnC={x:0,y:0},follow0=false;
 const globeEl=document.getElementById('globe');
-function openPG(inst){
+function openPG(inst,orig){
  if(pgOn||busy)return;
+ back.textContent=document.body.classList.contains('home-mode')?'←  Back to Home':'←  Back to Earth';
  if(inst===true){resize();document.body.classList.add('pg-on');window.__pgOn=true;pgOn=true;pg.style.opacity='1';pg.style.transition='none';pg.style.visibility='visible';setupWorld();pg.classList.add('in');return;}
- busy=true;const w=btn.offsetWidth,h=btn.offsetHeight,cx=innerWidth/2,cy=innerHeight-30-h/2;btnC={x:cx,y:cy};
+ busy=true;const rr=orig&&orig.getBoundingClientRect?orig.getBoundingClientRect():null;const w=rr?rr.width:btn.offsetWidth,h=rr?rr.height:btn.offsetHeight,cx=rr?rr.left+rr.width/2:innerWidth/2,cy=rr?rr.top+rr.height/2:innerHeight-30-h/2;btnC={x:cx,y:cy};
  const D=2*(Math.hypot(Math.max(cx,innerWidth-cx),Math.max(cy,innerHeight-cy))+10);
  pill.innerHTML='<b>Playground</b>';pill.style.transition='none';pill.style.cssText+='left:'+cx+'px;top:'+cy+'px;width:'+w+'px;height:'+h+'px;opacity:1;';
  btn.style.transition='none';btn.style.opacity='0';btn.classList.add('go');
