@@ -416,12 +416,33 @@ body.no-earth{background:var(--navy)}
 body.no-earth #globe,body.no-earth #fxTop,body.no-earth .legend,body.no-earth .panel,body.no-earth #pgBtn,body.no-earth .live{display:none!important}
 body.no-earth:not(.signed-in) .center-nav,body.no-earth:not(.signed-in) .top-right{display:none!important}
 body.no-earth:not(.signed-in) .wordmark{cursor:pointer}
+.pgpill{display:inline-flex;align-items:center;justify-content:center;padding:10px 22px;border:1.5px solid rgba(255,255,255,.85);border-radius:999px;background:transparent;color:#fff;font:600 15px/1 Inter,system-ui,sans-serif;cursor:pointer;transition:background .2s,color .2s,transform .35s cubic-bezier(.2,.9,.2,1.3),box-shadow .25s,opacity .2s}
+.pgpill span{display:inline-block;white-space:pre}
+.pgpill:hover{background:#fff;color:#0A0D16;transform:rotate(-2deg) scale(1.07);box-shadow:0 10px 40px rgba(255,255,255,.25)}
+.pgpill:hover span{animation:pgw2 .55s cubic-bezier(.3,1.6,.5,1) calc(var(--i)*38ms)}
+@keyframes pgw2{40%{transform:translateY(-5px)}}
+.pgpill.go{opacity:0!important;pointer-events:none;transition:none!important}
+.center-nav .nav.pgpill{color:#fff;padding:8px 20px;margin-left:0}
+.center-nav .nav.pgpill:hover{color:#0A0D16}
+.hist-foot{border-top:1px solid var(--edge);padding-top:12px;margin-top:8px;display:grid;gap:12px}
+.hf-pg{width:100%}
+.hf-acct{display:flex;gap:10px;align-items:center;padding:2px 4px}
+.hf-av{width:34px;height:34px;border-radius:50%;background:#FFC2DB;color:#060C1C;display:grid;place-items:center;font-weight:600;flex:none}
+.hf-who{min-width:0}.hf-who b{display:block;font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hf-who span{font-size:12.5px;opacity:.6}
+.hf-btns{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.hf-btns button{height:38px;border-radius:10px;border:1px solid var(--edge);background:rgba(255,255,255,.05);color:var(--ink);font-size:14px;cursor:pointer}
+.hf-btns button:hover{background:rgba(255,255,255,.1)}
+body.home-mode #loginBtn{display:none!important}
+body.no-earth.pg-arrive{background:var(--pgc,#fbfbfa)!important}
+body.pg-arrive .modal{background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+body.pg-light .wordmark{color:#0A0D16}
+@media (max-width:900px),(pointer:coarse){.hist-foot .hf-pg{display:none}}
 </style>
 <script>(function(){try{var d=document.documentElement;if(/[?&]nointro/.test(location.search)||/^#\/bot\//.test(location.hash)||matchMedia("(prefers-reduced-motion: reduce)").matches||window.innerWidth<=700||!matchMedia("(hover:hover) and (pointer:fine)").matches)return;d.classList.add("intro");setTimeout(function(){if(!window.__introOn)d.classList.remove("intro")},6000)}catch(e){}})();</script>
 <script>(function(){try{var d=document.documentElement,h=location.hash,go='',col='',a='';
 try{go=sessionStorage.getItem('fava-go')||'';col=sessionStorage.getItem('fava-col')||'';sessionStorage.removeItem('fava-go');sessionStorage.removeItem('fava-col');}catch(e){}
 if(/^#(signin|getstarted|playground|sales|chat)$/.test(h)){a=h.slice(1);}
-window.__arrive=a||go;
+window.__arrive=a||go;window.__arriveCol=col;
 d.classList.remove('intro');
 var ov=null;
 if(go){ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;z-index:2147483000;background:'+(col||'#060C1C')+';opacity:1;transition:opacity .9s ease';d.appendChild(ov);}
@@ -436,7 +457,7 @@ addEventListener('load',function(){setTimeout(fade,450);});
 <canvas id="globe" role="img" tabindex="0" aria-label="A turning dotted Earth showing where the FAVA bots live and where messages come from. Use the arrow keys to turn it."></canvas>
 <header class="top">
  <h1 class="wordmark"><span class="sr-only">FAVA</span><span class="ltr" data-fx="rocket" aria-hidden="true">F</span><span class="ltr" data-fx="teleport" aria-hidden="true">A</span><span class="ltr" data-fx="star" aria-hidden="true">V</span><span class="ltr" data-fx="radar" aria-hidden="true">A</span></h1>
- <nav class="center-nav" aria-label="Main"><button class="nav homeonly" type="button" data-pg>Playground</button><button class="nav unpaid" type="button">Pricing</button><button class="nav" type="button" data-chat>Chat</button><button class="nav guest" type="button">About</button><button class="nav member" type="button">My profile</button><button class="nav member" type="button" data-settings>Settings</button><button class="nav" type="button" data-home>Home</button></nav>
+ <nav class="center-nav" aria-label="Main"><button class="nav homeonly pgpill" type="button" data-pg>Playground</button><button class="nav unpaid" type="button">Pricing</button><button class="nav" type="button" data-chat>Chat</button><button class="nav guest" type="button">About</button><button class="nav member" type="button">My profile</button><button class="nav member" type="button" data-settings>Settings</button><button class="nav" type="button" data-home>Home</button></nav>
  <div class="top-right">
   <span class="live" id="liveBadge" role="status"><span class="live-dot" aria-hidden="true"></span><span class="spin" aria-hidden="true"></span><span id="liveText">Live</span></span>
   <button class="pill" id="loginBtn" type="button">Log in</button>
@@ -514,6 +535,11 @@ addEventListener('load',function(){setTimeout(fade,450);});
   <div class="hist-top"><h3>Chats</h3><button class="round-btn" id="histClose" type="button" aria-label="Close chat history"></button></div>
   <button class="hist-new" id="histNew" type="button"><span id="histNewIcon" aria-hidden="true"></span>New chat</button>
   <div class="hist-list" id="histList" role="list"></div>
+  <div class="hist-foot" id="histFoot">
+   <button class="pgpill hf-pg" type="button" data-pg>Playground</button>
+   <div class="hf-acct"><div class="hf-av" id="hfAv">F</div><div class="hf-who"><b id="hfEmail"></b><span id="hfPlan">Free plan</span></div></div>
+   <div class="hf-btns"><button type="button" data-dash="p">Profile</button><button type="button" data-dash="b">Billing</button><button type="button" data-dash="s">Settings</button><button type="button" id="hfOut">Sign out</button></div>
+  </div>
   <div class="hist-menu" id="histMenu" role="menu" hidden></div>
   <div class="hist-note" id="histNote" role="alert" hidden></div>
  </aside>
@@ -564,9 +590,14 @@ addEventListener('load',function(){setTimeout(fade,450);});
   <button class="close" data-close type="button" aria-label="Close">×</button>
   <h2 id="dashTitle">Dashboard</h2>
   <p class="who-line" id="dashWho"></p>
-  <div class="dtabs" role="tablist"><button class="on" type="button" data-dt="p" role="tab">Profile</button><button type="button" data-dt="b" role="tab">Billing</button></div>
+  <div class="dtabs" role="tablist"><button class="on" type="button" data-dt="p" role="tab">Profile</button><button type="button" data-dt="b" role="tab">Billing</button><button type="button" data-dt="s" role="tab">Settings</button></div>
   <div class="dpane" id="dp-p"><div class="drow"><span>Email</span><b id="dEmail"></b></div><div class="drow"><span>Plan</span><b id="dPlan">Free</b></div><div class="drow"><span>Name</span><b>Not set</b></div><p class="soon">Profile editing is coming soon.</p></div>
   <div class="dpane" id="dp-b" hidden><div class="drow"><span>Current plan</span><b id="dPlan2">Free</b></div><div class="drow"><span>Payment method</span><b>None</b></div><div class="drow"><span>Invoices</span><b>None yet</b></div><button class="wide" type="button" disabled>Upgrade (coming soon)</button></div>
+  <div class="dpane" id="dp-s" hidden>
+   <div class="setting"><div><p class="set-name">Quicker replies</p><p class="set-desc">Shorter answers that arrive sooner.</p></div><button class="switch" id="dsQuick" type="button" role="switch" aria-checked="false"><span></span></button></div>
+   <div class="setting"><div><p class="set-name">Read replies aloud</p><p class="set-desc">Hear each answer spoken back to you.</p></div><button class="switch" id="dsSpeak" type="button" role="switch" aria-checked="false"><span></span></button></div>
+   <div class="setting"><div><p class="set-name">Save my chats</p><p class="set-desc">Keep conversations so you can come back to them.</p></div><button class="switch" id="dsSave" type="button" role="switch" aria-checked="true"><span></span></button></div>
+  </div>
   <button class="wide" id="logout" type="button">Sign out</button>
  </div>
 </div>
@@ -926,7 +957,8 @@ const FX={
 };
 function goHome(){if(!chat.hidden)closeChat(false);if(menuIsOpen)closeMenu(false);if(pageOpen)location.hash='';if(focus)closeCity();}
 document.querySelectorAll('[data-home]').forEach(b=>b.addEventListener('click',()=>goHome()));
-document.querySelectorAll('[data-pg]').forEach(b=>b.addEventListener('click',()=>{const f=window.__fava;if(!f||!f.ready())return;if(menuIsOpen)closeMenu(false);if(pageOpen)location.hash='';f.open(false,b);}));
+document.querySelectorAll('.pgpill').forEach(b=>{b.innerHTML=[...b.textContent].map((c,i)=>'<span style="--i:'+i+'">'+c+'</span>').join('');});
+document.querySelectorAll('[data-pg]').forEach(b=>b.addEventListener('click',()=>{const f=window.__fava;if(!f||!f.ready())return;if(menuIsOpen)closeMenu(false);if(pageOpen)location.hash='';f.open(false,b);if(b.closest('#hist'))setTimeout(()=>closeHist(true),1250);}));
 document.querySelector('.wordmark').addEventListener('click',e=>{if(pageOpen||focus||menuIsOpen||(!chat.hidden&&chat.classList.contains('open'))){goHome();return;}if(!finePointer||W<=700)return;const l=e.target.closest('.ltr');if(l)FX[l.dataset.fx](l);});
 if(!finePointer)document.body.classList.add('touch');
 
@@ -938,8 +970,12 @@ document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if
 let loginMode='login';
 function setLoginMode(m){loginMode=m;el('loginTitle').textContent=m==='join'?'Join FAVA':'Log in';el('loginGo').textContent=m==='join'?'Create account':'Log in';el('footText').textContent=m==='join'?'Already have an account?':'New here?';el('create').textContent=m==='join'?'Log in':'Create an account';pwd.setAttribute('autocomplete',m==='join'?'new-password':'current-password');}
 function showLogin(why,mode){setLoginMode(mode||'login');el('loginWhy').textContent=why||'';note.textContent='';err.textContent='';showModal(el('login'));}
-function setUser(u){user=u;document.body.classList.toggle('signed-in',!!u);document.body.classList.toggle('home-mode',!!u);document.body.classList.toggle('paid',!!(u&&u.paid));if(typeof syncUi==='function')syncUi();renderLegend();if(focus)renderPanel();if(!u&&pageOpen)location.hash='';if(!u)holdLegend(false);chatAccountChanged();if(!u&&!chat.hidden)closeChat(false,true);setTimeout(measureNav,0);}
-function dashTab(k){document.querySelectorAll('.dtabs button').forEach(b=>b.classList.toggle('on',b.dataset.dt===k));el('dp-p').hidden=k!=='p';el('dp-b').hidden=k!=='b';}
+function setUser(u){user=u;document.body.classList.toggle('signed-in',!!u);document.body.classList.toggle('home-mode',!!u);document.body.classList.toggle('paid',!!(u&&u.paid));if(typeof syncUi==='function')syncUi();renderLegend();if(focus)renderPanel();if(!u&&pageOpen)location.hash='';if(!u)holdLegend(false);chatAccountChanged();if(u){el('hfEmail').textContent=u.email;el('hfAv').textContent=(u.email[0]||'F').toUpperCase();el('hfPlan').textContent=u.paid?'Paid plan':'Free plan';}if(!u&&!chat.hidden)closeChat(false,true);setTimeout(measureNav,0);}
+function syncDS(){[['dsQuick','csQuick'],['dsSpeak','csSpeak'],['dsSave','csSave']].forEach(([a,b])=>el(a).setAttribute('aria-checked',el(b).getAttribute('aria-checked')||'false'));}
+[['dsQuick','csQuick'],['dsSpeak','csSpeak'],['dsSave','csSave']].forEach(([a,b])=>el(a).addEventListener('click',()=>{el(b).click();syncDS();}));
+function dashTab(k){document.querySelectorAll('.dtabs button').forEach(b=>b.classList.toggle('on',b.dataset.dt===k));el('dp-p').hidden=k!=='p';el('dp-b').hidden=k!=='b';el('dp-s').hidden=k!=='s';if(k==='s')syncDS();}
+document.querySelectorAll('[data-dash]').forEach(b=>b.addEventListener('click',()=>{closeHist(true);accountClick();dashTab(b.dataset.dash);}));
+el('hfOut').addEventListener('click',()=>{closeHist(true);signOut();});
 document.querySelectorAll('.dtabs button').forEach(b=>b.addEventListener('click',()=>dashTab(b.dataset.dt)));
 function accountClick(){if(user){el('dashWho').textContent='Signed in as '+user.email;el('dEmail').textContent=user.email;el('dPlan').textContent=el('dPlan2').textContent=user.paid?'Paid':'Free';dashTab('p');showModal(el('dash'));}else showLogin('','login');}
 loginBtn.addEventListener('click',accountClick);
@@ -1195,8 +1231,11 @@ document.addEventListener('click',e=>{if(performance.now()<swallowUntil){swallow
 document.addEventListener('keydown',e=>{if(vOn&&e.key==='Enter'&&!(e.target.closest&&e.target.closest('#voiceStop'))){e.preventDefault();stopVoice(false);}});
 voiceStopBtn.addEventListener('click',()=>stopVoice(true));
 function holdLegend(v){legHold=v;document.body.classList.toggle('hold-legend',v);if(typeof syncUi==='function')syncUi();}
-function previewSignIn(addr){err.textContent='';const toChat=loginMode==='join'&&!pendingBot;holdLegend(true);setUser({email:addr,botId:MOCK.me,paid:false});note.textContent="Preview only. Sign-in isn't connected yet, so this just shows the signed-in view.";setTimeout(()=>{hideModal();
+function previewSignIn(addr){err.textContent='';const toChat=loginMode==='join'&&!pendingBot;holdLegend(true);setUser({email:addr,botId:MOCK.me,paid:false});note.textContent="Preview only. Sign-in isn't connected yet, so this just shows the signed-in view.";setTimeout(()=>{const goPg=!pendingBot&&window.__arrive==='playground';const rc=goPg?el('loginGo').getBoundingClientRect():null;hideModal();
   if(pendingBot){const b=pendingBot;pendingBot=null;quietChat();openBot(b);setTimeout(()=>holdLegend(false),800);}
+  else if(goPg){window.__arrive='';const f=window.__fava,t0=Date.now();
+   (function w(){if(f&&f.ready()){f.open(false,{getBoundingClientRect:()=>rc});setTimeout(quietChat,1150);setTimeout(()=>{document.body.classList.remove('pg-arrive','pg-light');holdLegend(false);},1500);}
+    else if(Date.now()-t0<6000)setTimeout(w,150);else{document.body.classList.remove('pg-arrive','pg-light');openChat();setTimeout(()=>holdLegend(false),800);}})();}
   else{openChat();setTimeout(()=>holdLegend(false),800);}},1300);}
 el('loginGo').addEventListener('click',()=>{previewSignIn(email.value.trim()||'you@example.com');pwd.value='';});
 [email,pwd].forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();el('loginGo').click();}}));
@@ -1261,7 +1300,8 @@ document.addEventListener('keydown',e=>{
 setData(MOCK);
 syncMenuBtn();
 document.querySelector('.wordmark').addEventListener('click',e=>{if(!user){e.stopImmediatePropagation();location.href='index.html';}},true);
-(function(){const A=window.__arrive||'';if(user)return;const why=A==='playground'?'Log in to enter the Playground.':A==='chat'?'Log in to start chatting.':'';showLogin(why,A==='getstarted'?'join':'login');})();
+(function(){const A=window.__arrive||'';if(user)return;const why=A==='playground'?'Log in to enter the Playground.':A==='chat'?'Log in to start chatting.':'';if(A==='playground'){const c=window.__arriveCol||'#fbfbfa';document.body.classList.add('pg-arrive');document.body.style.setProperty('--pgc',c);if(/^#fbfbfa$/i.test(c))document.body.classList.add('pg-light');}
+showLogin(why,A==='getstarted'?'join':'login');})();
 setInterval(()=>{const mt=el('myTime'),mb=myBot();if(mt&&mb)mt.textContent=localParts(mb.tz).text;},15000);
 drop(cities[0]||{x:0,y:0,z:1},.8,2.1,1.2);
 /* ---- Connection quality: "Live" turns into "Poor connection" when the network is slow or down ---- */
@@ -1935,14 +1975,15 @@ function openPG(inst,orig){
  if(inst===true){resize();document.body.classList.add('pg-on');window.__pgOn=true;pgOn=true;pg.style.opacity='1';pg.style.transition='none';pg.style.visibility='visible';setupWorld();pg.classList.add('in');return;}
  busy=true;const rr=orig&&orig.getBoundingClientRect?orig.getBoundingClientRect():null;const w=rr?rr.width:btn.offsetWidth,h=rr?rr.height:btn.offsetHeight,cx=rr?rr.left+rr.width/2:innerWidth/2,cy=rr?rr.top+rr.height/2:innerHeight-30-h/2;btnC={x:cx,y:cy};
  const D=2*(Math.hypot(Math.max(cx,innerWidth-cx),Math.max(cy,innerHeight-cy))+10);
- pill.innerHTML='<b>Playground</b>';pill.style.transition='none';pill.style.cssText+='left:'+cx+'px;top:'+cy+'px;width:'+w+'px;height:'+h+'px;opacity:1;';
+ const tilt=!!(orig&&orig.matches&&orig.matches(':hover'));if(orig&&orig.classList)orig.classList.add('go');
+ pill.innerHTML='<b>Playground</b>';pill.style.transition='none';pill.style.cssText+='left:'+cx+'px;top:'+cy+'px;width:'+w+'px;height:'+h+'px;opacity:1;background:#fff;transform:translate(-50%,-50%)'+(tilt?' rotate(-2deg)':'')+';';
  btn.style.transition='none';btn.style.opacity='0';btn.classList.add('go');
  void pill.offsetWidth;
  requestAnimationFrame(()=>{pill.querySelector('b').style.opacity='0';});
  if(DARK){pill.style.transition='background .32s ease';requestAnimationFrame(()=>{pill.style.background='#25272d';});}
- setTimeout(()=>{pill.style.transition='width 1.05s cubic-bezier(.65,0,.2,1),height 1.05s cubic-bezier(.65,0,.2,1),background .32s ease';pill.style.width=D+'px';pill.style.height=D+'px';},200);
+ setTimeout(()=>{pill.style.transition='width 1.05s cubic-bezier(.65,0,.2,1),height 1.05s cubic-bezier(.65,0,.2,1),transform .5s ease,background .32s ease';pill.style.width=D+'px';pill.style.height=D+'px';pill.style.transform='translate(-50%,-50%)';if(!DARK)pill.style.background='#fbfbfa';},200);
  setTimeout(()=>{resize();document.body.classList.add('pg-on');window.__pgOn=true;pgOn=true;pg.style.opacity='1';pg.style.transition='none';pg.style.visibility='visible';setupWorld();},1130);
- setTimeout(()=>{pill.style.opacity='0';pill.style.transition='none';pill.style.background='';pg.classList.add('in');busy=false;btn.style.transition='';btn.style.opacity='';},1300);
+ setTimeout(()=>{pill.style.opacity='0';pill.style.transition='none';pill.style.background='';pg.classList.add('in');busy=false;btn.style.transition='';btn.style.opacity='';if(orig&&orig.classList)orig.classList.remove('go');},1300);
 }
 window.__fava={open:openPG,ready:()=>!!(loaded&&bots.length>0&&!pgOn&&!busy)};
 function setupWorld(){
