@@ -436,6 +436,147 @@ body.home-mode #loginBtn{display:none!important}
 body.no-earth.pg-arrive{background:var(--pgc,#fbfbfa)!important}
 body.pg-arrive .modal{background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 body.pg-arrive .wordmark{display:none!important}
+/* ===== docked sidebar (desktop) ===== */
+.side-logo{font-size:21px;font-weight:700;letter-spacing:-.03em;padding-left:6px}
+.side-nav{display:grid;gap:2px;margin:2px 0 10px}
+.side-item{display:flex;align-items:center;gap:12px;width:100%;height:42px;padding:0 12px;border:0;border-radius:11px;background:none;color:var(--ink);font:500 15px var(--font);text-align:left;cursor:pointer;transition:background .15s}
+.side-item:hover{background:rgba(255,255,255,.07)}
+.side-item.on{background:rgba(255,255,255,.11)}
+.side-item svg{flex:none;opacity:.9}
+.side-item .chv{margin-left:auto;opacity:.55}
+.side-item.acct{height:54px}
+.side-item .hf-av{width:32px;height:32px;font-size:14px}
+.side-item .hf-who{flex:1;min-width:0}
+.side-item .hf-who b{font-size:14px}
+.side-pg{width:100%;margin:2px 0 12px}
+.hist-new{margin-bottom:4px}
+.side-sec{margin:12px 12px 4px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint)}
+.side-bottom{border-top:1px solid var(--edge);margin-top:8px;padding-top:8px;display:grid;gap:2px}
+.side-pop{position:fixed;z-index:40;width:264px;padding:8px;border-radius:14px;background:#10162B;border:1px solid var(--edge-strong);box-shadow:0 14px 40px rgba(0,0,0,.55);animation:popIn .14s ease}
+.side-pop[hidden]{display:none}
+.side-pop .pop-row{display:flex;align-items:center;gap:12px;width:100%;height:40px;padding:0 10px;border:0;border-radius:9px;background:none;color:var(--ink);font:500 14.5px var(--font);text-align:left;cursor:pointer}
+.side-pop .pop-row:hover{background:rgba(255,255,255,.08)}
+.side-pop .pop-row.danger{color:#FF8A80}
+.side-pop hr{border:0;border-top:1px solid var(--edge);margin:6px 4px}
+.side-pop .pop-set{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 10px}
+.side-pop .pop-set span{font-size:14.5px;font-weight:500}
+.side-pop .pop-head{padding:6px 10px 8px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint)}
+.switch.sm{width:38px;height:22px}.switch.sm span{top:3px;left:3px;width:16px;height:16px}.switch.sm[aria-checked="true"] span{transform:translateX(16px)}
+@media (min-width:901px) and (hover:hover) and (pointer:fine){
+ body.home-mode .top{display:none!important}
+ body.side-docked .hist{width:280px;transform:none;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+ body.side-docked.side-collapsed .hist{transform:translateX(-102%)}
+ body.side-docked:not(.side-collapsed) .chat{padding-left:280px}
+ body.side-docked:not(.side-collapsed){--sidew:280px}
+ body.side-docked:not(.side-collapsed) .chat-hist{display:none}
+ body.side-docked .hist-scrim{display:none!important}
+ body.side-docked #chatSetBtn{display:none}
+ .chat.inner-hidden .hist{opacity:0}
+ .hist{transition:opacity .3s ease,transform .28s cubic-bezier(.2,.8,.2,1)}
+ .composer .pick-group{opacity:0;pointer-events:none;transition:opacity .18s ease}
+ .composer:focus-within .pick-group{opacity:1;pointer-events:auto}
+}
+@media (max-width:900px),(pointer:coarse){.side-pg{display:none}}
+/* ===== charts ===== */
+#charts{position:absolute;top:0;right:0;bottom:0;left:var(--sidew,0px);z-index:5;display:none;flex-direction:column;background:var(--navy);color:var(--ink);font-family:var(--font)}
+body.view-charts #charts{display:flex}
+body.view-charts .chat-inner{display:none}
+#chTop{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;padding:12px 18px 10px;border-bottom:1px solid var(--edge)}
+body:not(.side-docked) #chTop,body.side-collapsed #chTop{padding-left:76px}
+.ch-sym{display:flex;align-items:baseline;gap:10px;margin-right:6px}
+#chSym{font-size:18px;font-weight:650;letter-spacing:-.02em}
+#chPrice{font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
+#chChg{font-size:13px;font-weight:500}
+.ch-src{font-size:11.5px;color:var(--faint);letter-spacing:.02em}
+#chTf{display:flex;gap:2px;padding:3px;border-radius:10px;background:rgba(255,255,255,.05)}
+#chTf button,.ch-btn{height:30px;padding:0 10px;border:0;border-radius:8px;background:none;color:var(--muted);font:600 13px var(--font);cursor:pointer;transition:background .15s,color .15s}
+#chTf button:hover,.ch-btn:hover{color:var(--ink);background:rgba(255,255,255,.07)}
+#chTf button.on{background:rgba(255,255,255,.14);color:var(--ink)}
+#chCustom{width:112px;height:30px;padding:0 10px;border-radius:8px;border:1px solid var(--edge);background:rgba(255,255,255,.04);color:var(--ink);font:500 13px var(--font);outline:none}
+#chCustom::placeholder{color:var(--faint)}#chCustom:focus{border-color:var(--edge-strong)}#chCustom.on{border-color:var(--bot)}
+.ch-btn{background:rgba(255,255,255,.05)}
+.ch-spacer{flex:1}
+.ch-menuwrap{position:relative}
+.ch-menu{position:absolute;top:36px;right:0;z-index:20;width:270px;padding:8px;border-radius:14px;background:#10162B;border:1px solid var(--edge-strong);box-shadow:0 14px 40px rgba(0,0,0,.55)}
+.ch-menu[hidden]{display:none}
+.ch-opt{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 8px;font-size:14px}
+.ch-opt .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:9px}
+.ch-opt-r{display:flex;align-items:center;gap:8px}
+.ch-x{width:22px;height:22px;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:var(--muted);font-size:15px;line-height:1;cursor:pointer}
+.ch-add{display:flex;gap:6px;padding:8px 6px 4px;border-top:1px solid var(--edge);margin-top:6px}
+.ch-add select,.ch-add input,.ch-in{height:32px;border-radius:8px;border:1px solid var(--edge);background:rgba(255,255,255,.05);color:var(--ink);font:500 13px var(--font);padding:0 8px;outline:none;min-width:0}
+.ch-add input{flex:1;width:70px}.ch-add button{height:32px;padding:0 12px;border:0;border-radius:8px;background:var(--bot);color:#1a0612;font:600 13px var(--font);cursor:pointer}
+#chBody{flex:1;min-height:0;display:flex}
+#chTools{width:46px;flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0;border-right:1px solid var(--edge)}
+#chTools button{width:34px;height:34px;display:grid;place-items:center;border:0;border-radius:9px;background:none;color:var(--muted);cursor:pointer}
+#chTools button:hover{background:rgba(255,255,255,.08);color:var(--ink)}
+#chTools button.on{background:rgba(255,116,177,.18);color:var(--bot)}
+#chTools hr{width:24px;border:0;border-top:1px solid var(--edge);margin:4px 0}
+#chMain{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}
+#chInfo{display:flex;flex-wrap:wrap;gap:4px 16px;padding:8px 14px 0;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;min-height:28px}
+#chOHLC{display:flex;gap:12px}
+#chPlot{position:relative;flex:1;min-height:0}
+#chCanvas{position:absolute;inset:0;touch-action:none;cursor:crosshair;display:block}
+#chTip{position:absolute;z-index:5;max-width:190px;padding:8px 10px;border-radius:10px;background:#10162B;border:1px solid var(--edge-strong);font-size:12px;line-height:1.5;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+#chTip[hidden]{display:none}
+#chStatus{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:6;padding:7px 14px;border-radius:999px;background:#10162B;border:1px solid var(--edge-strong);font-size:13px}
+#chStatus[hidden],#chBanner[hidden]{display:none}
+#chBanner{margin:8px 14px 0;padding:8px 12px;border-radius:10px;background:rgba(240,85,106,.14);border:1px solid rgba(240,85,106,.4);color:#FFB0B8;font-size:13px}
+#chPanel{width:300px;flex:none;border-left:1px solid var(--edge);display:flex;flex-direction:column;min-height:0}
+#charts.no-panel #chPanel{display:none}
+#chPTabs{display:flex;gap:2px;padding:10px 12px 0}
+#chPTabs button{flex:1;height:34px;border:0;border-radius:9px;background:none;color:var(--muted);font:600 13px var(--font);cursor:pointer}
+#chPTabs button.on{background:rgba(255,255,255,.1);color:var(--ink)}
+#chPanelBody{flex:1;min-height:0;overflow-y:auto;padding:12px 14px 18px;scrollbar-width:thin}
+#chPanelBody h4{margin:18px 0 8px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.ch-sample{margin:0 0 10px;padding:8px 10px;border-radius:10px;background:rgba(245,196,81,.1);border:1px solid rgba(245,196,81,.35);color:#F5D98A;font-size:12.5px;line-height:1.45}
+.ch-fine{margin:6px 0;font-size:12.5px;color:var(--faint)}
+.ch-kv{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--edge);font-size:14px}
+.ch-kv span{color:var(--muted)}.ch-kv b{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}.ch-kv small,.ch-tr small{font-weight:400;color:var(--muted);font-size:12px}
+.ch-buy{display:flex;gap:12px;align-items:center;padding:8px 0}
+.ch-buy .bring{flex:none;width:16px;height:16px;border-radius:50%;border:2px solid var(--buy,#22C58B);background:rgba(34,197,139,.16)}
+.ch-buy b{font-size:15px;font-variant-numeric:tabular-nums}.ch-buy em{font-style:normal;font-size:12px;color:var(--muted);margin-left:4px}.ch-buy span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.ch-fc{display:grid;grid-template-columns:42px 1fr;gap:0 8px;padding:8px 0;border-bottom:1px solid var(--edge);font-size:14px}.ch-fc small{grid-column:2;color:var(--muted);font-size:12.5px}.ch-fc span{font-weight:700}
+.ch-tr{display:grid;grid-template-columns:26px 1fr 1fr 62px;gap:6px;align-items:center;padding:9px 4px;border-bottom:1px solid var(--edge);font-size:13px;font-variant-numeric:tabular-nums;cursor:pointer}
+.ch-tr:hover:not(.head){background:rgba(255,255,255,.05)}
+.ch-tr.head{cursor:default;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+.ch-tr .sg{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:15px;line-height:1;color:#fff}
+.ch-tr .sg.b{background:#22C58B}.ch-tr .sg.s{background:#F0556A}
+.ch-in{width:100%;margin-bottom:8px;height:36px}
+.wl-row{position:relative;display:grid;grid-template-columns:1fr auto 64px 18px;gap:6px;align-items:center;padding:10px 6px;border-radius:10px;cursor:pointer;font-size:14px;font-variant-numeric:tabular-nums}
+.wl-row:hover{background:rgba(255,255,255,.06)}.wl-row.on{background:rgba(255,255,255,.1)}
+.wl-s{font-weight:650}.wl-s small{display:block;font-weight:400;font-size:11.5px;color:var(--faint)}.wl-p{text-align:right}.wl-c{text-align:right;font-size:12.5px}
+.wl-x{width:18px;height:18px;border:0;background:none;color:var(--faint);font-size:15px;cursor:pointer;opacity:0}.wl-row:hover .wl-x{opacity:1}
+@media (max-width:900px),(pointer:coarse){
+ #chBody{flex-direction:column}
+ #chTools{width:auto;flex-direction:row;border-right:0;border-bottom:1px solid var(--edge);padding:6px 10px;overflow-x:auto}
+ #chTools hr{width:0;height:20px;border-top:0;border-left:1px solid var(--edge);margin:0 4px}
+ #chMain{min-height:52vh}
+ #chPanel{width:auto;border-left:0;border-top:1px solid var(--edge);max-height:42vh}
+ #charts.no-panel #chPanel{display:none}
+ .ch-menu{right:auto;left:0}
+}
+
+@media (max-width:900px),(pointer:coarse){#chBody{overflow-y:auto}#chMain{flex:none;height:62vh}#chPanel{flex:none;max-height:none}}
+
+@media (max-width:900px),(pointer:coarse){body.view-charts .top{display:none!important}#chTf{order:5;width:100%;overflow-x:auto;scrollbar-width:none}#chTf button{flex:1 0 auto}#chTop{padding-right:14px}}
+
+#chWL{display:none;flex:1;min-height:0;overflow:auto;padding:22px 26px}
+#charts.wl #chBody{display:none}#charts.wl #chWL{display:block}
+.wl-head h3{margin:0 0 4px;font-size:20px;letter-spacing:-.02em}.wl-head p{margin:0 0 18px;font-size:13.5px;color:var(--muted)}
+.wl-t{width:100%;border-collapse:collapse;font-size:14.5px;font-variant-numeric:tabular-nums}
+.wl-t th{padding:8px 12px;text-align:left;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);font-weight:600;border-bottom:1px solid var(--edge)}
+.wl-t td{padding:14px 12px;border-bottom:1px solid var(--edge)}
+.wl-t .n{text-align:right}.wl-t td b{font-weight:650}.wl-t td small{display:block;font-size:12px;color:var(--faint);font-weight:400}
+.wl-t tbody tr{cursor:pointer}.wl-t tbody tr:hover{background:rgba(255,255,255,.05)}
+.wl-ppl{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.07);color:var(--muted);font-size:13px}
+.ch-mode{display:inline-block;margin-right:6px;padding:2px 8px;border-radius:999px;font-weight:700;font-size:11px;letter-spacing:.06em}
+.ch-mode.paper{background:rgba(245,196,81,.16);color:#F5D98A}.ch-mode.live{background:rgba(34,197,139,.16);color:#22C58B}
+.ch-note{margin:8px 0 0;font-size:12.5px;line-height:1.5;color:var(--muted)}
+.ch-tr .sg.m{background:transparent;border:2px solid #22C58B;color:#22C58B}
+@media (max-width:900px),(pointer:coarse){#chWL{padding:16px 12px}.wl-t th,.wl-t td{padding:10px 6px}.wl-t th:nth-child(3),.wl-t td:nth-child(3),.wl-t th:nth-child(4),.wl-t td:nth-child(4){display:none}}
+@media (min-width:901px){#chTf button{padding:0 8px}#chCustom{width:92px}#chTop{gap:8px 10px}}
+
 @media (max-width:900px),(pointer:coarse){.hist-foot .hf-pg{display:none}}
 </style>
 <script>(function(){try{var d=document.documentElement;if(/[?&]nointro/.test(location.search)||/^#\/bot\//.test(location.hash)||matchMedia("(prefers-reduced-motion: reduce)").matches||window.innerWidth<=700||!matchMedia("(hover:hover) and (pointer:fine)").matches)return;d.classList.add("intro");setTimeout(function(){if(!window.__introOn)d.classList.remove("intro")},6000)}catch(e){}})();</script>
@@ -457,7 +598,7 @@ addEventListener('load',function(){setTimeout(fade,450);});
 <canvas id="globe" role="img" tabindex="0" aria-label="A turning dotted Earth showing where the FAVA bots live and where messages come from. Use the arrow keys to turn it."></canvas>
 <header class="top">
  <h1 class="wordmark"><span class="sr-only">FAVA</span><span class="ltr" data-fx="rocket" aria-hidden="true">F</span><span class="ltr" data-fx="teleport" aria-hidden="true">A</span><span class="ltr" data-fx="star" aria-hidden="true">V</span><span class="ltr" data-fx="radar" aria-hidden="true">A</span></h1>
- <nav class="center-nav" aria-label="Main"><button class="nav homeonly pgpill" type="button" data-pg>Playground</button><button class="nav unpaid" type="button">Pricing</button><button class="nav" type="button" data-chat>Chat</button><button class="nav guest" type="button">About</button><button class="nav member" type="button">My profile</button><button class="nav member" type="button" data-settings>Settings</button><button class="nav" type="button" data-home>Home</button></nav>
+ <nav class="center-nav" aria-label="Main"><button class="nav unpaid" type="button">Pricing</button><button class="nav" type="button" data-chat>Chat</button><button class="nav guest" type="button">About</button><button class="nav member" type="button">My profile</button><button class="nav member" type="button" data-settings>Settings</button><button class="nav" type="button" data-home>Home</button></nav>
  <div class="top-right">
   <span class="live" id="liveBadge" role="status"><span class="live-dot" aria-hidden="true"></span><span class="spin" aria-hidden="true"></span><span id="liveText">Live</span></span>
   <button class="pill" id="loginBtn" type="button">Log in</button>
@@ -466,7 +607,7 @@ addEventListener('load',function(){setTimeout(fade,450);});
  </div>
 </header>
 <div class="menu" id="menu" hidden>
- <nav aria-label="Menu"><button class="mitem homeonly" type="button" data-pg>Playground</button><button class="mitem unpaid" type="button">Pricing</button><button class="mitem" type="button" data-chat>Chat</button><button class="mitem guest" type="button">About</button><button class="mitem member" type="button">My profile</button><button class="mitem member" type="button" data-settings>Settings</button><button class="mitem" type="button" data-home>Home</button><button class="mitem" id="menuLogin" type="button">Log in</button><button class="mitem member signout" id="menuSignOut" type="button">Sign out</button></nav>
+ <nav aria-label="Menu"><button class="mitem unpaid" type="button">Pricing</button><button class="mitem" type="button" data-chat>Chat</button><button class="mitem guest" type="button">About</button><button class="mitem member" type="button">My profile</button><button class="mitem member" type="button" data-settings>Settings</button><button class="mitem" type="button" data-home>Home</button><button class="mitem" id="menuLogin" type="button">Log in</button><button class="mitem member signout" id="menuSignOut" type="button">Sign out</button></nav>
 </div>
 <section class="legend" aria-labelledby="where">
  <div class="legend-head"><h2 id="where" class="online">Online now</h2></div>
@@ -530,15 +671,61 @@ addEventListener('load',function(){setTimeout(fade,450);});
   <p class="conn-note" id="connNote" aria-live="polite"><span class="spin" aria-hidden="true"></span>Poor connection</p>
   <p class="chat-note">Chat is a preview for now.</p>
  </div>
+ <section id="charts" aria-label="Charts">
+ <div id="chTop">
+  <div class="ch-sym"><span id="chSym">BTC / USD</span><span id="chPrice"></span><span id="chChg"></span></div>
+  <div id="chTf" role="group" aria-label="Time frame"></div>
+  <input id="chCustom" type="text" placeholder="Custom…" aria-label="Custom time frame, minimum 5 minutes" autocomplete="off" spellcheck="false">
+  <span class="ch-spacer"></span>
+  <span class="ch-menuwrap"><button class="ch-btn" id="chIndBtn" type="button">Indicators</button><div class="ch-menu" id="chIndMenu" hidden></div></span>
+  <span class="ch-menuwrap"><button class="ch-btn" id="chOptBtn" type="button">Overlays</button><div class="ch-menu" id="chOptMenu" hidden></div></span>
+  <button class="ch-btn" id="chWLBtn" type="button">Watchlist</button>
+  <button class="ch-btn" id="chPanelBtn" type="button">Panel</button>
+ </div>
+ <div id="chBody">
+  <div id="chTools" role="toolbar" aria-label="Drawing tools">
+   <button type="button" data-tool="cursor" title="Cursor"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l14 8-6 2-2 6z"/></svg></button><hr>
+   <button type="button" data-tool="trend" title="Trend line"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19L20 5"/><circle cx="4" cy="19" r="1.6"/><circle cx="20" cy="5" r="1.6"/></svg></button>
+   <button type="button" data-tool="hline" title="Horizontal line"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"/><path d="M12 9v6" opacity=".5"/></svg></button>
+   <button type="button" data-tool="rect" title="Rectangle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="6" width="16" height="12" rx="1"/></svg></button>
+   <button type="button" data-tool="fib" title="Fib retracement"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18M3 10h18M3 15h18M3 20h18"/></svg></button><hr>
+   <button type="button" id="chClear" title="Delete selected (or clear all)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
+  </div>
+  <div id="chMain">
+   <div id="chInfo"><div id="chOHLC"></div><span class="ch-src" id="chSrc">Hyperliquid · BTC perp</span></div>
+   <div id="chBanner" hidden></div>
+   <div id="chPlot"><canvas id="chCanvas"></canvas><div id="chTip" hidden></div><div id="chStatus" hidden></div></div>
+  </div>
+  <aside id="chPanel"><div id="chPTabs"><button type="button" data-ptab="account">Account</button><button type="button" data-ptab="trades">Trades</button></div><div id="chPanelBody"></div></aside>
+ </div>
+ <div id="chWL"><div class="wl-head"><h3>Global watchlist</h3><p>Everything FAVA is watching. The person icon shows how many people asked to watch each one.</p></div><div id="chWLBody"></div></div>
+</section>
  <div class="hist-scrim" id="histScrim" hidden></div>
  <aside class="hist" id="hist" aria-label="Previous chats" hidden>
-  <div class="hist-top"><h3>Chats</h3><button class="round-btn" id="histClose" type="button" aria-label="Close chat history"></button></div>
+  <div class="hist-top"><span class="side-logo">FAVA</span><button class="round-btn" id="histClose" type="button" aria-label="Close sidebar"></button></div>
+  <nav class="side-nav" aria-label="Sections">
+   <button class="side-item on" id="navChat" type="button" data-view="chat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>Chat</button>
+   <button class="side-item" id="navCharts" type="button" data-view="charts"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>Charts</button>
+  </nav>
+  <button class="pgpill side-pg" type="button" data-pg>Playground</button>
   <button class="hist-new" id="histNew" type="button"><span id="histNewIcon" aria-hidden="true"></span>New chat</button>
+  <div class="side-sec">Chats</div>
   <div class="hist-list" id="histList" role="list"></div>
-  <div class="hist-foot" id="histFoot">
-   <button class="pgpill hf-pg" type="button" data-pg>Playground</button>
-   <div class="hf-acct"><div class="hf-av" id="hfAv">F</div><div class="hf-who"><b id="hfEmail"></b><span id="hfPlan">Free plan</span></div></div>
-   <div class="hf-btns"><button type="button" data-dash="p">Profile</button><button type="button" data-dash="b">Billing</button><button type="button" data-dash="s">Settings</button><button type="button" id="hfOut">Sign out</button></div>
+  <div class="side-bottom">
+   <button class="side-item" id="sbSettings" type="button" aria-haspopup="true" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Settings<svg class="chv" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+   <button class="side-item acct" id="sbAcct" type="button" aria-haspopup="true" aria-expanded="false"><div class="hf-av" id="hfAv">F</div><div class="hf-who"><b id="hfEmail"></b><span id="hfPlan">Free plan</span></div><svg class="chv" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+  </div>
+  <div class="side-pop" id="popSet" role="menu" hidden>
+   <div class="pop-head">Chat</div>
+   <div class="pop-set"><span>Quicker replies</span><button class="switch sm" id="psQuick" type="button" role="switch" aria-checked="false"><span></span></button></div>
+   <div class="pop-set"><span>Read replies aloud</span><button class="switch sm" id="psSpeak" type="button" role="switch" aria-checked="false"><span></span></button></div>
+   <div class="pop-set"><span>Save my chats</span><button class="switch sm" id="psSave" type="button" role="switch" aria-checked="true"><span></span></button></div>
+   <hr><button class="pop-row" type="button" data-pd="s"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>All settings</button>
+  </div>
+  <div class="side-pop" id="popAcct" role="menu" hidden>
+   <button class="pop-row" type="button" data-pd="p"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Profile</button>
+   <button class="pop-row" type="button" data-pd="b"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>Billing</button>
+   <hr><button class="pop-row danger" id="hfOut" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Sign out</button>
   </div>
   <div class="hist-menu" id="histMenu" role="menu" hidden></div>
   <div class="hist-note" id="histNote" role="alert" hidden></div>
@@ -958,7 +1145,7 @@ const FX={
 function goHome(){if(!chat.hidden)closeChat(false);if(menuIsOpen)closeMenu(false);if(pageOpen)location.hash='';if(focus)closeCity();}
 document.querySelectorAll('[data-home]').forEach(b=>b.addEventListener('click',()=>goHome()));
 document.querySelectorAll('.pgpill').forEach(b=>{b.innerHTML=[...b.textContent].map((c,i)=>'<span style="--i:'+i+'">'+c+'</span>').join('');});
-document.querySelectorAll('[data-pg]').forEach(b=>b.addEventListener('click',()=>{const f=window.__fava;if(!f||!f.ready())return;if(menuIsOpen)closeMenu(false);if(pageOpen)location.hash='';f.open(false,b);if(b.closest('#hist'))setTimeout(()=>closeHist(true),1250);}));
+document.querySelectorAll('[data-pg]').forEach(b=>b.addEventListener('click',()=>{const f=window.__fava;if(!f||!f.ready())return;if(menuIsOpen)closeMenu(false);if(pageOpen)location.hash='';f.open(false,b);if(b.closest('#hist')&&!DOCK())setTimeout(()=>closeHist(true),1250);}));
 document.querySelector('.wordmark').addEventListener('click',e=>{if(pageOpen||focus||menuIsOpen||(!chat.hidden&&chat.classList.contains('open'))){goHome();return;}if(!finePointer||W<=700)return;const l=e.target.closest('.ltr');if(l)FX[l.dataset.fx](l);});
 if(!finePointer)document.body.classList.add('touch');
 
@@ -970,12 +1157,12 @@ document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if
 let loginMode='login';
 function setLoginMode(m){loginMode=m;el('loginTitle').textContent=m==='join'?'Join FAVA':'Log in';el('loginGo').textContent=m==='join'?'Create account':'Log in';el('footText').textContent=m==='join'?'Already have an account?':'New here?';el('create').textContent=m==='join'?'Log in':'Create an account';pwd.setAttribute('autocomplete',m==='join'?'new-password':'current-password');}
 function showLogin(why,mode){setLoginMode(mode||'login');el('loginWhy').textContent=why||'';note.textContent='';err.textContent='';showModal(el('login'));}
-function setUser(u){user=u;document.body.classList.toggle('signed-in',!!u);document.body.classList.toggle('home-mode',!!u);document.body.classList.toggle('paid',!!(u&&u.paid));if(typeof syncUi==='function')syncUi();renderLegend();if(focus)renderPanel();if(!u&&pageOpen)location.hash='';if(!u)holdLegend(false);chatAccountChanged();if(u){el('hfEmail').textContent=u.email;el('hfAv').textContent=(u.email[0]||'F').toUpperCase();el('hfPlan').textContent=u.paid?'Paid plan':'Free plan';}if(!u&&!chat.hidden)closeChat(false,true);setTimeout(measureNav,0);}
+function setUser(u){user=u;document.body.classList.toggle('signed-in',!!u);document.body.classList.toggle('home-mode',!!u);document.body.classList.toggle('paid',!!(u&&u.paid));if(typeof syncUi==='function')syncUi();renderLegend();if(focus)renderPanel();if(!u&&pageOpen)location.hash='';if(!u)holdLegend(false);chatAccountChanged();if(u){el('hfEmail').textContent=u.email;el('hfAv').textContent=(u.email[0]||'F').toUpperCase();el('hfPlan').textContent=u.paid?'Paid plan':'Free plan';}if(!u&&!chat.hidden)closeChat(false,true);setTimeout(measureNav,0);setTimeout(syncDock,0);}
 function syncDS(){[['dsQuick','csQuick'],['dsSpeak','csSpeak'],['dsSave','csSave']].forEach(([a,b])=>el(a).setAttribute('aria-checked',el(b).getAttribute('aria-checked')||'false'));}
 [['dsQuick','csQuick'],['dsSpeak','csSpeak'],['dsSave','csSave']].forEach(([a,b])=>el(a).addEventListener('click',()=>{el(b).click();syncDS();}));
 function dashTab(k){document.querySelectorAll('.dtabs button').forEach(b=>b.classList.toggle('on',b.dataset.dt===k));el('dp-p').hidden=k!=='p';el('dp-b').hidden=k!=='b';el('dp-s').hidden=k!=='s';if(k==='s')syncDS();}
 document.querySelectorAll('[data-dash]').forEach(b=>b.addEventListener('click',()=>{closeHist(true);accountClick();dashTab(b.dataset.dash);}));
-el('hfOut').addEventListener('click',()=>{closeHist(true);signOut();});
+el('hfOut').addEventListener('click',()=>{closePops();signOut();});
 document.querySelectorAll('.dtabs button').forEach(b=>b.addEventListener('click',()=>dashTab(b.dataset.dt)));
 function accountClick(){if(user){el('dashWho').textContent='Signed in as '+user.email;el('dEmail').textContent=user.email;el('dPlan').textContent=el('dPlan2').textContent=user.paid?'Paid':'Free';dashTab('p');showModal(el('dash'));}else showLogin('','login');}
 loginBtn.addEventListener('click',accountClick);
@@ -998,11 +1185,11 @@ function openChat(bot){clearTimeout(chatTimer);clearTimeout(chatLoadTimer);if(bo
  const ld=el('loader');
  if(pageOpen||!ld.hidden){/* something else owns the loader — skip */ }
  else{el('loadMsg').textContent=pickLine();startOrb();ld.hidden=false;}
- chat.classList.add('inner-hidden');chat.hidden=false;document.body.classList.add('chat-open');
+ chat.classList.add('inner-hidden');chat.hidden=false;document.body.classList.add('chat-open');syncDock();
  if(menuIsOpen){chatReturn=menuBtn;chat.classList.add('instant','open');closeMenu(false);requestAnimationFrame(()=>requestAnimationFrame(()=>{chat.classList.remove('instant');ld.classList.add('show');}));}
  else requestAnimationFrame(()=>requestAnimationFrame(()=>{chat.classList.add('open');ld.classList.add('show');}));
- chatLoadTimer=setTimeout(()=>{ld.classList.remove('show');chat.classList.remove('inner-hidden');chatLoadTimer=setTimeout(()=>{ld.hidden=true;stopOrb();},reduce?0:460);setTimeout(()=>chatInput.focus({preventScroll:true}),60);},reduce?300:1400);}
-function quietChat(){chat.classList.add('instant','open');chat.classList.remove('inner-hidden');chat.hidden=false;document.body.classList.add('chat-open');if(!chatBot)setChatBot(resumeBot());if(!chat.classList.contains('has-msgs'))el('chatHello').textContent=greeting();requestAnimationFrame(()=>requestAnimationFrame(()=>chat.classList.remove('instant')));}
+ chatLoadTimer=setTimeout(()=>{ld.classList.remove('show');chat.classList.remove('inner-hidden');chatLoadTimer=setTimeout(()=>{ld.hidden=true;stopOrb();},reduce?0:460);setTimeout(()=>{if(!DOCK())chatInput.focus({preventScroll:true});},60);},reduce?300:1400);}
+function quietChat(){chat.classList.add('instant','open');chat.classList.remove('inner-hidden');chat.hidden=false;document.body.classList.add('chat-open');syncDock();if(!chatBot)setChatBot(resumeBot());if(!chat.classList.contains('has-msgs'))el('chatHello').textContent=greeting();requestAnimationFrame(()=>requestAnimationFrame(()=>chat.classList.remove('instant')));}
 function closeChat(back,force){if(chat.hidden)return;if(user&&!force)return;holdLegend(false);if(vOn)stopVoice(true);closeHist(true);closeBotMenu();closeChatSet();closeInfo();hideChatLoader();chat.classList.remove('open','inner-hidden');document.body.classList.remove('chat-open');chatTimer=setTimeout(()=>{chat.hidden=true;},reduce?0:300);if(back!==false&&chatReturn&&document.body.contains(chatReturn)&&chatReturn.offsetParent!==null)chatReturn.focus({preventScroll:true});}
 document.querySelectorAll('[data-chat]').forEach(b=>b.addEventListener('click',()=>{if(user){if(menuIsOpen)closeMenu(false);if(pageOpen)location.hash='';if(chat.hidden)openChat();return;}chat.hidden||!chat.classList.contains('open')?openChat():closeChat();}));
 el('chatClose').addEventListener('click',()=>closeChat());
@@ -1085,7 +1272,7 @@ async function makeTitle(c){const first=(c.msgs.find(m=>m.r==='me'&&m.t)||{}).t|
 async function titleConvo(id){const c=convoById(id);if(!c)return;titling.add(id);if(histIsOpen())renderHist();const t=await makeTitle(c);titling.delete(id);const c2=convoById(id);if(!c2)return;if(c2.custom){if(histIsOpen())renderHist();return;}c2.title=t;sweepIds.set(id,Date.now());saveConvos();if(histIsOpen())renderHist();}
 function openHist(){closeBotMenu();closeChatSet();closeInfo();clearTimeout(histTimer);renderHist();hist.hidden=false;histScrim.hidden=false;document.body.classList.add('hist-open');histBtn.setAttribute('aria-expanded','true');
  requestAnimationFrame(()=>requestAnimationFrame(()=>{hist.classList.add('open');histScrim.classList.add('open');}));setTimeout(()=>{const f=el('histNew');if(f)f.focus({preventScroll:true});},60);}
-function closeHist(instant){closeHistMenu(true);renamingId=null;clearTimeout(noteTimer);histNoteEl.classList.remove('show');histNoteEl.hidden=true;if(hist.hidden)return;hist.classList.remove('open');histScrim.classList.remove('open');document.body.classList.remove('hist-open');histBtn.setAttribute('aria-expanded','false');
+function closeHist(instant){closeHistMenu(true);renamingId=null;clearTimeout(noteTimer);histNoteEl.classList.remove('show');histNoteEl.hidden=true;if(DOCK()&&instant!==true)return;if(hist.hidden)return;hist.classList.remove('open');histScrim.classList.remove('open');document.body.classList.remove('hist-open');if(instant===true)document.body.classList.remove('side-docked');histBtn.setAttribute('aria-expanded','false');
  clearTimeout(histTimer);histTimer=setTimeout(()=>{hist.hidden=true;histScrim.hidden=true;},(instant||reduce)?0:300);}
 function openConvo(id){const c=convoById(id);if(!c)return;const b=findBot(c.bot);if(vOn)stopVoice(true);if(b){chatBot=b;chatInput.placeholder='Message '+b.name;botPickName.textContent=b.name;}activeId=id;renderConvo(c);saveConvos();closeHist();}
 function deleteConvo(id){sweepIds.delete(id);titling.delete(id);convos=convos.filter(c=>c.id!==id);if(activeId===id){activeId=null;renderConvo(null);}saveConvos();renderHist();}
@@ -1134,7 +1321,7 @@ function sendChat(){const text=chatInput.value.trim();if(!text&&!pendingImgs.len
   .finally(()=>{chatBusyIds.delete(cid);if(live())chatLog.scrollTop=chatLog.scrollHeight;});}
 Object.assign(ICON,{info:'<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="6.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 8.2v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9" cy="5.8" r="1" fill="currentColor"/></svg>',more:'<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3.5" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="12.5" cy="8" r="1.3" fill="currentColor"/></svg>',pin:'<svg width="11" height="11" viewBox="0 0 16 16" aria-hidden="true"><path d="M10 1.5l4.5 4.5-2 .8-2.6 2.6.3 3.3-1.2 1.2-2.9-2.9-4 4-.9-.9 4-4-2.9-2.9L3.5 6l3.3.3 2.6-2.6z" fill="currentColor"/></svg>',gear:'<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2.5 5.5h6M12.5 5.5h3M2.5 12.5h3M9.5 12.5h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="10.5" cy="5.5" r="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="7.5" cy="12.5" r="2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',hist:'<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect x="2.5" y="3.5" width="13" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 3.5v11" stroke="currentColor" stroke-width="1.6"/></svg>',chev:'<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5L6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',check:'<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',trash:'<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8h5.8l.6-8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'});
 histBtn.innerHTML=ICON.hist;el('chatSetBtn').innerHTML=ICON.gear;el('botPickChev').innerHTML=ICON.chev;el('histClose').innerHTML=ICON.x;el('histNewIcon').innerHTML=ICON.plus;
-histBtn.addEventListener('click',()=>{histIsOpen()?closeHist():openHist();});el('histClose').addEventListener('click',()=>closeHist());histScrim.addEventListener('click',()=>closeHist());el('histNew').addEventListener('click',newChat);
+histBtn.addEventListener('click',()=>{if(DOCK()){toggleSide(false);return;}histIsOpen()?closeHist():openHist();});el('histClose').addEventListener('click',()=>{if(DOCK()){toggleSide(true);return;}closeHist();});histScrim.addEventListener('click',()=>closeHist());el('histNew').addEventListener('click',newChat);
 botPick.addEventListener('click',()=>{botMenuOpen()?closeBotMenu():openBotMenu();});
 document.addEventListener('pointerdown',e=>{if(botMenuOpen()&&!(e.target.closest&&e.target.closest('.bot-pick-wrap')))closeBotMenu();});
 botMenu.addEventListener('keydown',e=>{if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return;e.preventDefault();const o=[...botMenu.querySelectorAll('.bot-opt')],i=o.indexOf(document.activeElement),n=e.key==='ArrowDown'?(i+1)%o.length:(i-1+o.length)%o.length;if(o[n])o[n].focus();});
@@ -1144,6 +1331,35 @@ try{Object.assign(cprefs,JSON.parse(localStorage.getItem(CPREF_KEY)||'{}'));}cat
 function syncCPrefs(){CS.forEach(([id,k])=>el(id).setAttribute('aria-checked',String(!!cprefs[k])));try{localStorage.setItem(CPREF_KEY,JSON.stringify(cprefs));}catch(e){}}
 CS.forEach(([id,k])=>el(id).addEventListener('click',()=>{cprefs[k]=!cprefs[k];syncCPrefs();}));syncCPrefs();
 const csOpen=()=>!csPop.hidden;
+
+/* ---------- docked sidebar, views and sidebar pop-ups ---------- */
+function DOCK(){return document.body.classList.contains('home-mode')&&window.matchMedia('(min-width:901px) and (hover:hover) and (pointer:fine)').matches;}
+function syncDock(){
+ const b=document.body,want=DOCK()&&!chat.hidden;
+ if(want){let col=false;try{col=localStorage.getItem('fava-side-collapsed')==='1';}catch(e){}b.classList.toggle('side-collapsed',col);
+  if(!b.classList.contains('side-docked')){renderHist();hist.hidden=false;histScrim.hidden=true;hist.classList.add('open');b.classList.add('side-docked');}
+  el('histClose').innerHTML=ICON.hist;el('histClose').setAttribute('aria-label','Collapse sidebar');}
+ else{if(b.classList.contains('side-docked')){b.classList.remove('side-docked','side-collapsed');hist.classList.remove('open');hist.hidden=true;}el('histClose').innerHTML=ICON.x;el('histClose').setAttribute('aria-label','Close chat history');}
+ if(!want)closePops();
+}
+function toggleSide(collapse){document.body.classList.toggle('side-collapsed',collapse);try{localStorage.setItem('fava-side-collapsed',collapse?'1':'0');}catch(e){}closePops();if(window.__favaCharts)setTimeout(window.__favaCharts.redraw,320);}
+window.addEventListener('resize',()=>{syncDock();});
+function setView(v){document.body.classList.toggle('view-charts',v==='charts');el('navChat').classList.toggle('on',v!=='charts');el('navCharts').classList.toggle('on',v==='charts');if(v==='charts'){closePops();if(window.__favaCharts)setTimeout(window.__favaCharts.show,30);}else{}}
+el('navChat').addEventListener('click',()=>{setView('chat');if(!DOCK())closeHist();});
+el('navCharts').addEventListener('click',()=>{setView('charts');if(!DOCK())closeHist();});
+el('histNew').addEventListener('click',()=>setView('chat'));
+histList.addEventListener('click',e=>{if(e.target.closest('.hist-row'))setView('chat');});
+const popSet=el('popSet'),popAcct=el('popAcct');
+function closePops(){popSet.hidden=true;popAcct.hidden=true;el('sbSettings').setAttribute('aria-expanded','false');el('sbAcct').setAttribute('aria-expanded','false');}
+function placePop(pop,btn){pop.hidden=false;const r=btn.getBoundingClientRect(),ph=pop.offsetHeight;if(DOCK()){pop.style.width='264px';pop.style.left=(r.right+8)+'px';pop.style.top=Math.max(8,Math.min(innerHeight-ph-8,r.bottom-ph))+'px';}else{const w=hist.getBoundingClientRect();pop.style.width=(w.width-24)+'px';pop.style.left=(w.left+12)+'px';pop.style.top=Math.max(8,r.top-ph-8)+'px';}}
+function togglePop(pop,btn){const open=pop.hidden;closePops();if(open){if(pop===popSet)syncPS();placePop(pop,btn);btn.setAttribute('aria-expanded','true');}}
+el('sbSettings').addEventListener('click',e=>{e.stopPropagation();togglePop(popSet,el('sbSettings'));});
+el('sbAcct').addEventListener('click',e=>{e.stopPropagation();togglePop(popAcct,el('sbAcct'));});
+document.addEventListener('pointerdown',e=>{if(popSet.hidden&&popAcct.hidden)return;if(e.target.closest&&e.target.closest('.side-pop,#sbSettings,#sbAcct'))return;closePops();});
+const PS=[['psQuick','csQuick'],['psSpeak','csSpeak'],['psSave','csSave']];
+function syncPS(){PS.forEach(([a,b])=>el(a).setAttribute('aria-checked',el(b).getAttribute('aria-checked')||'false'));}
+PS.forEach(([a,b])=>el(a).addEventListener('click',()=>{el(b).click();syncPS();}));
+document.querySelectorAll('[data-pd]').forEach(b=>b.addEventListener('click',()=>{closePops();accountClick();dashTab(b.dataset.pd);}));
 function openChatSet(){closeInfo();closeBotMenu();if(histIsOpen())closeHist();csPop.hidden=false;csBtn.setAttribute('aria-expanded','true');}
 function closeChatSet(){if(csPop.hidden)return;csPop.hidden=true;csBtn.setAttribute('aria-expanded','false');}
 csBtn.addEventListener('click',()=>{csOpen()?closeChatSet():openChatSet();});
@@ -2493,6 +2709,376 @@ void main(){
 
 route();
 requestAnimationFrame(frame);
+})();
+</script>
+<script>
+/* FAVA Charts: a TradingView-style chart (candles, timeframes, indicators, drawing tools, AI overview,
+   account lines, trade markers and a global watchlist). Price data comes straight from Hyperliquid
+   (the bot's own exchange) with Binance.US as a backup. Account / forecast / watchlist data comes from
+   a JSON feed (window.FAVA_FEED_URL). Without a feed, clearly-labelled SAMPLE data is shown. */
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const root=$('charts');if(!root)return;
+const FEED_URL=window.FAVA_FEED_URL||'';
+const cv=$('chCanvas'),ctx=cv.getContext('2d'),wrap=$('chPlot'),tip=$('chTip');
+const NATIVE={5:'5m',15:'15m',30:'30m',60:'1h',120:'2h',240:'4h',1440:'1d',10080:'1w'};
+const PRESETS=[['5m',5],['15m',15],['30m',30],['1h',60],['2h',120],['4h',240],['1D',1440],['1W',10080]];
+const COL={up:'#22C58B',dn:'#F0556A',grid:'rgba(255,255,255,.06)',txt:'#8E97AB',ink:'#F2F4F8',pink:'#FF74B1',violet:'#9B8CFF',amber:'#F5C451',blue:'#5B9BFF',buy:'#22C58B',sell:'#F0556A'};
+const IND_PRESETS=[['sma',350,'#5B9BFF'],['sma',200,'#9B8CFF'],['ema',200,'#F5C451'],['sma',50,'#FF9A5B'],['ema',55,'#FF74B1'],['ema',50,'#4FD1C5']];
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+
+const S={coin:LS.get('fava-ch-coin','BTC'),tf:LS.get('fava-ch-tf',1440),base:[],baseMin:1440,candles:[],bar:9,right:0,tool:'cursor',draw:[],sel:-1,cur:null,
+ opts:Object.assign({ai:true,acct:true,trades:true,vol:true,log:false},LS.get('fava-ch-opts',{})),
+ ind:LS.get('fava-ch-ind',null)||IND_PRESETS.map((p,i)=>({type:p[0],n:p[1],c:p[2],on:i<3})),
+ feed:null,feedErr:'',offline:false,loading:false,tok:0,hl:{},tab:'account',wlRows:[],wlStats:{},wlErr:'',olderBusy:false,noMore:false,hit:[],dr:null,live:0};
+let W=0,H=0,AX=66,BY=26,PW=0,PH=0,VH=0,lo=0,hi=1,i0=0,i1=0,tfMs=0,c0=0,dragging=null,raf=0;
+
+/* ---------- formatting ---------- */
+const fp=p=>{if(p==null||!isFinite(p))return '–';const a=Math.abs(p);return a>=1000?p.toLocaleString('en-US',{maximumFractionDigits:0}):a>=1?p.toFixed(2):a>=0.01?p.toFixed(4):p.toPrecision(3);};
+const fu=p=>'$'+fp(p);
+const fpct=p=>(p>=0?'+':'')+p.toFixed(2)+'%';
+const fk=p=>p>=1000?'$'+(p/1000).toFixed(p>=100000?0:1)+'k':'$'+fp(p);
+const dtf=new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:false});
+const dtd=new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric'});
+const dtm=new Intl.DateTimeFormat('en-US',{month:'short',year:'numeric'});
+const dth=new Intl.DateTimeFormat('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+const tfLabel=m=>{const p=PRESETS.find(x=>x[1]===m);if(p)return p[0];if(m%10080===0)return (m/10080)+'W';if(m%1440===0)return (m/1440)+'D';if(m%60===0)return (m/60)+'h';return m+'m';};
+const parseTf=s=>{const m=String(s).trim().toLowerCase().match(/^(\d+(?:\.\d+)?)\s*(m|min|h|d|w)?$/);if(!m)return null;let v=parseFloat(m[1]),u=m[2]||'m';if(u==='h')v*=60;else if(u==='d')v*=1440;else if(u==='w')v*=10080;return v;};
+
+/* ---------- data: price candles ---------- */
+async function hlPost(body){const r=await fetch('https://api.hyperliquid.xyz/info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(!r.ok)throw new Error('hl '+r.status);return r.json();}
+async function fetchNative(coin,bm,endMs,count){
+ const iv=NATIVE[bm];const start=endMs-count*bm*60000;
+ try{const a=await hlPost({type:'candleSnapshot',req:{coin:coin,interval:iv,startTime:start,endTime:endMs}});if(!Array.isArray(a)||!a.length)throw new Error('empty');return a.map(x=>({t:+x.t,o:+x.o,h:+x.h,l:+x.l,c:+x.c,v:+x.v}));}
+ catch(e){const r=await fetch('https://api.binance.us/api/v3/klines?symbol='+coin+'USDT&interval='+iv+'&limit=1000&endTime='+endMs);if(!r.ok)throw e;const a=await r.json();if(!a.length)throw e;return a.map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}));}
+}
+const baseFor=m=>[10080,1440,240,120,60,30,15,5].find(b=>m%b===0)||5;
+function agg(base,bm,m){if(m===bm)return base.slice();const f=m*60000,out=[];let cur=null;for(const c of base){const k=Math.floor(c.t/f)*f;if(!cur||cur.t!==k){cur={t:k,o:c.o,h:c.h,l:c.l,c:c.c,v:c.v};out.push(cur);}else{if(c.h>cur.h)cur.h=c.h;if(c.l<cur.l)cur.l=c.l;cur.c=c.c;cur.v+=c.v;}}return out;}
+function synth(bm){/* only used when no price source can be reached, and clearly labelled */let p=95000,t=Date.now()-5000*bm*60000,s=7,out=[];const rnd=()=>{s=(s*16807)%2147483647;return s/2147483647;};for(let i=0;i<5000;i++){const o=p,m=(rnd()-.5)*0.012*Math.sqrt(bm/60+1);const c=o*(1+m),h=Math.max(o,c)*(1+rnd()*.004),l=Math.min(o,c)*(1-rnd()*.004);out.push({t:t+i*bm*60000,o:o,h:h,l:l,c:c,v:100+rnd()*300});p=c;}return out;}
+function rebuild(){S.candles=agg(S.base,S.baseMin,S.tf);tfMs=S.tf*60000;c0=S.candles.length?S.candles[0].t:0;calcInd();}
+async function load(){
+ const tok=++S.tok;S.loading=true;status('Loading '+S.coin+'…');
+ S.baseMin=baseFor(S.tf);S.noMore=false;
+ try{S.base=await fetchNative(S.coin,S.baseMin,Date.now(),5000);S.offline=false;}
+ catch(e){S.base=synth(S.baseMin);S.offline=true;}
+ if(tok!==S.tok)return;
+ rebuild();fit();S.loading=false;status('');banner();loadDraw();renderPanel();draw();
+}
+async function loadOlder(){
+ if(S.olderBusy||S.noMore||S.offline||!S.base.length)return;S.olderBusy=true;
+ try{const a=await fetchNative(S.coin,S.baseMin,S.base[0].t-1,5000);const have=new Set(S.base.map(x=>x.t));const add=a.filter(x=>!have.has(x.t));if(!add.length)S.noMore=true;else{const shift=S.candles.length;S.base=add.concat(S.base).sort((x,y)=>x.t-y.t);const oldFirst=c0;rebuild();S.right+=Math.round((oldFirst-c0)/tfMs);}}
+ catch(e){S.noMore=true;}
+ S.olderBusy=false;draw();
+}
+async function liveTick(){
+ if(!root.offsetParent||S.loading||S.offline)return;
+ try{const a=await fetchNative(S.coin,S.baseMin,Date.now(),3);let ch=false;const last=S.base[S.base.length-1];for(const x of a){if(last&&x.t<last.t-S.baseMin*60000*5)continue;const j=S.base.findIndex(y=>y.t===x.t);if(j>=0){S.base[j]=x;ch=true;}else if(!last||x.t>last.t){S.base.push(x);ch=true;}}
+  if(ch){const atEnd=S.right>=S.candles.length-1+0.5;rebuild();if(atEnd&&S.right<S.candles.length+60){/* keep follow */}draw();renderHead();}}catch(e){}
+}
+async function loadCtx(){
+ try{const r=await hlPost({type:'metaAndAssetCtxs'});const u=r[0].universe,c=r[1],m={};u.forEach((x,i)=>{m[x.name]={px:+(c[i].markPx||c[i].midPx),prev:+c[i].prevDayPx};});S.hl=m;renderPanel();renderHead();}catch(e){}
+}
+
+/* ---------- data: your Google Sheets (BTC Bot Control: Control + Trades tabs) ---------- */
+const SHEET_ID=window.FAVA_BTC_SHEET||'1XnAz2cIM5L5FuO-Jfz-mBi66yno2DPArVyIXJLzTV0w';
+const FD=()=>S.coin==='BTC'?S.feed:null;
+function parseCSV(t){const rows=[];let r=[],f='',q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++;}else q=false;}else f+=c;}else if(c==='"')q=true;else if(c===','){r.push(f);f='';}else if(c==='\n'||c==='\r'){if(c==='\r'&&t[i+1]==='\n')i++;r.push(f);f='';rows.push(r);r=[];}else f+=c;}if(f!==''||r.length){r.push(f);rows.push(r);}return rows;}
+async function sheetTab(tab){const u='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(tab)+'&_='+Date.now();const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error('sheet '+r.status);const t=await r.text();if(/^\s*<(!doctype|html)/i.test(t))throw new Error('private');return parseCSV(t);}
+const num=x=>{if(x==null)return null;const s=String(x).replace(/[$,\s]/g,'');if(s===''||s==='-')return null;const v=parseFloat(s);return isFinite(v)?v:null;};
+const azMs=s=>{const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);return m?Date.UTC(+m[1],+m[2]-1,+m[3],+m[4]+7,+m[5]):NaN;};/* Arizona is UTC-7 all year */
+function ntype(s){s=String(s||'').toLowerCase();return s.includes('margin add')||s.includes('all margin')?'MARGIN':s.includes('mixed')?'MIXED':'BTC';}
+const tl=t=>t==='MARGIN'?'margin add':t==='MIXED'?'BTC + margin':'BTC buy';
+function parseOutlook(s){
+ const o={horizons:[],levels:[],next:[],raw:null};if(!s)return o;let j;try{j=JSON.parse(s);}catch(e){return o;}o.raw=j;
+ const add=(label,days,x)=>{if(x&&isFinite(+x.low)&&isFinite(+x.high))o.horizons.push({label:label,days:days,low:+x.low,mid:x.mid!=null?+x.mid:(+x.low+ +x.high)/2,high:+x.high});};
+ add('7d',7,j.range7||j.range_7d||j.r7);add('30d',30,j.range30||j.range_30d||j.r30||j.likelyRange30);
+ if(Array.isArray(j.horizons))j.horizons.forEach(h=>add(h.label||((+h.days||7)+'d'),+h.days||parseInt(h.label)||7,h));
+ o.levels=(j.levels||[]).map(l=>({price:+(l.price!=null?l.price:l.level),kind:String(l.kind||l.type||''),t7:l.touch7!=null?+l.touch7:l.t7!=null?+l.t7:null,t30:l.touch30!=null?+l.touch30:l.t30!=null?+l.t30:null,brk:l.break!=null?+l.break:l.brk!=null?+l.brk:null})).filter(l=>isFinite(l.price));
+ o.next=(j.next_buys||j.nextBuys||[]).map(x=>({price:+x.price,usd:x.usd==null?null:+x.usd,type:ntype(x.type),note:x.note||''})).filter(x=>isFinite(x.price));
+ return o;
+}
+async function loadFeed(){
+ try{
+  const [ctl,trd]=await Promise.all([sheetTab('Control'),sheetTab('Trades')]);
+  const m={};ctl.forEach(r=>{const k=(r[0]||'').trim();if(k&&!(k in m))m[k]=r[1]==null?'':r[1];});
+  const live=/live/i.test(m['Mode']||'')&&!/paper/i.test(m['Mode']||'');
+  const A=live?{avg:num(m['Axiom: avg entry']),liq:num(m['Axiom: liquidation']),btc:num(m['Axiom: BTC held']),cash:num(m['Axiom: free cash']),margin:num(m['Axiom: money in position']),profit:num(m['Axiom: open profit'])}
+   :{avg:num(m['Average entry']),liq:num(m['Liquidation price (Axiom)']),btc:num(m['BTC held']),cash:num(m['Cash available']),margin:num(m['Money in the position']),profit:num(m['Open profit'])};
+  const out=parseOutlook(m['Price outlook (data)']);
+  let next=out.next.slice();const np=num(m['Next buy price']);if(np!=null)next=[{price:np,usd:null,type:ntype(m['Next buy type']),note:''}].concat(next.filter(x=>Math.abs(x.price-np)>1));
+  const th=trd[0]||[],ix=n=>th.findIndex(x=>String(x).trim().toLowerCase()===n);
+  const iT=ix('date/time (az)'),iA=ix('action'),iP=ix('btc price'),iM=ix('your money in'),iO=ix('order margin (22x)'),iB=ix('btc added'),iMo=ix('mode');
+  const trades=[];trd.slice(1).forEach(r=>{const act=String(r[iA]||'').toUpperCase().trim(),t=azMs(r[iT]),p=num(r[iP]);if(!act||!isFinite(t)||p==null)return;if(/TEST/.test(act)||/TEST/i.test(r[iMo]||''))return;
+   const sell=/SELL|PROFIT/.test(act);const marg=!sell&&(/MARGIN/.test(act)||((num(r[iB])||0)===0&&(num(r[iO])||0)===0));
+   trades.push({t:t,side:sell?'SELL':'BUY',price:p,usd:num(r[iM]),btc:num(r[iB]),type:marg?'MARGIN':'BTC',paper:/PAPER/i.test(r[iMo]||''),act:act});});
+  trades.sort((a,b)=>a.t-b.t);
+  S.feed={updated:m['Last updated']||m['Last update']||null,mode:live?'LIVE':'PAPER',account:Object.assign(A,{next:next}),nextText:m['Next expected buy']||'',lastAction:m['Last action']||'',phase:m['Cycle phase']||'',trades:trades,forecast:out.horizons,levels:out.levels,outlookMissing:!out.raw,watch:[]};
+  S.feedErr='';
+ }catch(e){S.feedErr=String(e&&e.message||e).includes('private')||/sheet 4\d\d/.test(String(e&&e.message))?'private':'net';if(!S.feed)S.feed=null;}
+ banner();renderPanel();draw();
+}
+
+/* ---------- indicators ---------- */
+function sma(cl,n){const o=new Array(cl.length).fill(NaN);let s=0;for(let i=0;i<cl.length;i++){s+=cl[i];if(i>=n)s-=cl[i-n];if(i>=n-1)o[i]=s/n;}return o;}
+function ema(cl,n){const o=new Array(cl.length).fill(NaN),k=2/(n+1);let e=null;for(let i=0;i<cl.length;i++){if(i<n-1)continue;if(e===null){let s=0;for(let j=0;j<n;j++)s+=cl[i-j];e=s/n;}else e=cl[i]*k+e*(1-k);o[i]=e;}return o;}
+function calcInd(){const cl=S.candles.map(c=>c.c);S.ind.forEach(x=>{x.v=x.on?(x.type==='ema'?ema(cl,x.n):sma(cl,x.n)):null;});}
+
+/* ---------- geometry ---------- */
+function layout(){const r=wrap.getBoundingClientRect();W=Math.max(240,Math.floor(r.width));H=Math.max(200,Math.floor(r.height));const d=window.devicePixelRatio||1;if(cv.width!==Math.round(W*d)||cv.height!==Math.round(H*d)){cv.width=Math.round(W*d);cv.height=Math.round(H*d);cv.style.width=W+'px';cv.style.height=H+'px';}ctx.setTransform(d,0,0,d,0,0);AX=W<520?54:66;BY=26;PW=W-AX;VH=S.opts.vol?Math.round((H-BY)*.14):0;PH=H-BY-VH;}
+const xi=i=>PW-(S.right-i)*S.bar;
+const idxT=t=>(t-c0)/tfMs;
+const tOfX=x=>c0+(S.right-(PW-x)/S.bar)*tfMs;
+const L=v=>S.opts.log?Math.log(Math.max(v,1e-9)):v;
+const yp=p=>{const a=L(lo),b=L(hi);return 8+(b-L(p))/(b-a)*(PH-16);};
+const pOfY=y=>{const a=L(lo),b=L(hi),v=b-(y-8)/(PH-16)*(b-a);return S.opts.log?Math.exp(v):v;};
+function fit(){layout();S.bar=Math.min(14,Math.max(3,PW/Math.min(S.candles.length,110)));S.right=S.candles.length-1+Math.min(34,Math.floor(PW/S.bar*.3));}
+function clampView(){const n=S.candles.length;if(!n)return;const vis=PW/S.bar;const maxR=n-1+vis*.7,minR=Math.min(n-1,vis*.4);if(S.right>maxR)S.right=maxR;if(S.right<minR)S.right=minR;}
+function ranges(){
+ const n=S.candles.length;i0=Math.max(0,Math.floor(S.right-PW/S.bar)-1);i1=Math.min(n-1,Math.ceil(S.right)+1);
+ let a=Infinity,b=-Infinity;for(let i=i0;i<=i1;i++){const c=S.candles[i];if(c.l<a)a=c.l;if(c.h>b)b=c.h;}
+ if(!isFinite(a)){a=0;b=1;}const last=n?S.candles[n-1].c:1,near=v=>v!=null&&isFinite(v)&&v>last*.55&&v<last*1.6;const f=FD();
+ if(f&&S.opts.acct){const A=f.account;if(near(A.avg)){a=Math.min(a,A.avg);b=Math.max(b,A.avg);}if(near(A.liq)){a=Math.min(a,A.liq);b=Math.max(b,A.liq);}A.next.forEach(x=>{if(near(x.price)){a=Math.min(a,x.price);b=Math.max(b,x.price);}});}
+ if(f&&S.opts.ai)f.forecast.forEach(h=>{[h.low,h.high].forEach(v=>{if(near(v)&&v>last*.7&&v<last*1.4){a=Math.min(a,v);b=Math.max(b,v);}});});
+ const pad=(b-a)*.07||b*.01;a-=pad;b+=pad;if(S.opts.log)a=Math.max(a,b*.02);lo=a;hi=b;
+}
+
+/* ---------- drawing ---------- */
+function niceStep(r,n){const raw=r/n,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p;return(f<1.5?1:f<3?2:f<7?5:10)*p;}
+function tag(txt,y,bg,fg){ctx.font='600 11px Inter,system-ui,sans-serif';const w=ctx.measureText(txt).width+12;ctx.fillStyle=bg;ctx.fillRect(PW,y-9,AX,18);ctx.fillStyle=fg||'#fff';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(txt,PW+6,y+.5);return w;}
+function hline(p,col,dash,w){const y=Math.round(yp(p))+.5;if(y<0||y>PH)return;ctx.save();ctx.strokeStyle=col;ctx.lineWidth=w||1;ctx.setLineDash(dash||[]);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(PW,y);ctx.stroke();ctx.restore();}
+function draw(){
+ if(!root.offsetParent)return;layout();const n=S.candles.length;ctx.clearRect(0,0,W,H);S.hit=[];
+ if(!n){ctx.fillStyle=COL.txt;ctx.font='14px Inter,system-ui,sans-serif';ctx.textAlign='center';ctx.fillText(S.loading?'Loading…':'No data',W/2,H/2);return;}
+ clampView();ranges();
+ /* grid + price axis */
+ ctx.font='11px Inter,system-ui,sans-serif';ctx.textBaseline='middle';ctx.textAlign='left';
+ const st=niceStep(hi-lo,Math.max(3,PH/62));ctx.strokeStyle=COL.grid;ctx.lineWidth=1;ctx.fillStyle=COL.txt;
+ for(let p=Math.ceil(lo/st)*st;p<hi;p+=st){const y=Math.round(yp(p))+.5;if(y<4||y>PH-4)continue;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(PW,y);ctx.stroke();ctx.fillText(fp(p),PW+7,y);}
+ /* time axis */
+ const minGap=96,every=Math.max(1,Math.ceil(minGap/S.bar));ctx.textAlign='center';
+ let lastKey='';for(let i=Math.ceil(i0/every)*every;i<=i1+every;i+=every){const x=xi(i);if(x<10||x>PW-10)continue;const t=c0+i*tfMs,d=new Date(t);ctx.strokeStyle=COL.grid;ctx.beginPath();ctx.moveTo(Math.round(x)+.5,0);ctx.lineTo(Math.round(x)+.5,PH+VH);ctx.stroke();
+  let s;if(S.tf<1440)s=(d.getHours()===0&&d.getMinutes()===0)?dtd.format(d).replace(/,? \d{4}/,''):dth.format(d);else s=S.tf>=10080||every*S.tf>=43200?dtm.format(d):dtd.format(d).replace(/,? \d{4}/,'')+(d.getMonth()===0&&d.getDate()<=7?' '+d.getFullYear():'');
+  ctx.fillStyle=COL.txt;ctx.fillText(s,x,H-BY/2);}
+ /* clip plot */
+ ctx.save();ctx.beginPath();ctx.rect(0,0,PW,PH+VH);ctx.clip();
+ /* volume */
+ if(VH){let mv=0;for(let i=i0;i<=i1;i++)if(S.candles[i].v>mv)mv=S.candles[i].v;for(let i=i0;i<=i1;i++){const c=S.candles[i],h=(c.v/(mv||1))*(VH-6),x=xi(i);ctx.fillStyle=c.c>=c.o?'rgba(34,197,139,.28)':'rgba(240,85,106,.28)';ctx.fillRect(x-Math.max(1,S.bar*.34),PH+VH-h,Math.max(1,S.bar*.68),h);}}
+ /* AI overview bands (behind candles) */
+ const f=FD(),last=S.candles[n-1];
+ if(f&&S.opts.ai)drawAI(f,last,n);
+ /* candles */
+ const bw=Math.max(1,S.bar*.68);for(let i=i0;i<=i1;i++){const c=S.candles[i],x=xi(i),up=c.c>=c.o,col=up?COL.up:COL.dn;ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1;
+  const yh=yp(c.h),yl=yp(c.l),yo=yp(c.o),yc=yp(c.c);if(S.bar<2.2){ctx.beginPath();ctx.moveTo(Math.round(x)+.5,yh);ctx.lineTo(Math.round(x)+.5,yl);ctx.stroke();continue;}
+  ctx.beginPath();ctx.moveTo(Math.round(x)+.5,yh);ctx.lineTo(Math.round(x)+.5,yl);ctx.stroke();const top=Math.min(yo,yc),h=Math.max(1,Math.abs(yc-yo));ctx.fillRect(x-bw/2,top,bw,h);}
+ /* indicators */
+ S.ind.forEach(x=>{if(!x.v)return;ctx.strokeStyle=x.c;ctx.lineWidth=1.5;ctx.beginPath();let on=false;for(let i=Math.max(0,i0-1);i<=i1;i++){const v=x.v[i];if(!isFinite(v)){on=false;continue;}const X=xi(i),Y=yp(v);if(!on){ctx.moveTo(X,Y);on=true;}else ctx.lineTo(X,Y);}ctx.stroke();});
+ /* account lines + circles + trades */
+ if(f&&S.opts.acct)drawAcct(f,last,n);
+ if(f&&S.opts.trades)drawTrades(f);
+ /* drawings */
+ drawDrawings();
+ ctx.restore();
+ /* axis tags */
+ const up=last.c>=last.o;tag(fp(last.c),yp(last.c),up?COL.up:COL.dn);
+ if(f&&S.opts.acct){const A=f.account;if(A.avg!=null&&A.avg>lo&&A.avg<hi)tag(fp(A.avg),yp(A.avg),COL.amber,'#1a1405');if(A.liq!=null&&A.liq>lo&&A.liq<hi)tag(fp(A.liq),yp(A.liq),COL.dn);}
+ if(f&&S.opts.ai)f.forecast.forEach((h,k)=>{const col=k?COL.violet:COL.pink;[h.low,h.high].forEach(v=>{if(v>lo&&v<hi)tag(fp(v),yp(v),col,'#10051a');});});
+ /* axis separators */
+ ctx.strokeStyle='rgba(255,255,255,.1)';ctx.beginPath();ctx.moveTo(PW+.5,0);ctx.lineTo(PW+.5,H-BY);ctx.moveTo(0,H-BY+.5);ctx.lineTo(W,H-BY+.5);ctx.stroke();
+ /* crosshair */
+ if(S.cur&&!dragging&&S.cur.x<PW&&S.cur.y<PH+VH){const {x,y}=S.cur;ctx.save();ctx.strokeStyle='rgba(255,255,255,.32)';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(Math.round(x)+.5,0);ctx.lineTo(Math.round(x)+.5,PH+VH);ctx.moveTo(0,Math.round(y)+.5);ctx.lineTo(PW,Math.round(y)+.5);ctx.stroke();ctx.restore();
+  if(y<=PH)tag(fp(pOfY(y)),y,'#2A3250');const t=tOfX(x),d=new Date(t);const lab=S.tf<1440?dtf.format(d):dtd.format(d);ctx.font='600 11px Inter,system-ui,sans-serif';const w=ctx.measureText(lab).width+14;ctx.fillStyle='#2A3250';ctx.fillRect(Math.min(Math.max(0,x-w/2),PW-w),H-BY+3,w,19);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(lab,Math.min(Math.max(w/2,x),PW-w/2),H-BY+13);}
+ if(i0<30)loadOlder();
+}
+function drawAI(f,last,n){
+ (f.levels||[]).forEach(l=>{const y=yp(l.price);if(y<4||y>PH-4)return;ctx.save();ctx.strokeStyle='rgba(242,244,248,.28)';ctx.lineWidth=1;ctx.setLineDash([2,5]);ctx.beginPath();ctx.moveTo(0,Math.round(y)+.5);ctx.lineTo(PW,Math.round(y)+.5);ctx.stroke();ctx.restore();
+  const tx=(l.t7!=null?'7d '+Math.round(l.t7*100)+'%':'')+(l.t30!=null?(l.t7!=null?' · ':'')+'30d '+Math.round(l.t30*100)+'%':'');if(tx){ctx.font='11px Inter,system-ui,sans-serif';ctx.fillStyle='rgba(242,244,248,.6)';ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText(fk(l.price)+'  '+tx,8,y-3);}});
+ const xL=xi(n-1);f.forecast.forEach((h,k)=>{const col=k?COL.violet:COL.pink,bars=h.days*1440/S.tf,xe=Math.min(xi(n-1+bars),PW+4),yL=yp(h.low),yH=yp(h.high),yM=yp(h.mid);
+  ctx.fillStyle=k?'rgba(155,140,255,.10)':'rgba(255,116,177,.10)';ctx.fillRect(xL,Math.min(yL,yH),Math.max(0,xe-xL),Math.abs(yL-yH));
+  ctx.strokeStyle=col;ctx.lineWidth=1.4;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(xL,yL);ctx.lineTo(xe,yL);ctx.moveTo(xL,yH);ctx.lineTo(xe,yH);ctx.stroke();
+  ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(xL,yM);ctx.lineTo(xe,yM);ctx.stroke();ctx.setLineDash([]);
+  /* line from the last price to the middle target */
+  ctx.globalAlpha=.55;ctx.beginPath();ctx.moveTo(xL,yp(last.c));ctx.lineTo(xe,yM);ctx.stroke();ctx.globalAlpha=1;
+  const pm=(h.mid/last.c-1)*100,pl=(h.low/last.c-1)*100,ph=(h.high/last.c-1)*100;ctx.font='600 11px Inter,system-ui,sans-serif';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillStyle=col;
+  const lx=Math.min(xe,PW)-6;ctx.fillText('AI '+h.label+' range  '+fk(h.low)+' – '+fk(h.high)+'  ·  mid '+fpct(pm),lx,Math.min(yL,yH)-4);ctx.textBaseline='top';ctx.fillStyle='rgba(242,244,248,.7)';ctx.font='11px Inter,system-ui,sans-serif';ctx.fillText(fpct(pl)+' / '+fpct(ph),lx,Math.max(yL,yH)+4);});
+}
+function drawAcct(f,last,n){
+ const A=f.account;if(A.avg!=null){hline(A.avg,COL.amber,[7,5],1.3);lab('Avg entry '+fu(A.avg),yp(A.avg),COL.amber);}
+ if(A.liq!=null){hline(A.liq,COL.dn,[2,4],1.3);lab('Liquidation '+fu(A.liq),yp(A.liq),COL.dn);}
+ A.next.forEach((b,k)=>{const x=xi(n-1+5+k*0),y=yp(b.price);if(y<-20||y>PH+20)return;const r=k?7:10;
+  ctx.save();ctx.strokeStyle='rgba(34,197,139,.55)';ctx.lineWidth=1;ctx.setLineDash([2,4]);ctx.beginPath();ctx.moveTo(xi(n-1),y);ctx.lineTo(x-r,y);ctx.stroke();ctx.restore();
+  ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle='rgba(34,197,139,.16)';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle=COL.buy;ctx.stroke();
+  if(!k){ctx.beginPath();ctx.arc(x,y,r+5,0,7);ctx.strokeStyle='rgba(34,197,139,.35)';ctx.lineWidth=1;ctx.stroke();}
+  ctx.font='600 11px Inter,system-ui,sans-serif';ctx.fillStyle=COL.buy;ctx.textBaseline='middle';const tx=(k?'Buy ':'Next buy ')+fu(b.price)+' · '+tl(b.type);if(x+r+12+ctx.measureText(tx).width>PW){ctx.textAlign='right';ctx.fillText(tx,x-r-8,y);}else{ctx.textAlign='left';ctx.fillText(tx,x+r+8,y);}
+  S.hit.push({x:x,y:y,r:r+4,html:'<b>'+(k?'Expected buy':'Next expected buy')+'</b><br>'+fu(b.price)+' · '+tl(b.type)+(b.usd!=null?'<br>about '+fu(b.usd):'')+'<br>'+fpct((b.price/last.c-1)*100)+' from now'+(b.note?'<br>'+esc(b.note):'')});});
+}
+function lab(t,y,col){ctx.font='600 11px Inter,system-ui,sans-serif';ctx.fillStyle=col;ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText(t,8,y-4);}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function drawTrades(f){
+ f.trades.forEach(tr=>{const i=idxT(tr.t);if(i<i0-2||i>i1+2)return;const x=xi(i),y=yp(tr.price);if(y<0||y>PH)return;const buy=tr.side==='BUY',col=buy?COL.buy:COL.sell,r=8;
+  const mg=tr.type==='MARGIN';ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle=mg?'#0B1A22':col;ctx.fill();ctx.lineWidth=mg?2:1.5;ctx.strokeStyle=mg?col:'#060C1C';ctx.stroke();ctx.strokeStyle=mg?col:'#fff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-3.5,y);ctx.lineTo(x+3.5,y);if(buy){ctx.moveTo(x,y-3.5);ctx.lineTo(x,y+3.5);}ctx.stroke();
+  S.hit.push({x:x,y:y,r:r+3,html:'<b style="color:'+col+'">'+(buy?'+ Buy':'− Sell')+'</b> · '+(tr.type==='MARGIN'?'margin add':'BTC')+'<br>'+fu(tr.price)+(tr.usd!=null?' · '+fu(tr.usd):'')+'<br>'+dtf.format(new Date(tr.t))+(tr.paper?'<br><i>paper trade</i>':'')});});
+}
+function dp(d){return{x:xi(idxT(d.t)),y:yp(d.p)};}
+function drawDrawings(){
+ const all=S.draw.slice();if(S.dr&&S.dr.p2)all.push(S.dr);
+ all.forEach((d,k)=>{const sel=k===S.sel&&d!==S.dr,col=sel?'#fff':d.col||COL.blue;ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=sel?2:1.5;ctx.setLineDash([]);
+  if(d.type==='hline'){const y=yp(d.p1.p);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(PW,y);ctx.stroke();ctx.font='600 11px Inter,system-ui,sans-serif';ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText(fp(d.p1.p),8,y-3);return;}
+  if(!d.p2)return;const a=dp(d.p1),b=dp(d.p2);
+  if(d.type==='trend'){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();[a,b].forEach(q=>{ctx.beginPath();ctx.arc(q.x,q.y,sel?4:2.5,0,7);ctx.fill();});}
+  else if(d.type==='rect'){ctx.globalAlpha=.12;ctx.fillRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y));ctx.globalAlpha=1;ctx.strokeRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y));}
+  else if(d.type==='fib'){const lv=[0,.236,.382,.5,.618,.786,1],p1=d.p1.p,p2=d.p2.p,x1=Math.min(a.x,b.x),x2=Math.max(a.x,b.x);ctx.font='11px Inter,system-ui,sans-serif';ctx.textAlign='left';ctx.textBaseline='bottom';
+   lv.forEach((r,j)=>{const p=p2+(p1-p2)*r,y=yp(p);ctx.globalAlpha=.9;ctx.strokeStyle=sel?'#fff':['#F0556A','#FF9A5B','#F5C451','#22C58B','#4FD1C5','#5B9BFF','#9B8CFF'][j];ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(Math.max(x2,x1+40),y);ctx.stroke();ctx.fillStyle=ctx.strokeStyle;ctx.fillText(r+'  ('+fp(p)+')',x1+4,y-2);ctx.globalAlpha=1;});
+   ctx.strokeStyle='rgba(255,255,255,.3)';ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.setLineDash([]);}
+ });
+}
+function distSeg(px,py,a,b){const dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy;let t=l?((px-a.x)*dx+(py-a.y)*dy)/l:0;t=Math.max(0,Math.min(1,t));return Math.hypot(px-(a.x+t*dx),py-(a.y+t*dy));}
+function pickDrawing(x,y){let best=-1,bd=9;S.draw.forEach((d,k)=>{let v=1e9;if(d.type==='hline')v=Math.abs(y-yp(d.p1.p));else{const a=dp(d.p1),b=dp(d.p2);if(d.type==='trend')v=distSeg(x,y,a,b);else if(d.type==='rect'){const x1=Math.min(a.x,b.x),x2=Math.max(a.x,b.x),y1=Math.min(a.y,b.y),y2=Math.max(a.y,b.y);v=Math.min(distSeg(x,y,{x:x1,y:y1},{x:x2,y:y1}),distSeg(x,y,{x:x2,y:y1},{x:x2,y:y2}),distSeg(x,y,{x:x2,y:y2},{x:x1,y:y2}),distSeg(x,y,{x:x1,y:y2},{x:x1,y:y1}));}else if(d.type==='fib'){const x1=Math.min(a.x,b.x),x2=Math.max(a.x,b.x);if(x>=x1-6&&x<=Math.max(x2,x1+40)+6)[0,.236,.382,.5,.618,.786,1].forEach(r=>{v=Math.min(v,Math.abs(y-yp(d.p2.p+(d.p1.p-d.p2.p)*r)));});}}
+  if(v<bd){bd=v;best=k;}});return best;}
+function saveDraw(){LS.set('fava-ch-draw-'+S.coin,S.draw);}
+function loadDraw(){S.draw=LS.get('fava-ch-draw-'+S.coin,[]);S.sel=-1;}
+
+/* ---------- interaction ---------- */
+function pos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+function pt(x,y){return{t:tOfX(x),p:pOfY(Math.max(0,Math.min(PH,y)))};}
+const TOOLS_2={trend:1,rect:1,fib:1};
+cv.addEventListener('pointerdown',e=>{
+ const p=pos(e);cv.setPointerCapture(e.pointerId);
+ if(S.tool!=='cursor'&&p.x<PW&&p.y<PH){
+  if(S.tool==='hline'){S.draw.push({type:'hline',p1:pt(p.x,p.y),col:COL.blue});S.tool='cursor';saveDraw();toolUI();draw();return;}
+  if(!S.dr){S.dr={type:S.tool,p1:pt(p.x,p.y),p2:pt(p.x,p.y),col:S.tool==='rect'?COL.violet:COL.blue,x0:p.x,y0:p.y};}
+  else{S.dr.p2=pt(p.x,p.y);finishDr();}
+  draw();return;}
+ if(p.x<PW&&p.y<PH+VH){const k=pickDrawing(p.x,p.y);S.sel=k;}
+ dragging={x:p.x,y:p.y,right:S.right,moved:false,axis:p.x>=PW};draw();
+});
+cv.addEventListener('pointermove',e=>{
+ const p=pos(e);S.cur=p;
+ if(S.dr){S.dr.p2=pt(p.x,p.y);}
+ if(dragging){const dx=p.x-dragging.x;if(Math.abs(dx)>2||Math.abs(p.y-dragging.y)>2)dragging.moved=true;
+  if(dragging.axis){const k=Math.exp((p.x-dragging.x)*-.004);S.bar=Math.max(.6,Math.min(60,S.bar*k));dragging.x=p.x;}else S.right=dragging.right-dx/S.bar;cv.style.cursor='grabbing';}
+ else cv.style.cursor=S.tool!=='cursor'?'crosshair':(p.x>=PW?'ew-resize':'crosshair');
+ hover(p);schedule();renderHead();
+});
+function finishDr(){if(S.dr&&(Math.abs(S.dr.p1.t-S.dr.p2.t)>0||Math.abs(S.dr.p1.p-S.dr.p2.p)>0)){delete S.dr.x0;delete S.dr.y0;S.draw.push(S.dr);saveDraw();}S.dr=null;S.tool='cursor';toolUI();}
+cv.addEventListener('pointerup',e=>{const p=pos(e);if(S.dr&&S.dr.x0!=null){const d=Math.hypot(p.x-S.dr.x0,p.y-S.dr.y0);if(d>8){S.dr.p2=pt(p.x,p.y);finishDr();}}dragging=null;cv.style.cursor='crosshair';schedule();});
+cv.addEventListener('pointerleave',()=>{S.cur=null;tip.hidden=true;schedule();renderHead();});
+cv.addEventListener('wheel',e=>{e.preventDefault();const p=pos(e);const anchor=S.right-(PW-p.x)/S.bar;const k=Math.exp(-e.deltaY*.0015);S.bar=Math.max(.6,Math.min(60,S.bar*k));S.right=anchor+(PW-p.x)/S.bar;schedule();},{passive:false});
+cv.addEventListener('dblclick',e=>{const p=pos(e);if(p.x>=PW||S.tool!=='cursor'){fit();schedule();}});
+function hover(p){let h=null;for(const k of S.hit){if(Math.hypot(p.x-k.x,p.y-k.y)<=k.r){h=k;break;}}if(h&&!dragging){tip.innerHTML=h.html;tip.hidden=false;const r=wrap.getBoundingClientRect();tip.style.left=Math.min(p.x+14,r.width-190)+'px';tip.style.top=Math.max(4,p.y-10)+'px';}else tip.hidden=true;}
+function schedule(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;draw();});}
+window.addEventListener('keydown',e=>{if(!root.offsetParent)return;const tg=e.target&&e.target.tagName;if(tg==='INPUT'||tg==='TEXTAREA')return;
+ if((e.key==='Delete'||e.key==='Backspace')&&S.sel>=0){S.draw.splice(S.sel,1);S.sel=-1;saveDraw();schedule();e.preventDefault();}
+ else if(e.key==='Escape'){if(S.dr){S.dr=null;}S.tool='cursor';toolUI();schedule();}});
+new ResizeObserver(()=>schedule()).observe(wrap);
+
+/* ---------- header, toolbar, controls ---------- */
+function status(t){const s=$('chStatus');s.textContent=t;s.hidden=!t;}
+function banner(){const b=$('chBanner');let m='';if(S.offline)m='Could not reach price data, so this is an offline SAMPLE series, not real prices.';else if(S.feedErr==='private')m='Can\'t read your BTC Bot Control sheet yet. In Google Sheets: Share > General access > Anyone with the link > Viewer.';else if(S.feedErr==='net'&&!S.feed)m='Could not reach your Google Sheet. Retrying…';b.textContent=m;b.hidden=!m;}
+function renderHead(){
+ const n=S.candles.length;if(!n)return;const i=S.cur&&S.cur.x<PW?Math.max(0,Math.min(n-1,Math.round(S.right-(PW-S.cur.x)/S.bar))):n-1,c=S.candles[i],prev=i>0?S.candles[i-1].c:c.o;
+ const up=c.c>=c.o,col=up?COL.up:COL.dn;$('chOHLC').innerHTML='<span>O <b style="color:'+col+'">'+fp(c.o)+'</b></span><span>H <b style="color:'+col+'">'+fp(c.h)+'</b></span><span>L <b style="color:'+col+'">'+fp(c.l)+'</b></span><span>C <b style="color:'+col+'">'+fp(c.c)+'</b></span><span style="color:'+col+'">'+fpct((c.c/prev-1)*100)+'</span>';
+ const m=S.hl[S.coin],last=S.candles[n-1].c,px=m&&m.px?m.px:last;$('chPrice').textContent=fu(px);const ch=m&&m.prev?(px/m.prev-1)*100:null;const e=$('chChg');e.textContent=ch==null?'':fpct(ch)+' 24h';e.style.color=ch>=0?COL.up:COL.dn;
+}
+function toolUI(){root.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('on',b.dataset.tool===S.tool));cv.style.cursor='crosshair';}
+function tfUI(){const box=$('chTf');box.innerHTML='';PRESETS.forEach(p=>{const b=document.createElement('button');b.type='button';b.textContent=p[0];b.className=S.tf===p[1]?'on':'';b.onclick=()=>setTf(p[1]);box.appendChild(b);});
+ const custom=!PRESETS.some(p=>p[1]===S.tf);const inp=$('chCustom');inp.classList.toggle('on',custom);if(custom)inp.value=tfLabel(S.tf);}
+function setTf(m){m=Math.max(5,m);if(m===S.tf&&S.candles.length)return;/* keep the view anchored on the same moment */S.tf=m;LS.set('fava-ch-tf',m);tfUI();load();}
+$('chCustom').addEventListener('keydown',e=>{if(e.key!=='Enter')return;const v=parseTf(e.target.value);if(!v){toast('Try something like 45m, 3h, 2d');return;}if(v<5){toast('The smallest time frame is 5 minutes');return;}e.target.blur();setTf(Math.round(v/5)*5);});
+$('chCustom').addEventListener('focus',e=>{e.target.select();});
+function toast(t){const s=$('chStatus');s.textContent=t;s.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>{if(!S.loading)s.hidden=true;},2400);}
+root.querySelectorAll('[data-tool]').forEach(b=>b.addEventListener('click',()=>{S.tool=b.dataset.tool;S.dr=null;toolUI();}));
+$('chClear').addEventListener('click',()=>{if(S.sel>=0){S.draw.splice(S.sel,1);S.sel=-1;}else S.draw=[];saveDraw();schedule();});
+/* menus */
+function closeMenus(except){root.querySelectorAll('.ch-menu').forEach(m=>{if(m!==except)m.hidden=true;});}
+function menuBtn(btn,menu,build){btn.addEventListener('click',e=>{e.stopPropagation();const open=menu.hidden;closeMenus(menu);if(open){build();menu.hidden=false;}else menu.hidden=true;});menu.addEventListener('click',e=>e.stopPropagation());}
+document.addEventListener('click',()=>closeMenus());
+function opt(label,key){const d=document.createElement('label');d.className='ch-opt';d.innerHTML='<span>'+label+'</span><button type="button" class="switch sm" role="switch" aria-checked="'+(!!S.opts[key])+'"><span></span></button>';const b=d.querySelector('button');b.onclick=()=>{S.opts[key]=!S.opts[key];b.setAttribute('aria-checked',S.opts[key]);LS.set('fava-ch-opts',S.opts);schedule();renderPanel();};return d;}
+menuBtn($('chOptBtn'),$('chOptMenu'),()=>{const m=$('chOptMenu');m.innerHTML='';[['AI overview (price targets)','ai'],['Account lines & next buy','acct'],['Trade markers','trades'],['Volume','vol'],['Log scale','log']].forEach(o=>m.appendChild(opt(o[0],o[1])));});
+menuBtn($('chIndBtn'),$('chIndMenu'),buildInd);
+function buildInd(){const m=$('chIndMenu');m.innerHTML='';S.ind.forEach((x,i)=>{const d=document.createElement('div');d.className='ch-opt';d.innerHTML='<span><i class="dot" style="background:'+x.c+'"></i>'+x.type.toUpperCase()+' '+x.n+'</span><span class="ch-opt-r"><button type="button" class="switch sm" role="switch" aria-checked="'+x.on+'"><span></span></button>'+(i>=IND_PRESETS.length?'<button type="button" class="ch-x" aria-label="Remove">×</button>':'')+'</span>';
+  d.querySelector('.switch').onclick=()=>{x.on=!x.on;LS.set('fava-ch-ind',S.ind.map(({type,n,c,on})=>({type,n,c,on})));calcInd();schedule();buildInd();};const rm=d.querySelector('.ch-x');if(rm)rm.onclick=()=>{S.ind.splice(i,1);LS.set('fava-ch-ind',S.ind.map(({type,n,c,on})=>({type,n,c,on})));calcInd();schedule();buildInd();};m.appendChild(d);});
+ const add=document.createElement('div');add.className='ch-add';add.innerHTML='<select id="indT"><option value="sma">SMA</option><option value="ema">EMA</option></select><input id="indN" type="number" min="2" max="1000" placeholder="Length" inputmode="numeric"><button type="button">Add</button>';
+ add.querySelector('button').onclick=()=>{const n=parseInt(add.querySelector('#indN').value,10);if(!(n>=2&&n<=1000))return;const cols=['#FF74B1','#4FD1C5','#F5C451','#9B8CFF','#FF9A5B','#5B9BFF'];S.ind.push({type:add.querySelector('#indT').value,n:n,c:cols[S.ind.length%cols.length],on:true});LS.set('fava-ch-ind',S.ind.map(({type,n,c,on})=>({type,n,c,on})));calcInd();schedule();buildInd();};m.appendChild(add);}
+
+/* ---------- right panel ---------- */
+function renderPanel(){
+ root.querySelectorAll('[data-ptab]').forEach(b=>b.classList.toggle('on',b.dataset.ptab===S.tab));const box=$('chPanelBody');if(!box)return;
+ if(S.tab==='trades')box.innerHTML=tradesHTML();else box.innerHTML=acctHTML();
+ box.querySelectorAll('[data-trade]').forEach(r=>r.addEventListener('click',()=>{const t=FD().trades[+r.dataset.trade];const i=idxT(t.t);S.right=i+PW/S.bar*.4;schedule();}));
+}
+function statusLine(){
+ if(S.coin!=='BTC')return '<p class="ch-fine">Account lines, trades and the price outlook are only for Bitcoin.</p>';
+ if(S.feedErr==='private')return '<p class="ch-sample">Can\'t read your BTC Bot Control sheet yet. In Google Sheets choose Share, then "Anyone with the link" as Viewer.</p>';
+ if(!S.feed)return '<p class="ch-fine">'+(S.feedErr?'Could not reach your Google Sheet. Retrying…':'Loading your sheet…')+'</p>';
+ return '<p class="ch-fine"><span class="ch-mode '+(S.feed.mode==='LIVE'?'live':'paper')+'">'+S.feed.mode+'</span>'+(S.feed.updated?' Sheet updated '+esc(S.feed.updated):'')+'</p>';
+}
+function acctHTML(){
+ const f=FD();if(!f)return statusLine();const A=f.account,last=S.candles.length?S.candles[S.candles.length-1].c:null;
+ const pl=A.profit!=null?A.profit:(A.avg&&last&&A.btc!=null?(last-A.avg)*A.btc:null),plp=(A.avg&&last)?(last/A.avg-1)*100:null,liqd=(A.liq&&last)?(A.liq/last-1)*100:null;
+ const row=(k,v,s)=>'<div class="ch-kv"><span>'+k+'</span><b'+(s?' style="color:'+s+'"':'')+'>'+v+'</b></div>';
+ let h=statusLine()+row('Average entry',A.avg!=null?fu(A.avg):'–',COL.amber)+row('Position',A.btc!=null?A.btc+' BTC':'–')+row('Liquidation price',A.liq!=null?fu(A.liq)+(liqd!=null?' <small>('+fpct(liqd)+')</small>':''):'–',COL.dn)
+  +row('Open profit',pl!=null?(pl>=0?'+':'−')+fu(Math.abs(pl))+(plp!=null?' <small>('+fpct(plp)+')</small>':''):'–',pl==null?null:pl>=0?COL.up:COL.dn)+row('Free cash',A.cash!=null?fu(A.cash):'–')+row('Money in position',A.margin!=null?fu(A.margin):'–');
+ h+='<h4>Where we buy next</h4>';
+ if(A.next.length)A.next.forEach(b=>{h+='<div class="ch-buy"><i class="bring"></i><div><b>'+fu(b.price)+'</b> <em>'+tl(b.type)+'</em><span>'+(last?fpct((b.price/last-1)*100)+' from now':'')+(b.usd!=null?' · about '+fu(b.usd):'')+'</span></div></div>';});
+ else h+='<p class="ch-fine">The bot has not filled in "Next buy price" on the sheet yet, so no circle is drawn.</p>';
+ if(f.nextText)h+='<p class="ch-note">'+esc(f.nextText)+'</p>';
+ h+='<h4>Price outlook</h4>';
+ if(f.forecast.length)f.forecast.forEach((x,k)=>{const col=k?COL.violet:COL.pink;h+='<div class="ch-fc"><span style="color:'+col+'">'+esc(x.label)+'</span><b>'+fk(x.low)+' – '+fk(x.high)+'</b><small>mid '+fk(x.mid)+(last?' ('+fpct((x.mid/last-1)*100)+')':'')+'</small></div>';});
+ else if(f.outlookMissing)h+='<p class="ch-fine">"Price outlook (data)" is empty on the sheet, so there are no AI lines yet.</p>';
+ if(f.levels.length&&last){h+='<h4>Levels</h4>';f.levels.slice().sort((p,q)=>Math.abs(p.price-last)-Math.abs(q.price-last)).slice(0,8).forEach(l=>{h+='<div class="ch-kv"><span>'+fu(l.price)+' <small>'+(l.kind?esc(l.kind):'')+'</small></span><b><small>'+(l.t7!=null?'7d '+Math.round(l.t7*100)+'%':'')+(l.t30!=null?' · 30d '+Math.round(l.t30*100)+'%':'')+(l.brk!=null?' · breaks '+Math.round(l.brk*100)+'%':'')+'</small></b></div>';});}
+ if(f.phase)h+='<h4>Cycle</h4><p class="ch-note">'+esc(f.phase)+'</p>';
+ return h;
+}
+function tradesHTML(){
+ const f=FD();if(!f)return statusLine();if(!f.trades.length)return statusLine()+'<p class="ch-fine">No trades yet.</p>';
+ let h=statusLine()+'<div class="ch-tr head"><span></span><span>Price</span><span>Amount</span><span>When</span></div>';
+ f.trades.map((t,i)=>({t:t,i:i})).reverse().forEach(o=>{const t=o.t,buy=t.side==='BUY';h+='<div class="ch-tr" data-trade="'+o.i+'"><span class="sg '+(buy?'b':'s')+(t.type==='MARGIN'?' m':'')+'">'+(buy?'+':'−')+'</span><span>'+fu(t.price)+'</span><span>'+(t.usd!=null?fu(t.usd):'–')+(t.type==='MARGIN'?' <small>margin</small>':'')+'</span><span>'+dtd.format(new Date(t.t)).replace(/, \d{4}/,'')+'</span></div>';});
+ return h;
+}
+/* ---------- global watchlist (full view) ---------- */
+const WATCH_TAB='Public Watchlist';
+async function loadStats(sym){
+ try{const a=await fetchNative(sym,15,Date.now(),3000);if(!a.length)throw 0;const last=a[a.length-1].c,now=Date.now();
+  const at=ms=>{const t=now-ms;if(a[0].t>t)return null;for(let i=a.length-1;i>=0;i--)if(a[i].t<=t)return a[i].o;return null;};
+  const pc=ms=>{const r=at(ms);return r?(last/r-1)*100:null;};
+  S.wlStats[sym]={px:last,h1:pc(36e5),h4:pc(144e5),d1:pc(864e5),w1:pc(6048e5),m1:pc(2592e6)};
+ }catch(e){S.wlStats[sym]=S.wlStats[sym]||null;}
+}
+async function loadWatchList(){
+ const map={};let err='';
+ try{const t=await sheetTab(WATCH_TAB);const h=(t[0]||[]).map(x=>String(x).trim().toLowerCase()),iS=h.indexOf('symbol'),iN=h.indexOf('name'),iW=h.findIndex(x=>x.indexOf('watcher')===0);
+  if(iS<0)throw new Error('format');
+  t.slice(1).forEach(r=>{const s=String(r[iS]||'').trim().toUpperCase();if(!s)return;const w=iW>=0?num(r[iW]):null;const o=map[s]||(map[s]={sym:s,name:'',watchers:0});if(!o.name&&iN>=0)o.name=r[iN]||'';o.watchers+=w==null?1:w;});}
+ catch(e){err=/private/.test(String(e.message))?'private':'sheet';}
+ if(!map.BTC)map.BTC={sym:'BTC',name:'Bitcoin',watchers:1};if(!map.BTC.name||map.BTC.name==='BTC')map.BTC.name='Bitcoin';
+ S.wlErr=err;S.wlRows=Object.values(map).sort((a,b)=>(a.sym==='BTC'?-1:b.sym==='BTC'?1:b.watchers-a.watchers||a.sym.localeCompare(b.sym)));
+ await Promise.all(S.wlRows.map(r=>loadStats(r.sym)));renderWL();
+}
+const PERSON='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>';
+function renderWL(){
+ const box=$('chWLBody');if(!box)return;const cell=v=>v==null?'<td class="n">–</td>':'<td class="n" style="color:'+(v>=0?COL.up:COL.dn)+'">'+fpct(v)+'</td>';
+ let h='<table class="wl-t"><thead><tr><th>Symbol</th><th class="n">Price</th><th class="n">1h</th><th class="n">4h</th><th class="n">1D</th><th class="n">1W</th><th class="n">1M</th><th class="n">Watching</th></tr></thead><tbody>';
+ S.wlRows.forEach(r=>{const s=S.wlStats[r.sym]||{};h+='<tr data-sym="'+r.sym+'" class="'+(r.sym===S.coin?'on':'')+'"><td><b>'+r.sym+'</b><small>'+esc(r.name&&r.name!==r.sym?r.name:'')+'</small></td><td class="n">'+(s.px!=null?fu(s.px):'–')+'</td>'+cell(s.h1)+cell(s.h4)+cell(s.d1)+cell(s.w1)+cell(s.m1)+'<td class="n"><span class="wl-ppl" title="People watching this">'+PERSON+r.watchers+'</span></td></tr>';});
+ h+='</tbody></table>';
+ if(S.wlErr==='private')h+='<p class="ch-sample">Can\'t read the "'+WATCH_TAB+'" tab yet because the sheet is not shared as "Anyone with the link can view".</p>';
+ else if(S.wlErr)h+='<p class="ch-fine">The "'+WATCH_TAB+'" tab was not found on your BTC Bot Control sheet, so only Bitcoin is listed.</p>';
+ box.innerHTML=h;box.querySelectorAll('tr[data-sym]').forEach(r=>r.addEventListener('click',()=>{root.classList.remove('wl');setCoin(r.dataset.sym);}));
+}
+$('chWLBtn').addEventListener('click',()=>{root.classList.toggle('wl');if(root.classList.contains('wl'))loadWatchList();else schedule();});
+root.querySelectorAll('[data-ptab]').forEach(b=>b.addEventListener('click',()=>{S.tab=b.dataset.ptab;renderPanel();}));
+function setCoin(c){if(c===S.coin)return;S.coin=c;LS.set('fava-ch-coin',c);$('chSym').textContent=c+' / USD';$('chSrc').textContent='Hyperliquid · '+c+' perp';load();}
+$('chPanelBtn').addEventListener('click',()=>root.classList.toggle('no-panel'));
+
+/* ---------- start ---------- */
+let started=false,timers=[];
+function show(){
+ if(!started){started=true;$('chSym').textContent=S.coin+' / USD';tfUI();toolUI();$('chSrc').textContent='Hyperliquid · '+S.coin+' perp';load().then(()=>{loadFeed();});loadCtx();
+  timers.push(setInterval(liveTick,10000),setInterval(()=>{if(root.offsetParent)loadCtx();},20000),setInterval(()=>{if(root.offsetParent)loadFeed();},30000),setInterval(()=>{if(root.offsetParent&&root.classList.contains('wl'))loadWatchList();},60000));}
+ else schedule();
+ renderPanel();
+}
+window.__favaCharts={show:show,redraw:schedule};
 })();
 </script>
 </body>
