@@ -2750,6 +2750,7 @@ const fp=p=>{if(p==null||!isFinite(p))return '–';const a=Math.abs(p);return a>
 const fu=p=>'$'+fp(p);
 const hexA=(h,a)=>{const n=parseInt(h.slice(1),16);return 'rgba('+(n>>16)+','+((n>>8)&255)+','+(n&255)+','+a+')';};
 const ax=p=>{if(!S.pct||!S.candles.length)return fp(p);const ref=S.candles[Math.min(S.candles.length-1,Math.max(0,i0))].c,v=(p/ref-1)*100;return (v>=0?'+':'')+v.toFixed(Math.abs(v)>=100?0:1)+'%';};
+const hcol=h=>h.days<=2?'#4FD1C5':h.days<=10?COL.pink:COL.violet;
 const IL=v=>S.opts.log?Math.exp(v):v;
 const fpct=p=>(p>=0?'+':'')+p.toFixed(2)+'%';
 const fk=p=>p>=1000?'$'+(p/1000).toFixed(p>=100000?0:1)+'k':'$'+fp(p);
@@ -2807,8 +2808,9 @@ const tl=t=>t==='MARGIN'?'margin add':t==='MIXED'?'BTC + margin':t==='ANY'?'expe
 function parseOutlook(s){
  const o={horizons:[],levels:[],next:[],raw:null};if(!s)return o;let j;try{j=JSON.parse(s);}catch(e){return o;}o.raw=j;
  const add=(label,days,x)=>{if(x&&isFinite(+x.low)&&isFinite(+x.high))o.horizons.push({label:label,days:days,low:+x.low,mid:x.mid!=null?+x.mid:(+x.low+ +x.high)/2,high:+x.high});};
- add('7d',7,j.range7||j.range_7d||j.r7);add('30d',30,j.range30||j.range_30d||j.r30||j.likelyRange30);
+ add('48h',2,j.range48||j.range48h||j.range_48h||j.range2d||j.r48);add('7d',7,j.range7||j.range_7d||j.r7);add('30d',30,j.range30||j.range_30d||j.r30||j.likelyRange30);
  if(Array.isArray(j.horizons))j.horizons.forEach(h=>add(h.label||((+h.days||7)+'d'),+h.days||parseInt(h.label)||7,h));
+ o.horizons.sort((p,q)=>p.days-q.days);
  o.levels=(j.levels||[]).map(l=>({price:+(l.price!=null?l.price:l.level),kind:String(l.kind||l.type||''),t7:l.touch7!=null?+l.touch7:l.t7!=null?+l.t7:null,t30:l.touch30!=null?+l.touch30:l.t30!=null?+l.t30:null,brk:l.break!=null?+l.break:l.brk!=null?+l.brk:null})).filter(l=>isFinite(l.price));
  o.next=(j.next_buys||j.nextBuys||[]).map(x=>({price:+x.price,usd:x.usd==null?null:+x.usd,type:ntype(x.type),note:x.note||''})).filter(x=>isFinite(x.price));
  return o;
@@ -2930,7 +2932,7 @@ function draw(){
  /* axis tags */
  const up=last.c>=last.o;tag(ax(last.c),yp(last.c),up?COL.up:COL.dn);
  if(f&&S.opts.acct){const A=f.account;if(A.avg!=null&&A.avg>lo&&A.avg<hi)tag(ax(A.avg),yp(A.avg),COL.amber,'#1a1405');if(A.liq!=null&&A.liq>lo&&A.liq<hi)tag(ax(A.liq),yp(A.liq),COL.dn);}
- if(f&&S.opts.ai)f.forecast.forEach((h,k)=>{const col=k?COL.violet:COL.pink;[h.low,h.high].forEach(v=>{if(v>lo&&v<hi)tag(ax(v),yp(v),col,'#10051a');});});
+ if(f&&S.opts.ai)f.forecast.forEach(h=>{const col=hcol(h);[h.low,h.high].forEach(v=>{if(v>lo&&v<hi)tag(ax(v),yp(v),col,'#10051a');});});
  /* axis separators */
  ctx.strokeStyle='rgba(255,255,255,.1)';ctx.beginPath();ctx.moveTo(PW+.5,0);ctx.lineTo(PW+.5,H-BY);ctx.moveTo(0,H-BY+.5);ctx.lineTo(W,H-BY+.5);ctx.stroke();
  /* crosshair */
@@ -2941,15 +2943,12 @@ function draw(){
 function drawAI(f,last,n){
  (f.levels||[]).forEach(l=>{const y=yp(l.price);if(y<4||y>PH-4)return;ctx.save();ctx.strokeStyle='rgba(242,244,248,.28)';ctx.lineWidth=1;ctx.setLineDash([2,5]);ctx.beginPath();ctx.moveTo(0,Math.round(y)+.5);ctx.lineTo(PW,Math.round(y)+.5);ctx.stroke();ctx.restore();
   const tx=(l.t7!=null?'7d '+Math.round(l.t7*100)+'%':'')+(l.t30!=null?(l.t7!=null?' · ':'')+'30d '+Math.round(l.t30*100)+'%':'');if(tx){ctx.font='11px Inter,system-ui,sans-serif';ctx.fillStyle='rgba(242,244,248,.6)';ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText(fk(l.price)+'  '+tx,8,y-3);}});
- const xL=xi(n-1);f.forecast.forEach((h,k)=>{const col=k?COL.violet:COL.pink,bars=h.days*1440/S.tf,xe=Math.min(xi(n-1+bars),PW+4),yL=yp(h.low),yH=yp(h.high),yM=yp(h.mid);
-  ctx.fillStyle=k?'rgba(155,140,255,.10)':'rgba(255,116,177,.10)';ctx.fillRect(xL,Math.min(yL,yH),Math.max(0,xe-xL),Math.abs(yL-yH));
-  ctx.strokeStyle=col;ctx.lineWidth=1.4;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(xL,yL);ctx.lineTo(xe,yL);ctx.moveTo(xL,yH);ctx.lineTo(xe,yH);ctx.stroke();
-  ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(xL,yM);ctx.lineTo(xe,yM);ctx.stroke();ctx.setLineDash([]);
-  /* line from the last price to the middle target */
-  ctx.globalAlpha=.55;ctx.beginPath();ctx.moveTo(xL,yp(last.c));ctx.lineTo(xe,yM);ctx.stroke();ctx.globalAlpha=1;
-  if(xe-xL>24){const ew=Math.min(60,(xe-xL)/2);ctx.save();ctx.setLineDash([5,4]);ctx.strokeStyle=col;ctx.globalAlpha=.8;ctx.lineWidth=1.3;ctx.beginPath();ctx.ellipse(xe-ew,(yL+yH)/2,ew+8,Math.abs(yL-yH)/2+10,0,0,7);ctx.stroke();ctx.restore();}
+ f.forecast.forEach(h=>{const col=hcol(h),yL=yp(h.low),yH=yp(h.high),yM=yp(h.mid),top=Math.min(yL,yH),bot=Math.max(yL,yH);
+  ctx.fillStyle=hexA(col,.075);ctx.fillRect(0,top,PW,bot-top);
+  ctx.strokeStyle=col;ctx.lineWidth=1.4;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(0,yL);ctx.lineTo(PW,yL);ctx.moveTo(0,yH);ctx.lineTo(PW,yH);ctx.stroke();
+  ctx.globalAlpha=.55;ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(0,yM);ctx.lineTo(PW,yM);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
   const pm=(h.mid/last.c-1)*100,pl=(h.low/last.c-1)*100,ph=(h.high/last.c-1)*100;ctx.font='600 11px Inter,system-ui,sans-serif';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillStyle=col;
-  const lx=Math.min(xe,PW)-6;ctx.fillText('AI '+h.label+' range  '+fk(h.low)+' – '+fk(h.high)+'  ·  mid '+fpct(pm),lx,Math.min(yL,yH)-4);ctx.textBaseline='top';ctx.fillStyle='rgba(242,244,248,.7)';ctx.font='11px Inter,system-ui,sans-serif';ctx.fillText(fpct(pl)+' / '+fpct(ph),lx,Math.max(yL,yH)+4);});
+  ctx.fillText('AI '+h.label+' range  '+fk(h.low)+' – '+fk(h.high)+'  ·  mid '+fpct(pm),PW-8,top-4);ctx.textBaseline='top';ctx.fillStyle='rgba(242,244,248,.7)';ctx.font='11px Inter,system-ui,sans-serif';ctx.fillText(fpct(pl)+' / '+fpct(ph),PW-8,bot+4);});
 }
 function drawAcct(f,last,n){
  const A=f.account;if(A.avg!=null){hline(A.avg,COL.amber,[7,5],1.3);lab('Avg entry '+fu(A.avg),yp(A.avg),COL.amber);}
@@ -3249,7 +3248,7 @@ function acctHTML(){
  else h+='<p class="ch-fine">The bot has not filled in "Next buy price" on the sheet yet, so no circle is drawn.</p>';
  if(f.nextText)h+='<p class="ch-note">'+esc(f.nextText)+'</p>';
  h+='<h4>Price outlook</h4>';
- if(f.forecast.length)f.forecast.forEach((x,k)=>{const col=k?COL.violet:COL.pink;h+='<div class="ch-fc"><span style="color:'+col+'">'+esc(x.label)+'</span><b>'+fk(x.low)+' – '+fk(x.high)+'</b><small>mid '+fk(x.mid)+(last?' ('+fpct((x.mid/last-1)*100)+')':'')+'</small></div>';});
+ if(f.forecast.length)f.forecast.forEach(x=>{const col=hcol(x);h+='<div class="ch-fc"><span style="color:'+col+'">'+esc(x.label)+'</span><b>'+fk(x.low)+' – '+fk(x.high)+'</b><small>mid '+fk(x.mid)+(last?' ('+fpct((x.mid/last-1)*100)+')':'')+'</small></div>';});
  else if(f.outlookMissing)h+='<p class="ch-fine">"Price outlook (data)" is empty on the sheet, so there are no AI lines yet.</p>';
  if(f.levels.length&&last){h+='<h4>Levels</h4>';f.levels.slice().sort((p,q)=>Math.abs(p.price-last)-Math.abs(q.price-last)).slice(0,8).forEach(l=>{h+='<div class="ch-kv"><span>'+fu(l.price)+' <small>'+(l.kind?esc(l.kind):'')+'</small></span><b><small>'+(l.t7!=null?'7d '+Math.round(l.t7*100)+'%':'')+(l.t30!=null?' · 30d '+Math.round(l.t30*100)+'%':'')+(l.brk!=null?' · breaks '+Math.round(l.brk*100)+'%':'')+'</small></b></div>';});}
  h+=predHTML(f,last);
