@@ -2806,13 +2806,16 @@ const azMs=s=>{const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):
 function ntype(s){s=String(s||'').toLowerCase();return s.includes('margin add')||s.includes('all margin')?'MARGIN':s.includes('mixed')?'MIXED':'BTC';}
 const tl=t=>t==='MARGIN'?'margin add':t==='MIXED'?'BTC + margin':t==='ANY'?'expected buy':'BTC buy';
 function parseOutlook(s){
- const o={horizons:[],levels:[],next:[],raw:null};if(!s)return o;let j;try{j=JSON.parse(s);}catch(e){return o;}o.raw=j;
+ const o={horizons:[],levels:[],next:[],raw:null,emerg:[],bottom:null};if(!s)return o;let j;try{j=JSON.parse(s);}catch(e){return o;}o.raw=j;
  const add=(label,days,x)=>{if(x&&isFinite(+x.low)&&isFinite(+x.high))o.horizons.push({label:label,days:days,low:+x.low,mid:x.mid!=null?+x.mid:(+x.low+ +x.high)/2,high:+x.high});};
  add('48h',2,j.range48||j.range48h||j.range_48h||j.range2d||j.r48);add('7d',7,j.range7||j.range_7d||j.r7);add('30d',30,j.range30||j.range_30d||j.r30||j.likelyRange30);
  if(Array.isArray(j.horizons))j.horizons.forEach(h=>add(h.label||((+h.days||7)+'d'),+h.days||parseInt(h.label)||7,h));
  o.horizons.sort((p,q)=>p.days-q.days);
  o.levels=(j.levels||[]).map(l=>({price:+(l.price!=null?l.price:l.level),kind:String(l.kind||l.type||''),t7:l.touch7!=null?+l.touch7:l.t7!=null?+l.t7:null,t30:l.touch30!=null?+l.touch30:l.t30!=null?+l.t30:null,brk:l.break!=null?+l.break:l.brk!=null?+l.brk:null})).filter(l=>isFinite(l.price));
  o.next=(j.next_buys||j.nextBuys||[]).map(x=>({price:+x.price,usd:x.usd==null?null:+x.usd,type:ntype(x.type),note:x.note||''})).filter(x=>isFinite(x.price));
+ o.emerg=(j.emergency_buys||j.emergencyBuys||j.emergency||[]).map(x=>({price:+x.price,usd:x.usd==null?null:+x.usd,note:x.note||''})).filter(x=>isFinite(x.price)&&x.price>0);
+ o.bottom=j.bottom&&isFinite(+j.bottom.price)?{price:+j.bottom.price,date:j.bottom.date||null,note:j.bottom.note||'',newLow:j.bottom.newLow!=null?+j.bottom.newLow:null,est:j.bottom.estimate||null}:null;
+ if(!o.bottom){const all=[].concat(j.levels||[],(j.range48&&j.range48.levels)||[]);const c=all.find(x=>/cycle low/i.test(x.name||''));if(c&&isFinite(+c.price))o.bottom={price:+c.price,date:null,note:'cycle low',newLow:null,est:null};}
  return o;
 }
 
@@ -2849,14 +2852,14 @@ async function loadFeed(){
   const A=live?{avg:num(m['Axiom: avg entry']),liq:num(m['Axiom: liquidation']),btc:num(m['Axiom: BTC held']),cash:num(m['Axiom: free cash']),margin:num(m['Axiom: money in position']),profit:num(m['Axiom: open profit'])}
    :{avg:num(m['Average entry']),liq:num(m['Liquidation price (Axiom)']),btc:num(m['BTC held']),cash:num(m['Cash available']),margin:num(m['Money in the position']),profit:num(m['Open profit'])};
   const out=parseOutlook(m['Price outlook (data)']);
-  const PT=parseSheetText(m);let next=out.next.slice();const np=num(m['Next buy price']);if(np!=null)next=[{price:np,usd:null,type:ntype(m['Next buy type']),note:''}].concat(next.filter(x=>Math.abs(x.price-np)>1));if(!next.length)next=PT.nextT.filter(x=>x.price);
+  const PT=parseSheetText(m);let emergAll=out.emerg.slice();{const et=String(m['Emergency top-up (next)']||'').replace(/,/g,''),em=et.match(/\$\s*(\d+(?:\.\d+)?)/g);if(em&&em.length&&!emergAll.length)emergAll=[{price:+em[0].replace('$',''),usd:em[1]?+em[1].replace('$',''):null,note:et.slice(0,120)}];}let next=out.next.slice();const np=num(m['Next buy price']);if(np!=null)next=[{price:np,usd:null,type:ntype(m['Next buy type']),note:''}].concat(next.filter(x=>Math.abs(x.price-np)>1));if(!next.length)next=PT.nextT.filter(x=>x.price);
   const th=trd[0]||[],ix=n=>th.findIndex(x=>String(x).trim().toLowerCase()===n);
   const iT=ix('date/time (az)'),iA=ix('action'),iP=ix('btc price'),iM=ix('your money in'),iO=ix('order margin (22x)'),iB=ix('btc added'),iMo=ix('mode');
   const trades=[];trd.slice(1).forEach(r=>{const act=String(r[iA]||'').toUpperCase().trim(),t=azMs(r[iT]),p=num(r[iP]);if(!act||!isFinite(t)||p==null)return;if(/TEST/.test(act)||/TEST/i.test(r[iMo]||''))return;
    const sell=/SELL|PROFIT/.test(act);const marg=!sell&&(/MARGIN/.test(act)||((num(r[iB])||0)===0&&(num(r[iO])||0)===0));
    trades.push({t:t,side:sell?'SELL':'BUY',price:p,usd:num(r[iM]),btc:num(r[iB]),type:marg?'MARGIN':'BTC',paper:/PAPER/i.test(r[iMo]||''),act:act});});
   trades.sort((a,b)=>a.t-b.t);
-  S.feed={updated:m['Last updated']||m['Last update']||null,mode:live?'LIVE':'PAPER',account:Object.assign(A,{next:next}),nextText:m['Next expected buy']||'',lastAction:m['Last action']||'',phase:m['Cycle phase']||'',trades:trades,forecast:out.horizons,levels:out.levels,outlookMissing:!out.raw,watch:[],pred:PT.pred.filter(q=>q.p),keys:PT.keys,liq:PT.liq,ob:PT.ob,cme:PT.cme,cash:{avail:num(m['Cash available']),reserve:num(m['Emergency reserve now']),pool:num(m['Regular pool']),axiom:num(m['Axiom: free cash']),axiomPos:String(m['Axiom: BTC held']||''),saved:String(m['Saved money (reserves)']||''),dep:num(m['Total deposited'])},sellP:usd(m['Final sell price'])};
+  S.feed={updated:m['Last updated']||m['Last update']||null,mode:live?'LIVE':'PAPER',account:Object.assign(A,{next:next}),nextText:m['Next expected buy']||'',lastAction:m['Last action']||'',phase:m['Cycle phase']||'',trades:trades,forecast:out.horizons,levels:out.levels,outlookMissing:!out.raw,watch:[],pred:PT.pred.filter(q=>q.p),keys:PT.keys,liq:PT.liq,ob:PT.ob,cme:PT.cme,cash:{avail:num(m['Cash available']),reserve:num(m['Emergency reserve now']),pool:num(m['Regular pool']),axiom:num(m['Axiom: free cash']),axiomPos:String(m['Axiom: BTC held']||''),saved:String(m['Saved money (reserves)']||''),dep:num(m['Total deposited'])},sellP:usd(m['Final sell price']),emerg:emergAll,bottom:out.bottom};
   S.feedErr='';
  }catch(e){S.feedErr=String(e&&e.message||e).includes('private')||/sheet 4\d\d/.test(String(e&&e.message))?'private':'net';if(!S.feed)S.feed=null;}
  banner();renderPanel();draw();
@@ -2885,6 +2888,7 @@ function ranges(){
  const near=v=>v!=null&&isFinite(v)&&v>last*.55&&v<last*1.6;const f=FD();
  if(f&&S.opts.acct){const A=f.account;if(near(A.avg)){a=Math.min(a,A.avg);b=Math.max(b,A.avg);}if(near(A.liq)){a=Math.min(a,A.liq);b=Math.max(b,A.liq);}A.next.forEach(x=>{if(near(x.price)){a=Math.min(a,x.price);b=Math.max(b,x.price);}});}
  if(f&&S.opts.ai)f.forecast.forEach(h=>{[h.low,h.high].forEach(v=>{if(near(v)&&v>last*.7&&v<last*1.4){a=Math.min(a,v);b=Math.max(b,v);}});});
+ if(f&&S.opts.acct)(f.emerg||[]).forEach(x=>{if(near(x.price)){a=Math.min(a,x.price);b=Math.max(b,x.price);}});
  if(f&&S.opts.pred)(f.pred||[]).forEach(q=>{if(q.t){const k=idxT(q.t);if(k>=S.right-PW/S.bar&&k<=S.right){a=Math.min(a,q.p);b=Math.max(b,q.p);}}});
  const pad=(b-a)*.07||b*.01;a-=pad;b+=pad;if(S.opts.log)a=Math.max(a,b*.02);
  if(S.yman){a=S.yman.lo;b=S.yman.hi;}
@@ -2925,6 +2929,8 @@ function draw(){
  /* account lines + circles + trades */
  if(f&&S.opts.acct)drawAcct(f,last,n);
  if(f&&S.opts.pred)drawPred(f,last,n);
+ if(f&&S.opts.pred)drawBottom(f,last,n);
+ if(f&&S.opts.acct)drawEmerg(f,last,n);
  if(f&&S.opts.trades)drawTrades(f);
  /* drawings */
  drawDrawings();
@@ -2980,6 +2986,23 @@ function drawLevels(f,last){
  if(S.opts.cme&&f.cme)f.cme.forEach(g=>{if(g.p<lo||g.p>hi)return;hline(g.p,'rgba(245,196,81,.55)',[4,4],1);ctx.font='11px Inter,system-ui,sans-serif';ctx.fillStyle='rgba(245,196,81,.85)';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText('CME gap '+fu(g.p),PW-8,yp(g.p)-2);});
  if(S.opts.liq&&f.liq)f.liq.forEach(l=>{if(l.p<lo||l.p>hi)return;hline(l.p,'rgba(155,140,255,.45)',[1,4],1);ctx.font='11px Inter,system-ui,sans-serif';ctx.fillStyle='rgba(155,140,255,.85)';ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText(l.tf+' '+l.side+' '+fu(l.p),PW*.55,yp(l.p)-2);});
  if(S.opts.lvls&&f.keys){let prev=-99;f.keys.slice().sort((a,b)=>yp(a.p)-yp(b.p)).forEach(k=>{if(k.p<lo||k.p>hi)return;const y=yp(k.p);hline(k.p,'rgba(242,244,248,'+(k.flip?.2:.34)+')',k.flip?[3,5]:[],1);if(Math.abs(y-prev)>13){prev=y;ctx.font='11px Inter,system-ui,sans-serif';ctx.fillStyle='rgba(242,244,248,.55)';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText(fu(k.p)+'  ×'+k.n+(k.flip?' flipped':''),PW-8,y-2);}});}
+}
+function ring(x,y,col,rx,ry,dash){ctx.save();ctx.setLineDash(dash||[5,4]);ctx.strokeStyle=col;ctx.fillStyle=hexA(col,.10);ctx.lineWidth=1.6;ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,7);ctx.fill();ctx.stroke();ctx.restore();}
+function drawEmerg(f,last,n){
+ (f.emerg||[]).forEach(e=>{const x=xi(n-1+14),y=yp(e.price);if(y<-20||y>PH+20)return;const col='#FF9A5B';
+  ctx.save();ctx.setLineDash([2,4]);ctx.strokeStyle=hexA(col,.6);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(xi(n-1),y);ctx.lineTo(x-14,y);ctx.stroke();ctx.restore();
+  ring(x,y,col,16,14);ctx.beginPath();ctx.arc(x,y,6,0,7);ctx.lineWidth=2;ctx.strokeStyle=col;ctx.stroke();ctx.fillStyle=col;ctx.font='700 9px Inter,system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('E',x,y+.5);
+  ctx.font='600 11px Inter,system-ui,sans-serif';ctx.textBaseline='middle';const tx='Emergency top-up '+fu(e.price)+(e.usd!=null?' · '+fu(e.usd):'');if(x+34+ctx.measureText(tx).width>PW){ctx.textAlign='right';ctx.fillText(tx,x-24,y);}else{ctx.textAlign='left';ctx.fillText(tx,x+24,y);}
+  S.hit.push({x:x,y:y,r:20,html:'<b style="color:'+col+'">Emergency top-up</b><br>'+fu(e.price)+' · '+fpct((e.price/last.c-1)*100)+' from now'+(e.usd!=null?'<br>about '+fu(e.usd)+' from the emergency reserve':'')+(e.note?'<br>'+esc(e.note):'')});});
+}
+function bottomInfo(f){const b=f&&f.bottom;if(!b||!S.candles.length)return null;const n=S.candles.length;let bi=-1,bd=1e9;for(let i=Math.max(0,n-1500);i<n;i++){const d=Math.abs(S.candles[i].l-b.price)/b.price;if(d<bd){bd=d;bi=i;}}if(bd>.004)bi=-1;
+ let low=Infinity,li=-1;for(let i=Math.max(0,bi<0?n-400:bi+1);i<n;i++){if(S.candles[i].l<low){low=S.candles[i].l;li=i;}}
+ return{b:b,bi:bi,low:low,li:li,broken:isFinite(low)&&low<b.price*.998};}
+function drawBottom(f,last,n){const I=bottomInfo(f);if(!I)return;const b=I.b;
+ const bx=I.bi>=0?xi(I.bi):-999,by=yp(b.price);
+ if(I.bi>=0&&bx>-30&&bx<PW+30&&by>-30&&by<PH+30){const x=bx,y=by;{ring(x,y,COL.blue,13,13);ctx.font='600 11px Inter,system-ui,sans-serif';ctx.fillStyle=COL.blue;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('Assumed bottom '+fk(b.price),x,y+18);S.hit.push({x:x,y:y,r:16,html:'<b style="color:'+COL.blue+'">Assumed bottom</b><br>'+fu(b.price)+'<br>'+dtd.format(new Date(S.candles[I.bi].t))+(I.broken?'<br><i>since broken</i>':'')});}}
+ else if(b.price>lo&&b.price<hi){hline(b.price,hexA(COL.blue,.6),[6,5],1.2);ctx.font='600 11px Inter,system-ui,sans-serif';ctx.fillStyle=COL.blue;ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText('Assumed bottom '+fu(b.price),PW-8,yp(b.price)-3);}
+ if(I.broken&&I.li>=0){const x=xi(I.li),y=yp(I.low);if(x>-30&&x<PW+30&&y>-30&&y<PH+30){ring(x,y,COL.dn,15,15,[3,3]);ctx.font='600 11px Inter,system-ui,sans-serif';ctx.fillStyle=COL.dn;ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText('Bottom broken · new low '+fk(I.low),x-22,y);S.hit.push({x:x,y:y,r:18,html:'<b style="color:'+COL.dn+'">New low</b><br>'+fu(I.low)+' · '+fpct((I.low/b.price-1)*100)+' under the assumed bottom<br>'+dtd.format(new Date(S.candles[I.li].t))});}}
 }
 function lab(t,y,col){ctx.font='600 11px Inter,system-ui,sans-serif';ctx.fillStyle=col;ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText(t,8,y-4);}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -3246,11 +3269,14 @@ function acctHTML(){
  h+='<h4>Where we buy next</h4>';
  if(A.next.length)A.next.forEach(b=>{h+='<div class="ch-buy"><i class="bring"></i><div><b>'+fu(b.price)+'</b> <em>'+tl(b.type)+'</em><span>'+(last?fpct((b.price/last-1)*100)+' from now':'')+(b.usd!=null?' · about '+fu(b.usd):'')+'</span></div></div>';});
  else h+='<p class="ch-fine">The bot has not filled in "Next buy price" on the sheet yet, so no circle is drawn.</p>';
+ (f.emerg||[]).forEach(e=>{h+='<div class="ch-buy"><i class="bring" style="border-color:#FF9A5B"></i><div><b>'+fu(e.price)+'</b> <em>emergency top-up</em><span>'+(last?fpct((e.price/last-1)*100)+' from now':'')+(e.usd!=null?' · about '+fu(e.usd):'')+'</span></div></div>';});
+ if(!(f.emerg||[]).length)h+='<p class="ch-fine">The bot has not sent an emergency top-up price yet.</p>';
  if(f.nextText)h+='<p class="ch-note">'+esc(f.nextText)+'</p>';
  h+='<h4>Price outlook</h4>';
  if(f.forecast.length)f.forecast.forEach(x=>{const col=hcol(x);h+='<div class="ch-fc"><span style="color:'+col+'">'+esc(x.label)+'</span><b>'+fk(x.low)+' – '+fk(x.high)+'</b><small>mid '+fk(x.mid)+(last?' ('+fpct((x.mid/last-1)*100)+')':'')+'</small></div>';});
  else if(f.outlookMissing)h+='<p class="ch-fine">"Price outlook (data)" is empty on the sheet, so there are no AI lines yet.</p>';
  if(f.levels.length&&last){h+='<h4>Levels</h4>';f.levels.slice().sort((p,q)=>Math.abs(p.price-last)-Math.abs(q.price-last)).slice(0,8).forEach(l=>{h+='<div class="ch-kv"><span>'+fu(l.price)+' <small>'+(l.kind?esc(l.kind):'')+'</small></span><b><small>'+(l.t7!=null?'7d '+Math.round(l.t7*100)+'%':'')+(l.t30!=null?' · 30d '+Math.round(l.t30*100)+'%':'')+(l.brk!=null?' · breaks '+Math.round(l.brk*100)+'%':'')+'</small></b></div>';});}
+ {const I=bottomInfo(f);if(I)h+='<h4>Bottom check</h4><div class="ch-kv"><span>Assumed bottom</span><b style="color:'+COL.blue+'">'+fu(I.b.price)+'</b></div>'+(I.broken?'<div class="ch-kv"><span>New low</span><b style="color:'+COL.dn+'">'+fu(I.low)+' <small>('+fpct((I.low/I.b.price-1)*100)+')</small></b></div><p class="ch-note">Price went under the assumed bottom, so that was not the bottom. The bot needs to work out a new one.</p>':'<p class="ch-fine">Still holding.</p>');}
  h+=predHTML(f,last);
  if(f.phase)h+='<h4>Cycle</h4><p class="ch-note">'+esc(f.phase)+'</p>';
  return h;
