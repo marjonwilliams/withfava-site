@@ -588,6 +588,36 @@ body:not(.side-docked) #chTop,body.side-collapsed #chTop{padding-left:76px}
 .ch-scale button.on{color:var(--bot);background:rgba(255,116,177,.16)}
 .ch-textbox{position:absolute;z-index:4;width:190px;padding:6px 8px;border-radius:8px;border:1px solid var(--bot);background:rgba(8,12,28,.95);color:var(--ink);font:500 12px Inter,system-ui,sans-serif;outline:0}
 
+/* v68: status line, folding sections, Ask AI */
+.ch-stat{display:flex;align-items:center;gap:8px;margin:2px 0 6px;font-size:12.5px;color:var(--faint);white-space:nowrap;overflow:hidden}
+.ch-stat span:last-child{overflow:hidden;text-overflow:ellipsis}
+.ch-stat .ch-mode{margin-right:0;flex:none}
+details.ch-sec{border-top:1px solid var(--edge);margin-top:6px}
+details.ch-sec>summary{list-style:none;display:flex;align-items:baseline;gap:10px;padding:12px 0 10px;cursor:pointer;user-select:none}
+details.ch-sec>summary::-webkit-details-marker{display:none}
+details.ch-sec>summary span{flex:none;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);font-weight:600}
+details.ch-sec>summary span::before{content:'\25B8';display:inline-block;margin-right:6px;transition:transform .15s}
+details.ch-sec[open]>summary span::before{transform:rotate(90deg)}
+details.ch-sec>summary em{flex:1;min-width:0;text-align:right;font-style:normal;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+details.ch-sec>summary:hover span{color:var(--ink)}
+.ch-secb{padding-bottom:8px}
+#chAI{display:flex;flex-direction:column;gap:8px}
+.ch-aihead{display:flex;align-items:center;gap:6px;font-weight:600;font-size:14px}
+.ch-aihead span{flex:1}
+.ch-aihead button{border:0;background:rgba(255,255,255,.06);color:var(--muted);font:500 12px var(--font);border-radius:7px;padding:4px 8px;cursor:pointer}
+#chAIlog{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;scrollbar-width:thin}
+.ch-aimsg{padding:9px 11px;border-radius:12px;font-size:13.5px;line-height:1.45;max-width:92%;word-wrap:break-word}
+.ch-aimsg.me{align-self:flex-end;background:rgba(91,155,255,.18)}
+.ch-aimsg.ai{align-self:flex-start;background:rgba(255,255,255,.06)}
+.ch-aimsg.err{color:#FF8A80}
+.ch-aimsg.wait{color:var(--muted);font-style:italic}
+.ch-aichips{display:flex;flex-wrap:wrap;gap:6px}
+.ch-aichips button{border:1px solid var(--edge);background:none;color:var(--muted);font:500 12px var(--font);border-radius:999px;padding:5px 10px;cursor:pointer;text-align:left}
+.ch-aichips button:hover{color:var(--ink);border-color:var(--edge-strong)}
+#chAIform{display:flex;gap:6px;align-items:flex-end}
+#chAIq{flex:1;height:auto;min-height:40px;padding:8px;resize:vertical;font:500 13.5px var(--font)}
+.ch-aiin{width:100%;margin:4px 0}
+
 @media (max-width:900px),(pointer:coarse){.hist-foot .hf-pg{display:none}}
 </style>
 <script>(function(){try{var d=document.documentElement;if(/[?&]nointro/.test(location.search)||/^#\/bot\//.test(location.hash)||matchMedia("(prefers-reduced-motion: reduce)").matches||window.innerWidth<=700||!matchMedia("(hover:hover) and (pointer:fine)").matches)return;d.classList.add("intro");setTimeout(function(){if(!window.__introOn)d.classList.remove("intro")},6000)}catch(e){}})();</script>
@@ -707,7 +737,7 @@ addEventListener('load',function(){setTimeout(fade,450);});
    <div id="chBanner" hidden></div>
    <div id="chPlot"><canvas id="chCanvas"></canvas><div id="chTip" hidden></div><div id="chStatus" hidden></div></div>
   </div>
-  <aside id="chPanel"><div id="chPTabs"><button type="button" data-ptab="account">Account</button><button type="button" data-ptab="trades">Trades</button></div><div id="chPanelBody"></div></aside>
+  <aside id="chPanel"><div id="chPTabs"><button type="button" data-ptab="account">Account</button><button type="button" data-ptab="trades">Trades</button><button type="button" data-ptab="ai">Ask AI</button></div><div id="chPanelBody"></div></aside>
  </div>
  <div id="chWL"><div class="wl-head"><h3>Global watchlist</h3><p>Everything FAVA is watching. The person icon shows how many people asked to watch each one.</p></div><div id="chWLBody"></div></div>
 </section>
@@ -2742,7 +2772,7 @@ const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.par
 const S={coin:LS.get('fava-ch-coin','BTC'),tf:LS.get('fava-ch-tf',1440),base:[],baseMin:1440,candles:[],bar:9,right:0,tool:'cursor',draw:[],sel:-1,cur:null,
  opts:Object.assign({ai:true,acct:true,trades:true,vol:true,log:false,pred:true,lvls:true,liq:false,ob:false,cme:true},LS.get('fava-ch-opts',{})),
  ind:LS.get('fava-ch-ind',null)||IND_PRESETS.map((p,i)=>({type:p[0],n:p[1],c:p[2],on:i<3})),
- feed:null,feedErr:'',offline:false,loading:false,tok:0,hl:{},tab:'account',wlRows:[],wlStats:{},wlErr:'',olderBusy:false,noMore:false,hit:[],dr:null,live:0,yman:null,pct:LS.get('fava-ch-pct',false),hist:[],redo:[],clip:null,pen:LS.get('fava-ch-pen','#5B9BFF'),magnet:LS.get('fava-ch-mag',false),hideDr:false};
+ feed:null,feedErr:'',offline:false,loading:false,tok:0,hl:{},tab:'account',wlRows:[],wlStats:{},wlErr:'',olderBusy:false,noMore:false,hit:[],dr:null,live:0,yman:null,pct:LS.get('fava-ch-pct',false),hist:[],redo:[],clip:null,pen:LS.get('fava-ch-pen','#5B9BFF'),magnet:LS.get('fava-ch-mag',false),hideDr:false,fold:LS.get('fava-ch-fold',{}),ai:{msgs:LS.get('fava-ch-ai',[]),busy:false,wait:''}};
 let W=0,H=0,AX=66,BY=26,PW=0,PH=0,VH=0,lo=0,hi=1,i0=0,i1=0,tfMs=0,c0=0,dragging=null,raf=0;
 
 /* ---------- formatting ---------- */
@@ -3013,7 +3043,7 @@ function drawBottom(f,last,n){const I=bottomInfo(f);if(!I)return;const b=I.b,C=S
   else if(b.price>lo&&b.price<hi){hline(b.price,hexA(COL.blue,.6),[6,5],1.2);ctx.font=fnt;ctx.fillStyle=COL.blue;ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText('Assumed bottom '+fu(b.price),PW-8,yp(b.price)-3);}
  }else{
   /* broken bottoms stay as levels: old support can turn into resistance */
-  const old=[{price:b.price,date:I.bi>=0?dtd.format(new Date(C[I.bi].t)):(b.date||''),cur:true}].concat((b.hist||[]).map(h=>({price:h.price,date:h.date})));
+  const old=[{price:b.price,date:I.bi>=0?dtd.format(new Date(C[I.bi].t)):(b.date||''),cur:true}].concat((b.hist||[]).filter(h=>Math.abs(h.price/b.price-1)>.002).map(h=>({price:h.price,date:h.date})));
   old.forEach(o=>{if(!(o.price>lo&&o.price<hi))return;hline(o.price,hexA(COL.blue,o.cur?.5:.32),[3,5],1);ctx.font=fnt;ctx.fillStyle=hexA(COL.blue,o.cur?.85:.6);ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText((o.cur?'Previous bottom ':'Older bottom ')+fu(o.price)+(o.date?' · '+o.date:'')+' · now possible resistance',PW-8,yp(o.price)-3);});
   if(vis){ring(bx,by,COL.blue,9,9,[2,3]);S.hit.push({x:bx,y:by,r:14,html:'<b style="color:'+COL.blue+'">Previous bottom (broken)</b><br>'+fu(b.price)+'<br>'+dtd.format(new Date(C[I.bi].t))+'<br>May act as resistance now'});}
   if(I.showBreak){const k=C[I.ki],x=xi(I.ki),y=yp(k.l);if(x>-30&&x<PW+30&&y>-30&&y<PH+30){ring(x,y,COL.dn,15,15,[3,3]);ctx.font=fnt;ctx.fillStyle=COL.dn;ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText('Bottom broken · '+dtd.format(new Date(k.t)),x-22,y);S.hit.push({x:x,y:y,r:18,html:'<b style="color:'+COL.dn+'">Bottom broken</b><br>'+dtd.format(new Date(k.t))+' · candle low '+fu(k.l)+'<br>'+fpct((k.l/b.price-1)*100)+' under the previous bottom '+fu(b.price)+'<br><i>Marked for 30 days after the break</i>'});}}
@@ -3256,16 +3286,42 @@ function buildInd(){const m=$('chIndMenu');m.innerHTML='';S.ind.forEach((x,i)=>{
  add.querySelector('button').onclick=()=>{const n=parseInt(add.querySelector('#indN').value,10);if(!(n>=2&&n<=1000))return;const cols=['#FF74B1','#4FD1C5','#F5C451','#9B8CFF','#FF9A5B','#5B9BFF'];S.ind.push({type:add.querySelector('#indT').value,n:n,c:cols[S.ind.length%cols.length],on:true});LS.set('fava-ch-ind',S.ind.map(({type,n,c,on})=>({type,n,c,on})));calcInd();schedule();buildInd();};m.appendChild(add);}
 
 /* ---------- right panel ---------- */
+/* ---------- Ask AI (owner): Apps Script helper takes the AI Lock, reads Control + Engine, asks the local model, unloads, clears the lock ---------- */
+function aiCfg(){return{url:LS.get('fava-ai-url',''),key:LS.get('fava-ai-key','')};}
+function aiMount(box){const c=aiCfg();
+ if(!c.url||!c.key){box.innerHTML='<div id="chAI"><h4 style="margin-top:4px">Ask AI — setup</h4><p class="ch-note">Paste the link of your FAVA Owner AI helper (the Apps Script web app) and your owner key. They are saved only in this browser, never on the website.</p><input class="ch-in ch-aiin" id="chAIurl" placeholder="https://script.google.com/macros/s/…/exec" value="'+esc(c.url)+'"><input class="ch-in ch-aiin" id="chAIkey" type="password" placeholder="Owner key" value="'+esc(c.key)+'"><button class="ch-btn" id="chAIsave" type="button">Save</button><p class="ch-fine" id="chAImsg"></p></div>';
+  $('chAIsave').onclick=async()=>{const u=$('chAIurl').value.trim(),k=$('chAIkey').value.trim();if(!/^https:\/\/script\.google\.com\//.test(u)||!k){$('chAImsg').textContent='Paste the script.google.com link and the key.';return;}
+   $('chAImsg').textContent='Checking…';try{const j=await aiPost(u,{key:k,ping:true});if(j.ok){LS.set('fava-ai-url',u);LS.set('fava-ai-key',k);aiMount(box);}else $('chAImsg').textContent=j.error==='wrong key'?'The key does not match OWNER_KEY in the script.':'The helper answered: '+(j.error||'?');}catch(e){$('chAImsg').textContent='Could not reach that link ('+e.message+').';}};return;}
+ box.innerHTML='<div id="chAI"><div class="ch-aihead"><span>Ask about your bot</span><button type="button" id="chAIclr">Clear</button><button type="button" id="chAIset">Setup</button></div><div id="chAIlog"></div><div class="ch-aichips"></div><form id="chAIform"><textarea class="ch-in" id="chAIq" rows="2" placeholder="Ask about your position, buys, liquidation…"></textarea><button class="ch-btn" type="submit" id="chAIgo">Ask</button></form><p class="ch-fine">Answers come from your BTC Bot Control and Engine sheets, using your local model (one model at a time through the AI Lock, unloaded after each answer).</p></div>';
+ const chips=['Why didn\'t the bot buy today?','How close are we to liquidation?','What\'s the next emergency top-up?','Where could the new bottom be?'];
+ const ch=box.querySelector('.ch-aichips');chips.forEach(q=>{const b=document.createElement('button');b.type='button';b.textContent=q;b.onclick=()=>aiAsk(q);ch.appendChild(b);});
+ $('chAIclr').onclick=()=>{S.ai.msgs=[];LS.set('fava-ch-ai',[]);aiLog();};
+ $('chAIset').onclick=()=>{LS.set('fava-ai-url','');aiMount(box);};
+ $('chAIform').onsubmit=e=>{e.preventDefault();const q=$('chAIq').value.trim();if(q){$('chAIq').value='';aiAsk(q);}};
+ $('chAIq').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('chAIform').requestSubmit();}});
+ aiLog();}
+function aiLog(){const L=$('chAIlog');if(!L)return;L.innerHTML=S.ai.msgs.map(m=>'<div class="ch-aimsg '+(m.r==='me'?'me':'ai')+(m.err?' err':'')+'">'+esc(m.t).replace(/\n/g,'<br>')+'</div>').join('')+(S.ai.busy?'<div class="ch-aimsg ai wait">'+esc(S.ai.wait||'Thinking…')+'</div>':'');
+ const b=$('chAIgo');if(b)b.disabled=S.ai.busy;const ch=document.querySelector('.ch-aichips');if(ch)ch.style.display=S.ai.msgs.length?'none':'';L.scrollTop=L.scrollHeight;const box=$('chPanelBody');if(box)box.scrollTop=0;}
+async function aiPost(url,body){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),redirect:'follow'});if(!r.ok)throw new Error('status '+r.status);return r.json();}
+async function aiAsk(q){if(S.ai.busy)return;const c=aiCfg();const hist=S.ai.msgs.filter(m=>!m.err).slice(-8);S.ai.msgs.push({r:'me',t:q});S.ai.busy=true;S.ai.wait='Thinking…';aiLog();
+ const last=S.candles.length?S.candles[S.candles.length-1].c:null;let ans=null,err='';
+ for(let tries=0;tries<18&&!ans;tries++){try{const j=await aiPost(c.url,{key:c.key,q:q,history:hist,price:last});
+   if(j.busy){S.ai.wait='The AI is busy'+(j.holder?' ('+String(j.holder).split(':')[0]+')':'')+'. Waiting for it to be free… '+(tries+1)+'/18';aiLog();await new Promise(r=>setTimeout(r,10000));continue;}
+   if(j.answer){ans=j.answer;break;}err=j.error||'No answer.';break;}catch(e){err='Could not reach the helper ('+e.message+').';break;}}
+ if(!ans&&!err)err='The AI stayed busy for 3 minutes. Try again in a bit.';
+ S.ai.busy=false;S.ai.msgs.push(ans?{r:'ai',t:ans}:{r:'ai',t:err,err:true});S.ai.msgs=S.ai.msgs.slice(-40);LS.set('fava-ch-ai',S.ai.msgs);aiLog();}
 function renderPanel(){
  root.querySelectorAll('[data-ptab]').forEach(b=>b.classList.toggle('on',b.dataset.ptab===S.tab));const box=$('chPanelBody');if(!box)return;
- if(S.tab==='trades')box.innerHTML=tradesHTML();else box.innerHTML=acctHTML();
+ if(S.tab==='ai'){if(!box.querySelector('#chAI'))aiMount(box);return;}
+ const st=box.scrollTop;if(S.tab==='trades')box.innerHTML=tradesHTML();else box.innerHTML=acctHTML();box.scrollTop=st;
+ box.querySelectorAll('details.ch-sec').forEach(d=>d.addEventListener('toggle',()=>{S.fold[d.dataset.sec]=d.open;LS.set('fava-ch-fold',S.fold);}));
  box.querySelectorAll('[data-trade]').forEach(r=>r.addEventListener('click',()=>{const t=FD().trades[+r.dataset.trade];const i=idxT(t.t);S.right=i+PW/S.bar*.4;schedule();}));
 }
 function statusLine(){
  if(S.coin!=='BTC')return '<p class="ch-fine">Account lines, trades and the price outlook are only for Bitcoin.</p>';
  if(S.feedErr==='private')return '<p class="ch-sample">Can\'t read your BTC Bot Control sheet yet. In Google Sheets choose Share, then "Anyone with the link" as Viewer.</p>';
  if(!S.feed)return '<p class="ch-fine">'+(S.feedErr?'Could not reach your Google Sheet. Retrying…':'Loading your sheet…')+'</p>';
- return '<p class="ch-fine"><span class="ch-mode '+(S.feed.mode==='LIVE'?'live':'paper')+'">'+S.feed.mode+'</span>'+(S.feed.updated?' Sheet updated '+esc(S.feed.updated):'')+'</p>';
+ return '<div class="ch-stat"><span class="ch-mode '+(S.feed.mode==='LIVE'?'live':'paper')+'">'+S.feed.mode+'</span>'+(S.feed.updated?'<span title="Sheet updated '+esc(S.feed.updated)+'">Updated '+esc(String(S.feed.updated).replace(/\s*(MST|AZ|MDT)\s*$/i,''))+'</span>':'')+'</div>';
 }
 function cashHTML(f,A,row){const c=f.cash||{};let h='<h4>Cash</h4>';
  h+=row(f.mode==='LIVE'?'Free cash (Axiom)':'Cash available (paper)',A.cash!=null?fu(A.cash):'–');
@@ -3280,7 +3336,8 @@ function cashHTML(f,A,row){const c=f.cash||{};let h='<h4>Cash</h4>';
 function predHTML(f,last){const P=(f.pred||[]).slice().sort((a,b)=>(a.t||1e15)-(b.t||1e15));if(!P.length)return '';let h='<h4>Predictions from the bot</h4>';
  P.forEach(q=>{h+='<div class="ch-kv"><span><i class="dot" style="background:'+q.col+'"></i>'+esc(q.label)+(q.dt?' <small>'+esc(q.dt)+'</small>':'')+'</span><b>'+fu(q.p)+(last?' <small>('+fpct((q.p/last-1)*100)+')</small>':'')+'</b></div>';});
  return h;}
-function acctHTML(){
+function acctHTML(){return foldHTML(acctRaw());}
+function acctRaw(){
  const f=FD();if(!f)return statusLine();const A=f.account,last=S.candles.length?S.candles[S.candles.length-1].c:null;
  const pl=A.profit!=null?A.profit:(A.avg&&last&&A.btc!=null?(last-A.avg)*A.btc:null),plp=(A.avg&&last)?(last/A.avg-1)*100:null,liqd=(A.liq&&last)?(A.liq/last-1)*100:null;
  const row=(k,v,s)=>'<div class="ch-kv"><span>'+k+'</span><b'+(s?' style="color:'+s+'"':'')+'>'+v+'</b></div>';
@@ -3302,6 +3359,20 @@ function acctHTML(){
  if(f.phase)h+='<h4>Cycle</h4><p class="ch-note">'+esc(f.phase)+'</p>';
  return h;
 }
+function secSum(t,f,last){const A=f.account,c=f.cash||{};try{
+ if(t==='Cash')return (c.pool!=null?'Free '+fu(c.pool):'')+(c.reserve!=null?' · Emergency '+fu(c.reserve):'');
+ if(t==='Where we buy next'){const b=A.next[0],e=emergNext(f,last)[0];return b?fu(b.price)+' '+tl(b.type):e?'Emergency top-up '+fu(e.price):'Nothing set';}
+ if(t==='Price outlook'){const x=f.forecast.find(h=>h.days===7)||f.forecast[0];return x?x.label+' '+fk(x.low)+' – '+fk(x.high):'';}
+ if(t==='Levels'){const l=f.levels.slice().sort((p,q)=>Math.abs(p.price-last)-Math.abs(q.price-last))[0];return l?'Nearest '+fu(l.price):'';}
+ if(t==='Bottom check'){const I=bottomInfo(f);return I?(I.broken?'Broken · '+(I.b.est?'est. '+fk(I.b.est.low)+' – '+fk(I.b.est.high):fu(I.b.price)):'Holding '+fu(I.b.price)):'';}
+ if(t==='Predictions from the bot')return (f.pred||[]).length+' targets';
+ if(t==='Cycle')return String(f.phase||'').split(/[—,-]/)[0].trim();
+ }catch(e){}return '';}
+function foldHTML(h){const f=FD();if(!f)return h;const last=S.candles.length?S.candles[S.candles.length-1].c:null;
+ const parts=h.split(/<h4>(.*?)<\/h4>/);let o=parts[0];
+ for(let i=1;i<parts.length;i+=2){const t=parts[i],body=parts[i+1]||'',op=S.fold[t];
+  o+='<details class="ch-sec" data-sec="'+esc(t)+'"'+(op?' open':'')+'><summary><span>'+t+'</span><em>'+esc(secSum(t,f,last))+'</em></summary><div class="ch-secb">'+body+'</div></details>';}
+ return o;}
 function tradesHTML(){
  const f=FD();if(!f)return statusLine();if(!f.trades.length)return statusLine()+'<p class="ch-fine">No trades yet.</p>';
  let h=statusLine()+'<div class="ch-tr head"><span></span><span>Price</span><span>Amount</span><span>When</span></div>';
