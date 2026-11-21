@@ -2814,7 +2814,7 @@ function parseOutlook(s){
  o.levels=(j.levels||[]).map(l=>({price:+(l.price!=null?l.price:l.level),kind:String(l.kind||l.type||''),t7:l.touch7!=null?+l.touch7:l.t7!=null?+l.t7:null,t30:l.touch30!=null?+l.touch30:l.t30!=null?+l.t30:null,brk:l.break!=null?+l.break:l.brk!=null?+l.brk:null})).filter(l=>isFinite(l.price));
  o.next=(j.next_buys||j.nextBuys||[]).map(x=>({price:+x.price,usd:x.usd==null?null:+x.usd,type:ntype(x.type),note:x.note||''})).filter(x=>isFinite(x.price));
  o.emerg=(j.emergency_buys||j.emergencyBuys||j.emergency||[]).map(x=>({price:+x.price,usd:x.usd==null?null:+x.usd,type:String(x.type||'emergency'),active:x.active,liqAfter:x.liqAfter!=null?+x.liqAfter:null,fromReserve:x.fromReserve!=null?+x.fromReserve:null,note:x.note||''})).filter(x=>isFinite(x.price)&&x.price>0&&(x.type!=='critical_exit'||x.active===true));
- if(j.bottom&&isFinite(+j.bottom.price)){const B=j.bottom,E=B.estimate;o.bottom={price:+B.price,date:B.date||null,note:B.note||'',broken:B.broken===true,brokenAt:B.brokenAt||null,newLow:B.newLow!=null?+B.newLow:null,atRisk:!!B.atRisk,floor:B.historyFloor!=null?+B.historyFloor:null,est:E&&isFinite(+E.price)?{price:+E.price,low:E.low!=null?+E.low:+E.price,high:E.high!=null?+E.high:+E.price,date:E.date||'',when:E.when||'',t30:E.touch30!=null?+E.touch30:null,note:E.note||''}:null};}
+ if(j.bottom&&isFinite(+j.bottom.price)){const B=j.bottom,E=B.estimate;o.bottom={price:+B.price,date:B.date||null,note:B.note||'',broken:B.broken===true,brokenAt:B.brokenAt||null,newLow:B.newLow!=null?+B.newLow:null,atRisk:!!B.atRisk,floor:B.historyFloor!=null?+B.historyFloor:null,hist:(Array.isArray(B.history)?B.history:[]).map(h=>({price:+(h&&h.price!=null?h.price:h),date:(h&&h.date)||''})).filter(h=>isFinite(h.price)&&h.price>0),est:E&&isFinite(+E.price)?{price:+E.price,low:E.low!=null?+E.low:+E.price,high:E.high!=null?+E.high:+E.price,date:E.date||'',when:E.when||'',t30:E.touch30!=null?+E.touch30:null,note:E.note||''}:null};}
  if(!o.bottom){const all=[].concat(j.levels||[],(j.range48&&j.range48.levels)||[]);const c=all.find(x=>/cycle low/i.test(x.name||''));if(c&&isFinite(+c.price))o.bottom={price:+c.price,date:null,note:'cycle low',broken:false,newLow:null,est:null};}
  o.cme2=(j.cme_gaps||[]).map(g=>({low:+g.low,high:+g.high,fill:g.fillPrice!=null?+g.fillPrice:+g.high,made:Date.parse(String(g.made||'')+'T12:00:00'),filled:g.filled!=null?+g.filled:null,t7:g.touch7,t30:g.touch30,side:g.side||''})).filter(g=>isFinite(g.low)&&isFinite(g.high));
  return o;
@@ -2928,6 +2928,7 @@ function draw(){
  /* indicators */
  S.ind.forEach(x=>{if(!x.v)return;ctx.strokeStyle=x.c;ctx.lineWidth=1.5;ctx.beginPath();let on=false;for(let i=Math.max(0,i0-1);i<=i1;i++){const v=x.v[i];if(!isFinite(v)){on=false;continue;}const X=xi(i),Y=yp(v);if(!on){ctx.moveTo(X,Y);on=true;}else ctx.lineTo(X,Y);}ctx.stroke();});
  /* account lines + circles + trades */
+ {const cu=last.c>=last.o?COL.up:COL.dn;hline(last.c,cu,[2,3],1.3);lab('Current price '+fu(last.c),yp(last.c),cu);}
  if(f&&S.opts.acct)drawAcct(f,last,n);
  if(f&&S.opts.pred)drawPred(f,last,n);
  if(f&&S.opts.pred)drawBottom(f,last,n);
@@ -2943,8 +2944,8 @@ function draw(){
  /* axis separators */
  ctx.strokeStyle='rgba(255,255,255,.1)';ctx.beginPath();ctx.moveTo(PW+.5,0);ctx.lineTo(PW+.5,H-BY);ctx.moveTo(0,H-BY+.5);ctx.lineTo(W,H-BY+.5);ctx.stroke();
  /* crosshair */
- if(S.cur&&!dragging&&S.cur.x<PW&&S.cur.y<PH+VH){const {x,y}=S.cur;ctx.save();ctx.strokeStyle='rgba(255,255,255,.32)';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(Math.round(x)+.5,0);ctx.lineTo(Math.round(x)+.5,PH+VH);ctx.moveTo(0,Math.round(y)+.5);ctx.lineTo(PW,Math.round(y)+.5);ctx.stroke();ctx.restore();
-  if(y<=PH)tag(ax(pOfY(y)),y,'#2A3250');const t=tOfX(x),d=new Date(t);const lab=S.tf<1440?dtf.format(d):dtd.format(d);ctx.font='600 11px Inter,system-ui,sans-serif';const w=ctx.measureText(lab).width+14;ctx.fillStyle='#2A3250';ctx.fillRect(Math.min(Math.max(0,x-w/2),PW-w),H-BY+3,w,19);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(lab,Math.min(Math.max(w/2,x),PW-w/2),H-BY+13);}
+ if(S.cur&&!dragging&&S.cur.x<PW&&S.cur.y<PH+VH){let {x,y}=S.cur;let snapT=null;if(S.candles.length){const ii=Math.round(idxT(tOfX(x)));if(ii>=0&&ii<S.candles.length){x=xi(ii);snapT=S.candles[ii].t;}}ctx.save();ctx.strokeStyle='rgba(255,255,255,.32)';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(Math.round(x)+.5,0);ctx.lineTo(Math.round(x)+.5,PH+VH);ctx.moveTo(0,Math.round(y)+.5);ctx.lineTo(PW,Math.round(y)+.5);ctx.stroke();ctx.restore();
+  if(y<=PH)tag(ax(pOfY(y)),y,'#2A3250');const t=snapT!=null?snapT:tOfX(x),d=new Date(t);const lab=S.tf<1440?dtf.format(d):dtd.format(d);ctx.font='600 11px Inter,system-ui,sans-serif';const w=ctx.measureText(lab).width+14;ctx.fillStyle='#2A3250';ctx.fillRect(Math.min(Math.max(0,x-w/2),PW-w),H-BY+3,w,19);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(lab,Math.min(Math.max(w/2,x),PW-w/2),H-BY+13);}
  if(i0<30)loadOlder();
 }
 function drawAI(f,last,n){
@@ -2991,23 +2992,38 @@ function drawLevels(f,last){
  if(S.opts.lvls&&f.keys){let prev=-99;f.keys.slice().sort((a,b)=>yp(a.p)-yp(b.p)).forEach(k=>{if(k.p<lo||k.p>hi)return;const y=yp(k.p);hline(k.p,'rgba(242,244,248,'+(k.flip?.2:.34)+')',k.flip?[3,5]:[],1);if(Math.abs(y-prev)>13){prev=y;ctx.font='11px Inter,system-ui,sans-serif';ctx.fillStyle='rgba(242,244,248,.55)';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText(fu(k.p)+'  ×'+k.n+(k.flip?' flipped':''),PW-8,y-2);}});}
 }
 function ring(x,y,col,rx,ry,dash){ctx.save();ctx.setLineDash(dash||[5,4]);ctx.strokeStyle=col;ctx.fillStyle=hexA(col,.10);ctx.lineWidth=1.6;ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,7);ctx.fill();ctx.stroke();ctx.restore();}
+function emergNext(f,last){const L=last&&last.c,all=(f&&f.emerg)||[];const st=all.filter(e=>e.type!=='critical_exit'&&e.type!=='flash'&&(!L||e.price<L)).sort((a,b)=>b.price-a.price).slice(0,1);return st.concat(all.filter(e=>e.type==='critical_exit'));}
 function drawEmerg(f,last,n){
- (f.emerg||[]).forEach((e,k)=>{const x=xi(n-1+14),y=yp(e.price);if(y<-20||y>PH+20)return;const crit=e.type==='critical_exit',flash=e.type==='flash',col=crit?COL.dn:'#FF9A5B',dash=flash?[2,3]:[5,4];
+ emergNext(f,last).forEach((e,k)=>{const x=xi(n-1+14),y=yp(e.price);if(y<-20||y>PH+20)return;const crit=e.type==='critical_exit',flash=e.type==='flash',col=crit?COL.dn:'#FF9A5B',dash=flash?[2,3]:[5,4];
   ctx.save();ctx.setLineDash([2,4]);ctx.strokeStyle=hexA(col,.6);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(xi(n-1),y);ctx.lineTo(x-14,y);ctx.stroke();ctx.restore();
   ring(x,y,col,16,14,dash);ctx.beginPath();ctx.arc(x,y,6,0,7);ctx.lineWidth=2;ctx.setLineDash(flash?[2,2]:[]);ctx.strokeStyle=col;ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=col;ctx.font='700 9px Inter,system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(crit?'X':'E',x,y+.5);
   ctx.font='600 11px Inter,system-ui,sans-serif';ctx.textBaseline='middle';const nm=crit?'Critical exit':flash?'Flash top-up':'Emergency top-up',tx=nm+' '+fu(e.price)+(e.usd?' · '+fu(e.usd):'');if(x+34+ctx.measureText(tx).width>PW){ctx.textAlign='right';ctx.fillText(tx,x-24,y);}else{ctx.textAlign='left';ctx.fillText(tx,x+24,y);}
   S.hit.push({x:x,y:y,r:20,html:'<b style="color:'+col+'">'+nm+'</b><br>'+fu(e.price)+' · '+fpct((e.price/last.c-1)*100)+' from now'+(e.usd?'<br>adds about '+fu(e.usd)+' margin'+(e.fromReserve?' ('+fu(e.fromReserve)+' from the emergency fund)':''):'')+(e.liqAfter?'<br>liquidation moves to about '+fu(e.liqAfter):'')+(e.note?'<br>'+esc(e.note):'')});});
 }
-function bottomInfo(f){const b=f&&f.bottom;if(!b||!S.candles.length)return null;const n=S.candles.length;let bi=-1,bd=1e9;for(let i=Math.max(0,n-1500);i<n;i++){const d=Math.abs(S.candles[i].l-b.price)/b.price;if(d<bd){bd=d;bi=i;}}if(bd>.004)bi=-1;
- let low=Infinity,li=-1;for(let i=Math.max(0,bi<0?n-400:bi+1);i<n;i++){if(S.candles[i].l<low){low=S.candles[i].l;li=i;}}
- return{b:b,bi:bi,low:low,li:li,broken:b.broken||(isFinite(low)&&low<b.price*.998)};}
-function drawBottom(f,last,n){const I=bottomInfo(f);if(!I)return;const b=I.b;
- const bx=I.bi>=0?xi(I.bi):-999,by=yp(b.price);
- if(I.bi>=0&&bx>-30&&bx<PW+30&&by>-30&&by<PH+30){const x=bx,y=by;{ring(x,y,COL.blue,13,13);ctx.font='600 11px Inter,system-ui,sans-serif';ctx.fillStyle=COL.blue;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('Assumed bottom '+fk(b.price),x,y+18);S.hit.push({x:x,y:y,r:16,html:'<b style="color:'+COL.blue+'">Assumed bottom</b><br>'+fu(b.price)+'<br>'+dtd.format(new Date(S.candles[I.bi].t))+(I.broken?'<br><i>since broken</i>':'')});}}
- else if(b.price>lo&&b.price<hi){hline(b.price,hexA(COL.blue,.6),[6,5],1.2);ctx.font='600 11px Inter,system-ui,sans-serif';ctx.fillStyle=COL.blue;ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText('Assumed bottom '+fu(b.price),PW-8,yp(b.price)-3);}
- const E=b.est;if(E){const y1=yp(E.high),y2=yp(E.low);ctx.fillStyle=hexA(COL.blue,.09);ctx.fillRect(0,y1,PW,Math.max(3,y2-y1));ctx.save();ctx.strokeStyle=hexA(COL.blue,.7);ctx.lineWidth=1.2;ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(0,y1+.5);ctx.lineTo(PW,y1+.5);ctx.moveTo(0,y2+.5);ctx.lineTo(PW,y2+.5);ctx.stroke();ctx.restore();ctx.font='600 11px Inter,system-ui,sans-serif';ctx.fillStyle=COL.blue;ctx.textAlign='right';ctx.textBaseline='top';ctx.fillText('New bottom zone '+fk(E.low)+' – '+fk(E.high)+(E.when?' · '+E.when:'')+(E.t30!=null?' · '+Math.round(E.t30*100)+'% in 30d':''),PW-8,Math.max(y1,y2)+4);}
+function bottomInfo(f){const b=f&&f.bottom;if(!b||!S.candles.length)return null;const n=S.candles.length,C=S.candles;let bi=-1,bd=1e9;for(let i=Math.max(0,n-1500);i<n;i++){const d=Math.abs(C[i].l-b.price)/b.price;if(d<bd){bd=d;bi=i;}}if(bd>.004)bi=-1;
+ let low=Infinity,li=-1,ki=-1;for(let i=Math.max(0,bi<0?n-400:bi+1);i<n;i++){if(ki<0&&C[i].l<b.price*.998)ki=i;if(C[i].l<low){low=C[i].l;li=i;}}
+ const broken=b.broken||ki>=0;if(broken&&ki<0)ki=li;
+ const age=ki>=0?(C[n-1].t-C[ki].t)/864e5:0;
+ return{b:b,bi:bi,low:low,li:li,ki:ki,broken:broken,age:age,showBreak:broken&&ki>=0&&age<=30};}
+function drawBottom(f,last,n){const I=bottomInfo(f);if(!I)return;const b=I.b,C=S.candles;
+ const fnt='600 11px Inter,system-ui,sans-serif';
+ const bx=I.bi>=0?xi(I.bi):-999,by=yp(b.price),vis=I.bi>=0&&bx>-30&&bx<PW+30&&by>-30&&by<PH+30;
+ if(!I.broken){
+  if(vis){ring(bx,by,COL.blue,13,13);ctx.font=fnt;ctx.fillStyle=COL.blue;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('Assumed bottom '+fk(b.price),bx,by+18);S.hit.push({x:bx,y:by,r:16,html:'<b style="color:'+COL.blue+'">Assumed bottom</b><br>'+fu(b.price)+'<br>'+dtd.format(new Date(C[I.bi].t))});}
+  else if(b.price>lo&&b.price<hi){hline(b.price,hexA(COL.blue,.6),[6,5],1.2);ctx.font=fnt;ctx.fillStyle=COL.blue;ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText('Assumed bottom '+fu(b.price),PW-8,yp(b.price)-3);}
+ }else{
+  /* broken bottoms stay as levels: old support can turn into resistance */
+  const old=[{price:b.price,date:I.bi>=0?dtd.format(new Date(C[I.bi].t)):(b.date||''),cur:true}].concat((b.hist||[]).map(h=>({price:h.price,date:h.date})));
+  old.forEach(o=>{if(!(o.price>lo&&o.price<hi))return;hline(o.price,hexA(COL.blue,o.cur?.5:.32),[3,5],1);ctx.font=fnt;ctx.fillStyle=hexA(COL.blue,o.cur?.85:.6);ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText((o.cur?'Previous bottom ':'Older bottom ')+fu(o.price)+(o.date?' · '+o.date:'')+' · now possible resistance',PW-8,yp(o.price)-3);});
+  if(vis){ring(bx,by,COL.blue,9,9,[2,3]);S.hit.push({x:bx,y:by,r:14,html:'<b style="color:'+COL.blue+'">Previous bottom (broken)</b><br>'+fu(b.price)+'<br>'+dtd.format(new Date(C[I.bi].t))+'<br>May act as resistance now'});}
+  if(I.showBreak){const k=C[I.ki],x=xi(I.ki),y=yp(k.l);if(x>-30&&x<PW+30&&y>-30&&y<PH+30){ring(x,y,COL.dn,15,15,[3,3]);ctx.font=fnt;ctx.fillStyle=COL.dn;ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText('Bottom broken · '+dtd.format(new Date(k.t)),x-22,y);S.hit.push({x:x,y:y,r:18,html:'<b style="color:'+COL.dn+'">Bottom broken</b><br>'+dtd.format(new Date(k.t))+' · candle low '+fu(k.l)+'<br>'+fpct((k.l/b.price-1)*100)+' under the previous bottom '+fu(b.price)+'<br><i>Marked for 30 days after the break</i>'});}}
+ }
+ const E=b.est;if(E){const yh=yp(E.high),yl=yp(E.low),yc=yp(E.price||(E.low+E.high)/2);const ry=Math.max(24,Math.abs(yl-yh)/2+16),rx=88,cx=Math.min(xi(n-1+34),PW-rx-14);
+  ctx.fillStyle=hexA(COL.blue,.05);ctx.fillRect(0,Math.min(yh,yl),PW,Math.max(3,Math.abs(yl-yh)));
+  ctx.save();ctx.setLineDash([7,5]);ctx.strokeStyle=hexA(COL.blue,.85);ctx.fillStyle=hexA(COL.blue,.10);ctx.lineWidth=1.6;ctx.beginPath();ctx.ellipse(cx,yc,rx,ry,0,0,7);ctx.fill();ctx.stroke();ctx.restore();
+  ctx.font=fnt;ctx.fillStyle=COL.blue;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('Estimated new bottom area '+fk(E.low)+' – '+fk(E.high),cx,yc+ry+4);if(E.when||E.t30!=null){ctx.font='11px Inter,system-ui,sans-serif';ctx.fillStyle=hexA(COL.blue,.8);ctx.fillText((E.when||'')+(E.t30!=null?(E.when?' · ':'')+Math.round(E.t30*100)+'% in 30d':''),cx,yc+ry+18);}
+  S.hit.push({x:cx,y:yc,r:Math.max(rx,ry),html:'<b style="color:'+COL.blue+'">Estimated new bottom area</b><br>'+fu(E.low)+' – '+fu(E.high)+(E.when?'<br>'+esc(E.when):'')+(E.t30!=null?'<br>'+Math.round(E.t30*100)+'% chance within 30 days':'')+(E.note?'<br>'+esc(E.note):'')+'<br><i>A guess while price is falling, not a confirmed bottom</i>'});}
  if(b.floor&&b.floor>lo&&b.floor<hi){hline(b.floor,'rgba(242,244,248,.35)',[1,5],1);ctx.font='11px Inter,system-ui,sans-serif';ctx.fillStyle='rgba(242,244,248,.55)';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText('History floor '+fu(b.floor),PW-8,yp(b.floor)-2);}
- if(I.broken&&I.li>=0){const x=xi(I.li),y=yp(I.low);if(x>-30&&x<PW+30&&y>-30&&y<PH+30){ring(x,y,COL.dn,15,15,[3,3]);ctx.font='600 11px Inter,system-ui,sans-serif';ctx.fillStyle=COL.dn;ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText('Bottom broken · new low '+fk(I.low),x-22,y);S.hit.push({x:x,y:y,r:18,html:'<b style="color:'+COL.dn+'">New low</b><br>'+fu(I.low)+' · '+fpct((I.low/b.price-1)*100)+' under the assumed bottom<br>'+dtd.format(new Date(S.candles[I.li].t))});}}
 }
 function lab(t,y,col){ctx.font='600 11px Inter,system-ui,sans-serif';ctx.fillStyle=col;ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText(t,8,y-4);}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -3274,14 +3290,14 @@ function acctHTML(){
  h+='<h4>Where we buy next</h4>';
  if(A.next.length)A.next.forEach(b=>{h+='<div class="ch-buy"><i class="bring"></i><div><b>'+fu(b.price)+'</b> <em>'+tl(b.type)+'</em><span>'+(last?fpct((b.price/last-1)*100)+' from now':'')+(b.usd!=null?' · about '+fu(b.usd):'')+'</span></div></div>';});
  else h+='<p class="ch-fine">The bot has not filled in "Next buy price" on the sheet yet, so no circle is drawn.</p>';
- (f.emerg||[]).forEach(e=>{h+='<div class="ch-buy"><i class="bring" style="border-color:#FF9A5B"></i><div><b>'+fu(e.price)+'</b> <em>'+(e.type==='flash'?'flash top-up':e.type==='critical_exit'?'critical exit':'emergency top-up')+'</em><span>'+(last?fpct((e.price/last-1)*100)+' from now':'')+(e.usd?' · adds '+fu(e.usd):'')+(e.liqAfter?' · liq → '+fu(e.liqAfter):'')+'</span></div></div>';});
- if(!(f.emerg||[]).length)h+='<p class="ch-fine">The bot has not sent an emergency top-up price yet.</p>';
+ emergNext(f,last).forEach(e=>{h+='<div class="ch-buy"><i class="bring" style="border-color:#FF9A5B"></i><div><b>'+fu(e.price)+'</b> <em>'+(e.type==='flash'?'flash top-up':e.type==='critical_exit'?'critical exit':'emergency top-up')+'</em><span>'+(last?fpct((e.price/last-1)*100)+' from now':'')+(e.usd?' · adds '+fu(e.usd):'')+(e.liqAfter?' · liq → '+fu(e.liqAfter):'')+'</span></div></div>';});
+ if(!emergNext(f,last).length)h+='<p class="ch-fine">'+((f.emerg||[]).length?'No emergency top-up is waiting below the current price.':'The bot has not sent an emergency top-up price yet.')+'</p>';
  if(f.nextText)h+='<p class="ch-note">'+esc(f.nextText)+'</p>';
  h+='<h4>Price outlook</h4>';
  if(f.forecast.length)f.forecast.forEach(x=>{const col=hcol(x);h+='<div class="ch-fc"><span style="color:'+col+'">'+esc(x.label)+'</span><b>'+fk(x.low)+' – '+fk(x.high)+'</b><small>mid '+fk(x.mid)+(last?' ('+fpct((x.mid/last-1)*100)+')':'')+'</small></div>';});
  else if(f.outlookMissing)h+='<p class="ch-fine">"Price outlook (data)" is empty on the sheet, so there are no AI lines yet.</p>';
  if(f.levels.length&&last){h+='<h4>Levels</h4>';f.levels.slice().sort((p,q)=>Math.abs(p.price-last)-Math.abs(q.price-last)).slice(0,8).forEach(l=>{h+='<div class="ch-kv"><span>'+fu(l.price)+' <small>'+(l.kind?esc(l.kind):'')+'</small></span><b><small>'+(l.t7!=null?'7d '+Math.round(l.t7*100)+'%':'')+(l.t30!=null?' · 30d '+Math.round(l.t30*100)+'%':'')+(l.brk!=null?' · breaks '+Math.round(l.brk*100)+'%':'')+'</small></b></div>';});}
- {const I=bottomInfo(f);if(I)h+='<h4>Bottom check</h4><div class="ch-kv"><span>Assumed bottom</span><b style="color:'+COL.blue+'">'+fu(I.b.price)+'</b></div>'+(I.broken?'<div class="ch-kv"><span>New low</span><b style="color:'+COL.dn+'">'+fu(I.low)+' <small>('+fpct((I.low/I.b.price-1)*100)+')</small></b></div><p class="ch-note">Price went under the assumed bottom, so that was not the bottom.</p>':'<p class="ch-fine">Still holding'+(I.b.atRisk?' (at risk)':'')+'.</p>')+(I.b.est?'<div class="ch-kv"><span>New bottom zone</span><b style="color:'+COL.blue+'">'+fk(I.b.est.low)+' – '+fk(I.b.est.high)+'</b></div>'+(I.b.est.note?'<p class="ch-note">'+esc(I.b.est.note)+'</p>':''):'');}
+ {const I=bottomInfo(f);if(I){const bd=I.ki>=0?dtd.format(new Date(S.candles[I.ki].t)):'';h+='<h4>Bottom check</h4><div class="ch-kv"><span>'+(I.broken?'Previous bottom':'Assumed bottom')+'</span><b style="color:'+COL.blue+'">'+fu(I.b.price)+'</b></div>'+(I.broken?'<div class="ch-kv"><span>Broken on</span><b style="color:'+COL.dn+'">'+bd+(I.ki>=0?' <small>(candle low '+fu(S.candles[I.ki].l)+')</small>':'')+'</b></div><p class="ch-note">Free fall: no new bottom is assumed until the bot sees signs of a bounce. The old bottom stays on the chart as a level that can turn into resistance.</p>':'<p class="ch-fine">Still holding'+(I.b.atRisk?' (at risk)':'')+'.</p>')+(I.b.est?'<div class="ch-kv"><span>Estimated new bottom area</span><b style="color:'+COL.blue+'">'+fk(I.b.est.low)+' – '+fk(I.b.est.high)+'</b></div>'+(I.b.est.note?'<p class="ch-note">'+esc(I.b.est.note)+'</p>':''):'');}}
  h+=predHTML(f,last);
  if(f.phase)h+='<h4>Cycle</h4><p class="ch-note">'+esc(f.phase)+'</p>';
  return h;
