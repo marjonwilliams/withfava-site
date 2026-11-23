@@ -618,6 +618,9 @@ details.ch-sec>summary:hover span{color:var(--ink)}
 #chAIq{flex:1;height:auto;min-height:40px;padding:8px;resize:vertical;font:500 13.5px var(--font)}
 .ch-aiin{width:100%;margin:4px 0}
 
+.ch-tgt{width:112px;height:30px;text-align:right;padding:0 8px;font:600 13px var(--font)}
+#chPanelBody a{color:var(--accent,#7DB4FF)}
+
 @media (max-width:900px),(pointer:coarse){.hist-foot .hf-pg{display:none}}
 </style>
 <script>(function(){try{var d=document.documentElement;if(/[?&]nointro/.test(location.search)||/^#\/bot\//.test(location.hash)||matchMedia("(prefers-reduced-motion: reduce)").matches||window.innerWidth<=700||!matchMedia("(hover:hover) and (pointer:fine)").matches)return;d.classList.add("intro");setTimeout(function(){if(!window.__introOn)d.classList.remove("intro")},6000)}catch(e){}})();</script>
@@ -2772,7 +2775,7 @@ const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.par
 const S={coin:LS.get('fava-ch-coin','BTC'),tf:LS.get('fava-ch-tf',1440),base:[],baseMin:1440,candles:[],bar:9,right:0,tool:'cursor',draw:[],sel:-1,cur:null,
  opts:Object.assign({ai:true,acct:true,trades:true,vol:true,log:false,pred:true,lvls:true,liq:false,ob:false,cme:true},LS.get('fava-ch-opts',{})),
  ind:LS.get('fava-ch-ind',null)||IND_PRESETS.map((p,i)=>({type:p[0],n:p[1],c:p[2],on:i<3})),
- feed:null,feedErr:'',offline:false,loading:false,tok:0,hl:{},tab:'account',wlRows:[],wlStats:{},wlErr:'',olderBusy:false,noMore:false,hit:[],dr:null,live:0,yman:null,pct:LS.get('fava-ch-pct',false),hist:[],redo:[],clip:null,pen:LS.get('fava-ch-pen','#5B9BFF'),magnet:LS.get('fava-ch-mag',false),hideDr:false,fold:LS.get('fava-ch-fold',{}),ai:{msgs:LS.get('fava-ch-ai',[]),busy:false,wait:''}};
+ feed:null,feedErr:'',offline:false,loading:false,tok:0,hl:{},tab:'account',wlRows:[],wlStats:{},wlErr:'',olderBusy:false,noMore:false,hit:[],dr:null,live:0,yman:null,pct:LS.get('fava-ch-pct',false),hist:[],redo:[],clip:null,pen:LS.get('fava-ch-pen','#5B9BFF'),magnet:LS.get('fava-ch-mag',false),hideDr:false,fold:LS.get('fava-ch-fold',{}),target:null,ai:{msgs:LS.get('fava-ch-ai',[]),busy:false,wait:''}};
 let W=0,H=0,AX=66,BY=26,PW=0,PH=0,VH=0,lo=0,hi=1,i0=0,i1=0,tfMs=0,c0=0,dragging=null,raf=0;
 
 /* ---------- formatting ---------- */
@@ -2854,6 +2857,25 @@ function parseOutlook(s){
 
 const usd=s=>{if(s==null)return null;const m=String(s).replace(/,/g,'').match(/\$?\s*(-?\d+(?:\.\d+)?)\s*([KkMm])?/);if(!m)return null;let v=parseFloat(m[1]);if(m[2]&&/k/i.test(m[2]))v*=1e3;else if(m[2]&&/m/i.test(m[2]))v*=1e6;return v;};
 const mdate=s=>{const m=String(s||'').match(/([A-Z][a-z]{2})[a-z]*\s+(\d{4})/);if(!m)return null;const t=Date.parse(m[1]+' 15, '+m[2]+' 12:00:00');return isFinite(t)?t:null;};
+function profitParse(m,A,live){
+ const sg=s=>{const x=String(s||'').replace(/,/g,'').match(/([+\-−])?\s*\$\s*(\d+(?:\.\d+)?)/);return x?(/[\-−]/.test(x[1]||'')?-1:1)*parseFloat(x[2]):null;};
+ const g=k=>String(m[k]||'');
+ const tgt=usd(live?m['Final sell price']:(m['Future price']||m['Final sell price']));if(!tgt)return null;
+ const P={target:tgt,live:live,btc:A.btc,avg:A.avg,deposited:null,worth:null};
+ let x=g('Profit at your future price');P.hold=sg(x.split('(')[0].replace(/^[^:]*:/,''));x=x.replace(/,/g,'');let y=x.match(/account worth \$(\d+(?:\.\d+)?)/);if(y)P.worth=+y[1];y=x.match(/vs \$(\d+(?:\.\d+)?) deposited/);if(y)P.deposited=+y[1];
+ x=g('Profit now');P.now=sg(x.split('(')[0]);y=x.replace(/,/g,'').match(/\((-?[\d.]+)%/);if(y)P.nowPct=+y[1];
+ x=g('Profit at final sell (what you own)');y=x.replace(/,/g,'').match(/^(-?\d+(?:\.\d+)?)/);if(y)P.own=+y[1];y=x.replace(/,/g,'').match(/after \$(\d+(?:\.\d+)?) funding over ~(\d+) days/);if(y){P.fund=+y[1];P.fundDays=+y[2];}
+ x=g('Projected profit').replace(/,/g,'');y=x.match(/^([+\-−])?\$(\d+(?:\.\d+)?)/);if(y)P.proj=(/[\-−]/.test(y[1]||'')?-1:1)*parseFloat(y[2]);
+ y=x.match(/about \$(\d+) more going in until (\d{4}-\d\d-\d\d)/);if(y){P.more=+y[1];P.until=y[2];}y=x.match(/at about \$(\d+)\/day/);if(y)P.perDay=+y[1];
+ y=x.match(/bought around \$(\d+) on average \(\$(\d+)\s*[–-]\s*\$(\d+)/);if(y){P.avgBuy=+y[1];P.avgLo=+y[2];P.avgHi=+y[3];}else{y=x.match(/bought around \$(\d+) on average/);if(y)P.avgBuy=+y[1];}
+ y=g('Projected profit + total').replace(/,/g,'').match(/^\$(\d+)\s*\(\$(\d+) put into buys/);if(y){P.total=+y[1];P.putIn=+y[2];}
+ y=x.match(/\$(\d+) put into buys so far/);if(y)P.sofar=+y[1];
+ return (P.hold!=null||P.proj!=null)?P:null;}
+function profitAt(P,T){const d=P.btc?P.btc*(T-P.target)*(1-0.00045):0,o={T:T};
+ if(P.hold!=null)o.hold=P.hold+d;if(P.own!=null)o.own=P.own+d;if(P.worth!=null)o.worth=P.worth+d;
+ if(P.proj!=null&&P.avgBuy&&P.target>P.avgBuy){const Q=P.proj/(P.target-P.avgBuy);o.proj=Q*(T-P.avgBuy);o.Q=Q;if(P.avgLo&&P.avgHi){o.pLo=Q*(T-P.avgHi);o.pHi=Q*(T-P.avgLo);}if(P.putIn!=null)o.total=P.putIn+o.proj;}
+ else if(P.proj!=null&&T===P.target){o.proj=P.proj;if(P.total!=null)o.total=P.total;}
+ return o;}
 function parseSheetText(m){
  const o={pred:[],keys:[],liq:[],ob:[],cme:[],nextT:[]};
  const nt=String(m['Next expected buy']||'');
@@ -2892,7 +2914,7 @@ async function loadFeed(){
    const sell=/SELL|PROFIT/.test(act);const marg=!sell&&(/MARGIN/.test(act)||((num(r[iB])||0)===0&&(num(r[iO])||0)===0));
    trades.push({t:t,side:sell?'SELL':'BUY',price:p,usd:num(r[iM]),btc:num(r[iB]),type:marg?'MARGIN':'BTC',paper:/PAPER/i.test(r[iMo]||''),act:act});});
   trades.sort((a,b)=>a.t-b.t);
-  S.feed={updated:m['Last updated']||m['Last update']||null,mode:live?'LIVE':'PAPER',account:Object.assign(A,{next:next}),nextText:m['Next expected buy']||'',lastAction:m['Last action']||'',phase:m['Cycle phase']||'',trades:trades,forecast:out.horizons,levels:out.levels,outlookMissing:!out.raw,watch:[],pred:PT.pred.filter(q=>q.p),keys:PT.keys,liq:PT.liq,ob:PT.ob,cme:PT.cme,cash:{avail:num(m['Cash available']),reserve:num(m['Emergency fund'])!=null?num(m['Emergency fund']):num(m['Emergency reserve now']),pool:num(m['Free cash'])!=null?num(m['Free cash']):num(m['Regular pool']),axiom:num(m['Axiom: free cash']),axiomPos:String(m['Axiom: BTC held']||''),saved:String(m['Saved money (reserves)']||''),dep:num(m['Total deposited'])},sellP:usd(m['Final sell price']),emerg:emergAll,bottom:out.bottom,cme2:out.cme2,liqAll:(function(){const q=String(m['Liquidation']||'').match(/with all cash as margin:\s*\$([\d,]+)/);return q?usd(q[1]):null;})()};
+  S.feed={updated:m['Last updated']||m['Last update']||null,mode:live?'LIVE':'PAPER',account:Object.assign(A,{next:next}),nextText:m['Next expected buy']||'',lastAction:m['Last action']||'',phase:m['Cycle phase']||'',trades:trades,forecast:out.horizons,levels:out.levels,outlookMissing:!out.raw,watch:[],profit:profitParse(m,A,live),pred:PT.pred.filter(q=>q.p),keys:PT.keys,liq:PT.liq,ob:PT.ob,cme:PT.cme,cash:{avail:num(m['Cash available']),reserve:num(m['Emergency fund'])!=null?num(m['Emergency fund']):num(m['Emergency reserve now']),pool:num(m['Free cash'])!=null?num(m['Free cash']):num(m['Regular pool']),axiom:num(m['Axiom: free cash']),axiomPos:String(m['Axiom: BTC held']||''),saved:String(m['Saved money (reserves)']||''),dep:num(m['Total deposited'])},sellP:usd(m['Final sell price']),emerg:emergAll,bottom:out.bottom,cme2:out.cme2,liqAll:(function(){const q=String(m['Liquidation']||'').match(/with all cash as margin:\s*\$([\d,]+)/);return q?usd(q[1]):null;})()};
   S.feedErr='';
  }catch(e){S.feedErr=String(e&&e.message||e).includes('private')||/sheet 4\d\d/.test(String(e&&e.message))?'private':'net';if(!S.feed)S.feed=null;}
  banner();renderPanel();draw();
@@ -3002,12 +3024,13 @@ function drawAcct(f,last,n){
   S.hit.push({x:x,y:y,r:r+4,html:'<b>'+(k?'Expected buy':'Next expected buy')+'</b><br>'+fu(b.price)+' · '+tl(b.type)+(b.usd!=null?'<br>about '+fu(b.usd):'')+'<br>'+fpct((b.price/last.c-1)*100)+' from now'+(b.note?'<br>'+esc(b.note):'')});});
 }
 
+function dcaNear(q,last){return !!last&&last>=q.p*0.88;}
 function drawPred(f,last,n){
  const P=f.pred||[];if(!P.length)return;const xL=xi(n-1),yLast=yp(last.c);
  const fut=P.filter(q=>q.t&&(q.kind==='top'||q.kind==='bottom')&&q.label!=='Furthest-down case').sort((a,b)=>a.t-b.t);
  if(fut.length){ctx.save();ctx.setLineDash([3,6]);ctx.strokeStyle='rgba(242,244,248,.3)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(xL,yLast);fut.forEach(q=>ctx.lineTo(xi(idxT(q.t)),yp(q.p)));ctx.stroke();ctx.restore();}
  P.forEach(q=>{
-  if(q.kind==='dca'){if(q.p>lo&&q.p<hi){hline(q.p,hexA(q.col,.7),[8,5],1.2);ctx.font='600 11px Inter,system-ui,sans-serif';ctx.fillStyle=q.col;ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText(q.label+'  '+fu(q.p),PW-8,yp(q.p)-3);}return;}
+  if(q.kind==='dca'){if(dcaNear(q,last)&&q.p>lo&&q.p<hi){hline(q.p,hexA(q.col,.7),[8,5],1.2);ctx.font='600 11px Inter,system-ui,sans-serif';ctx.fillStyle=q.col;ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText(q.label+'  '+fu(q.p),PW-8,yp(q.p)-3);}return;}
   if(!q.t)return;const x=xi(idxT(q.t)),y=yp(q.p);if(x<-40||x>PW+40||y<-40||y>PH+40)return;
   ctx.save();ctx.setLineDash([5,4]);ctx.fillStyle=hexA(q.col,.10);ctx.strokeStyle=q.col;ctx.lineWidth=1.6;ctx.beginPath();ctx.ellipse(x,y,26,20,0,0,7);ctx.fill();ctx.stroke();ctx.setLineDash([]);ctx.beginPath();ctx.arc(x,y,4,0,7);ctx.fillStyle=q.col;ctx.fill();
   ctx.font='600 11px Inter,system-ui,sans-serif';ctx.fillStyle=q.col;const tx=q.label+'  '+fk(q.p),w=ctx.measureText(tx).width,up=q.kind==='top'||q.label==='Est. bottom';ctx.textAlign='left';ctx.textBaseline=up?'bottom':'top';const lx=Math.max(4,Math.min(PW-w-4,x-w/2));ctx.fillText(tx,lx,up?y-24:y+24);
@@ -3316,6 +3339,7 @@ function renderPanel(){
  root.querySelectorAll('[data-ptab]').forEach(b=>b.classList.toggle('on',b.dataset.ptab===S.tab));const box=$('chPanelBody');if(!box)return;
  if(S.tab==='ai'){if(!box.querySelector('#chAI'))aiMount(box);return;}
  const st=box.scrollTop;if(S.tab==='trades')box.innerHTML=tradesHTML();else box.innerHTML=acctHTML();box.scrollTop=st;
+ {const ti=box.querySelector('#chTgt');if(ti){const go=()=>{const v=parseFloat(String(ti.value).replace(/[^\d.]/g,''));if(isFinite(v)&&v>0&&v!==S.target){S.target=v;if(S.feed&&S.feed.profit&&v===S.feed.profit.target)S.target=null;renderPanel();}};ti.addEventListener('change',go);ti.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go();}});const r=box.querySelector('#chTgtR');if(r)r.addEventListener('click',e=>{e.preventDefault();S.target=null;renderPanel();});}}
  box.querySelectorAll('details.ch-sec').forEach(d=>d.addEventListener('toggle',()=>{S.fold[d.dataset.sec]=d.open;LS.set('fava-ch-fold',S.fold);}));
  box.querySelectorAll('[data-trade]').forEach(r=>r.addEventListener('click',()=>{const t=FD().trades[+r.dataset.trade];const i=idxT(t.t);S.right=i+PW/S.bar*.4;schedule();}));
 }
@@ -3325,6 +3349,18 @@ function statusLine(){
  if(!S.feed)return '<p class="ch-fine">'+(S.feedErr?'Could not reach your Google Sheet. Retrying…':'Loading your sheet…')+'</p>';
  return '<div class="ch-stat"><span class="ch-mode '+(S.feed.mode==='LIVE'?'live':'paper')+'">'+S.feed.mode+'</span>'+(S.feed.updated?'<span title="Sheet updated '+esc(S.feed.updated)+'">Updated '+esc(String(S.feed.updated).replace(/\s*(MST|AZ|MDT)\s*$/i,''))+'</span>':'')+'</div>';
 }
+function profitHTML(f){const P=f&&f.profit;if(!P)return '';const T=S.target!=null?S.target:P.target,o=profitAt(P,T),ch=T!==P.target;const sgn=v=>(v>=0?'+':'−')+fu(Math.abs(v)),col=v=>v>=0?COL.up:COL.dn;
+ let h='<h4>Profit forecast</h4><div class="ch-kv"><span>If BTC reaches</span><b><input class="ch-in ch-tgt" id="chTgt" inputmode="numeric" value="'+Math.round(T).toLocaleString('en-US')+'" aria-label="Target price"></b></div><p class="ch-fine" style="margin-top:-2px">'+(ch?'Preview on this page only. <a href="#" id="chTgtR">Back to the sheet\'s '+fu(P.target)+'</a>':'Sheet\'s '+(P.live?'Final sell price':'Future price')+'. Type another price to preview it here; the sheet is not changed and a reload goes back to it.')+'</p>';
+ if(P.now!=null)h+='<div class="ch-kv"><span>Profit now</span><b style="color:'+col(P.now)+'">'+sgn(P.now)+(P.nowPct!=null?' <small>('+P.nowPct+'%)</small>':'')+'</b></div>';
+ if(o.hold!=null){h+='<div class="ch-kv"><span>Holding what you own</span><b style="color:'+col(o.hold)+'">'+sgn(o.hold)+'</b></div>';
+  if(o.own!=null)h+='<div class="ch-kv"><span>&nbsp;&nbsp;after funding'+(P.fund?' ('+fu(P.fund)+(P.fundDays?' over ~'+P.fundDays+' days':'')+')':'')+' + fee</span><b style="color:'+col(o.own)+'">'+sgn(o.own)+'</b></div>';
+  if(o.worth!=null&&P.deposited)h+='<div class="ch-kv"><span>&nbsp;&nbsp;account worth <small>vs '+fu(P.deposited)+' in</small></span><b>'+fu(o.worth)+'</b></div>';}
+ if(o.proj!=null){h+='<div class="ch-kv"><span>If you keep adding at this pace</span><b style="color:'+col(o.proj)+'">'+sgn(o.proj)+'</b></div>';
+  if(o.pLo!=null)h+='<p class="ch-fine" style="margin:-2px 0 4px">'+sgn(o.pLo)+' to '+sgn(o.pHi)+' depending on how the cycle plays out</p>';
+  if(o.total!=null)h+='<div class="ch-kv"><span>&nbsp;&nbsp;total put in + profit</span><b>'+fu(o.total)+(P.putIn?' <small>('+fu(P.putIn)+' in)</small>':'')+'</b></div>';
+  if(P.perDay)h+='<p class="ch-fine" style="margin:0 0 4px">About $'+Math.round(P.perDay).toLocaleString('en-US')+'/day'+(P.until?' until '+P.until:'')+(P.more?' (~$'+Math.round(P.more).toLocaleString('en-US')+' more)':'')+', the bot\'s own recent buying pace.</p>';}
+ const A=f.account||{};if(A.liq&&S.candles.length){const lc=S.candles[S.candles.length-1].c;h+='<div class="ch-kv"><span>Liquidation</span><b style="color:'+COL.dn+'">'+fu(A.liq)+' <small>('+fpct((A.liq/lc-1)*100)+')</small></b></div>';}
+ h+='<p class="ch-fine">Estimates from the bot\'s numbers; the exact figures are recalculated by the bot at the sheet\'s price.</p>';return h;}
 function cashHTML(f,A,row){const c=f.cash||{};let h='<h4>Cash</h4>';
  h+=row(f.mode==='LIVE'?'Free cash (Axiom)':'Cash available (paper)',A.cash!=null?fu(A.cash):'–');
  if(f.mode!=='LIVE'){
@@ -3335,7 +3371,7 @@ function cashHTML(f,A,row){const c=f.cash||{};let h='<h4>Cash</h4>';
   h+='<p class="ch-fine">This is paper money. Your real Axiom account has '+(c.axiom!=null?fu(c.axiom):'–')+' free'+(/no btc/i.test(c.axiomPos||'')?' and no open position':'')+'.</p>';
  }
  return h;}
-function predHTML(f,last){const P=(f.pred||[]).slice().sort((a,b)=>(a.t||1e15)-(b.t||1e15));if(!P.length)return '';let h='<h4>Predictions from the bot</h4>';
+function predHTML(f,last){const P=(f.pred||[]).filter(q=>q.kind!=='dca'||dcaNear(q,last)).slice().sort((a,b)=>(a.t||1e15)-(b.t||1e15));if(!P.length)return '';let h='<h4>Predictions from the bot</h4>';
  P.forEach(q=>{h+='<div class="ch-kv"><span><i class="dot" style="background:'+q.col+'"></i>'+esc(q.label)+(q.dt?' <small>'+esc(q.dt)+'</small>':'')+'</span><b>'+fu(q.p)+(last?' <small>('+fpct((q.p/last-1)*100)+')</small>':'')+'</b></div>';});
  return h;}
 function acctHTML(){return foldHTML(acctRaw());}
@@ -3345,7 +3381,7 @@ function acctRaw(){
  const row=(k,v,s)=>'<div class="ch-kv"><span>'+k+'</span><b'+(s?' style="color:'+s+'"':'')+'>'+v+'</b></div>';
  let h=statusLine()+row('Average entry',A.avg!=null?fu(A.avg):'–',COL.amber)+row('Position',A.btc!=null?A.btc+' BTC':'–')+row('Liquidation price',A.liq!=null?fu(A.liq)+(liqd!=null?' <small>('+fpct(liqd)+')</small>':''):'–',COL.dn)
   +row('Open profit',pl!=null?(pl>=0?'+':'−')+fu(Math.abs(pl))+(plp!=null?' <small>('+fpct(plp)+')</small>':''):'–',pl==null?null:pl>=0?COL.up:COL.dn)+row('Money in position',A.margin!=null?fu(A.margin):'–');
- h+=cashHTML(f,A,row);
+ h+=cashHTML(f,A,row);h+=profitHTML(f);
  h+='<h4>Where we buy next</h4>';
  if(A.next.length)A.next.forEach(b=>{h+='<div class="ch-buy"><i class="bring"></i><div><b>'+fu(b.price)+'</b> <em>'+tl(b.type)+'</em><span>'+(last?fpct((b.price/last-1)*100)+' from now':'')+(b.usd!=null?' · about '+fu(b.usd):'')+'</span></div></div>';});
  else h+='<p class="ch-fine">The bot has not filled in "Next buy price" on the sheet yet, so no circle is drawn.</p>';
@@ -3368,11 +3404,12 @@ function secSum(t,f,last){const A=f.account,c=f.cash||{};try{
  if(t==='Levels'){const l=f.levels.slice().sort((p,q)=>Math.abs(p.price-last)-Math.abs(q.price-last))[0];return l?'Nearest '+fu(l.price):'';}
  if(t==='Bottom check'){const I=bottomInfo(f);return I?(I.broken?'Broken · '+(I.b.est?'est. '+fk(I.b.est.low)+' – '+fk(I.b.est.high):fu(I.b.price)):'Holding '+fu(I.b.price)):'';}
  if(t==='Predictions from the bot')return (f.pred||[]).length+' targets';
+ if(t==='Profit forecast'){const P=f.profit;if(!P)return '';const T=S.target!=null?S.target:P.target,o=profitAt(P,T),v=o.proj!=null?o.proj:o.hold;return v!=null?(v>=0?'+':'\u2212')+fk(Math.abs(v))+' at '+fk(T):'';}
  if(t==='Cycle')return String(f.phase||'').split(/[—,-]/)[0].trim();
  }catch(e){}return '';}
 function foldHTML(h){const f=FD();if(!f)return h;const last=S.candles.length?S.candles[S.candles.length-1].c:null;
  const parts=h.split(/<h4>(.*?)<\/h4>/);let o=parts[0];
- for(let i=1;i<parts.length;i+=2){const t=parts[i],body=parts[i+1]||'',op=S.fold[t];
+ for(let i=1;i<parts.length;i+=2){const t=parts[i],body=parts[i+1]||'',op=S.fold[t]!=null?S.fold[t]:t==='Profit forecast';
   o+='<details class="ch-sec" data-sec="'+esc(t)+'"'+(op?' open':'')+'><summary><span>'+t+'</span><em>'+esc(secSum(t,f,last))+'</em></summary><div class="ch-secb">'+body+'</div></details>';}
  return o;}
 function tradesHTML(){
